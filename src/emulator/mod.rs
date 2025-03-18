@@ -36,6 +36,8 @@ impl TamEmulator {
     }
 }
 
+mod execute;
+
 #[cfg(test)]
 mod tests {
     use super::*;

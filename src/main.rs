@@ -1,6 +1,13 @@
-use tam_rs;
+use tam_rs::{errors::TamResult, TamEmulator};
 
-fn main() {
-    let instr = tam_rs::instructions::TamInstruction::from(0x12345678);
-    println!("{:?}", instr);
+fn main() -> TamResult<()> {
+    let mut emu = TamEmulator::new();
+    loop {
+        let instr = emu.fetch_decode()?;
+        if !emu.execute(instr)? {
+            break;
+        }
+    }
+
+    Ok(())
 }

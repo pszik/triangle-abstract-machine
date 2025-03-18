@@ -5,6 +5,7 @@ pub enum TamError {
     AccessViolation,
     StackUnderflow,
     StackOverflow,
+    UnknownOpcode(u8),
 }
 
 /// Convenient shorthand for a [Result] returning a [TamError] as its error type.
