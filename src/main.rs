@@ -1,19 +1,19 @@
 use byteorder::{ReadBytesExt, BE};
-use std::{fs::File, io::BufReader};
+use std::{
+    fs::File,
+    io::{Seek, SeekFrom},
+};
 use tam_rs::{errors::*, TamEmulator};
 
 fn code_from_file(filename: &str) -> std::io::Result<Vec<u32>> {
-    let file = File::open(filename)?;
-    let mut file_reader = BufReader::new(file);
+    let mut file = File::open(filename)?;
 
-    let mut code = Vec::new();
-    loop {
-        match file_reader.read_u32::<BE>() {
-            Ok(c) => code.push(c),
-            Err(_) => break,
-        }
-    }
+    file.seek(SeekFrom::End(0))?;
+    let file_len = file.stream_position()?;
+    file.rewind()?;
 
+    let mut code = Vec::with_capacity((file_len / 4) as usize);
+    file.read_u32_into::<BE>(&mut code)?;
     Ok(code)
 }
 
