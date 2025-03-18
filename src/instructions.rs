@@ -1,5 +1,5 @@
 /// A single TAM instruction.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct TamInstruction {
     /// Opcode
     pub op: u8,

@@ -1,5 +1,5 @@
 /// Error types that can be returned by a running emulator.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum TamError {
     IOError,
     AccessViolation,
