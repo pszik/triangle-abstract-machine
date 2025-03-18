@@ -2,6 +2,7 @@ use crate::{consts::*, errors::*, instructions::TamInstruction};
 
 const MEMORY_SIZE: usize = (u16::MAX as usize) + 1;
 
+/// A TAM emulator.
 pub struct TamEmulator {
     code_store: [u32; MEMORY_SIZE],
     data_store: [i16; MEMORY_SIZE],
@@ -17,11 +18,29 @@ impl TamEmulator {
             registers: [0; 16],
         };
 
-        emu.registers[PT] = (MEMORY_SIZE - 1) as u16;
-        emu.registers[PB] = emu.registers[PT] - 28;
-        emu.registers[HB] = (MEMORY_SIZE - 1) as u16;
-        emu.registers[HT] = (MEMORY_SIZE - 1) as u16;
+        emu.reset();
         emu
+    }
+
+    /// Sets the content of this emulator's code store after zeroing it.
+    pub fn set_code(&mut self, code: &[u32]) -> TamResult<()> {
+        if code.len() > self.registers[PB as usize] as usize {
+            return Err(TamError::IOError);
+        }
+
+        self.code_store.fill(0);
+        self.code_store[..code.len()].copy_from_slice(code);
+        self.registers[CT] = code.len() as u16;
+        Ok(())
+    }
+
+    /// Resets this emulator's registers to the defaults.
+    pub fn reset(&mut self) {
+        self.registers[PT] = (MEMORY_SIZE - 1) as u16;
+        self.registers[PB] = self.registers[PT] - 28;
+        self.registers[HB] = (MEMORY_SIZE - 1) as u16;
+        self.registers[HT] = (MEMORY_SIZE - 1) as u16;
+        self.registers[CP] = 0;
     }
 
     /// Retrieves the next instruction to be executed. Returns a [TamError::AccessViolation]
