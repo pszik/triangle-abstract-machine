@@ -16,7 +16,11 @@ impl TamEmulator {
         writer: &mut impl Write,
     ) -> TamResult<bool> {
         if self.trace {
-            println!("{}", instr);
+            writeln!(writer, "{}", instr).map_err(|e| TamError {
+                kind: TamErrorKind::IOError,
+                address: Some(self.registers[CP]),
+                message: Some(e.to_string()),
+            })?;
         }
 
         match instr.op {
