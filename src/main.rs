@@ -19,7 +19,11 @@ fn code_from_file(filename: &str) -> std::io::Result<Vec<u32>> {
 
 fn main() -> TamResult<()> {
     let mut emu = TamEmulator::new();
-    let code = code_from_file("test.tam").map_err(|_| TamError::IOError)?;
+    let code = code_from_file("test.tam").map_err(|r| TamError {
+        kind: TamErrorKind::IOError,
+        address: None,
+        message: Some(r.to_string()),
+    })?;
     emu.set_code(&code)?;
 
     loop {

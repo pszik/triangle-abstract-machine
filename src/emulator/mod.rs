@@ -25,7 +25,11 @@ impl TamEmulator {
     /// Sets the content of this emulator's code store after zeroing it.
     pub fn set_code(&mut self, code: &[u32]) -> TamResult<()> {
         if code.len() > self.registers[PB as usize] as usize {
-            return Err(TamError::IOError);
+            return Err(TamError {
+                kind: TamErrorKind::IOError,
+                address: None,
+                message: Some(String::from("Provided code was too large for memory")),
+            });
         }
 
         self.code_store.fill(0);
@@ -47,7 +51,11 @@ impl TamEmulator {
     /// if the code pointer points beyond the last instruction.
     pub fn fetch_decode(&mut self) -> TamResult<TamInstruction> {
         if self.registers[CP] >= self.registers[CT] {
-            return Err(TamError::AccessViolation);
+            return Err(TamError {
+                kind: TamErrorKind::AccessViolation,
+                address: Some(self.registers[CP]),
+                message: None,
+            });
         }
 
         let code = self.code_store[self.registers[CP] as usize];
@@ -125,6 +133,7 @@ mod tests {
         }
 
         let error = result.unwrap_err();
-        assert_eq!(TamError::AccessViolation, error);
+        assert_eq!(TamErrorKind::AccessViolation, error.kind);
+        assert_eq!(Some(20), error.address);
     }
 }

@@ -10,7 +10,13 @@ impl TamEmulator {
         match instr.op {
             0 => self.exec_load(instr)?,
             15 => return Ok(false),
-            op => return Err(TamError::UnknownOpcode(op)),
+            op => {
+                return Err(TamError {
+                    kind: TamErrorKind::UnknownOpcode(op),
+                    address: Some(self.registers[CP]),
+                    message: None,
+                })
+            }
         };
 
         Ok(true)
@@ -18,7 +24,11 @@ impl TamEmulator {
 
     fn push_data(&mut self, data: i16) -> TamResult<()> {
         if self.registers[ST] >= self.registers[HT] {
-            return Err(TamError::StackOverflow);
+            return Err(TamError {
+                kind: TamErrorKind::StackOverflow,
+                address: Some(self.registers[CP]),
+                message: None,
+            });
         }
 
         let addr = self.registers[ST] as usize;
@@ -29,7 +39,11 @@ impl TamEmulator {
 
     fn pop_data(&mut self) -> TamResult<i16> {
         if self.registers[ST] == 0 {
-            return Err(TamError::StackUnderflow);
+            return Err(TamError {
+                kind: TamErrorKind::StackUnderflow,
+                address: Some(self.registers[CP]),
+                message: None,
+            });
         }
 
         self.registers[ST] -= 1;
@@ -39,10 +53,18 @@ impl TamEmulator {
 
     fn calc_address(&self, instr: TamInstruction) -> TamResult<u16> {
         match u16::checked_add_signed(self.registers[instr.r as usize], instr.d) {
-            None => Err(TamError::AccessViolation),
+            None => Err(TamError {
+                kind: TamErrorKind::AccessViolation,
+                address: Some(self.registers[CP]),
+                message: None,
+            }),
             Some(addr) => {
                 if addr >= self.registers[ST] && addr <= self.registers[HT] {
-                    Err(TamError::AccessViolation)
+                    Err(TamError {
+                        kind: TamErrorKind::AccessViolation,
+                        address: Some(self.registers[CP]),
+                        message: None,
+                    })
                 } else {
                     Ok(addr)
                 }
@@ -56,7 +78,11 @@ impl TamEmulator {
         for i in 0..instr.n {
             let addr = base_addr + (i as u16);
             if addr >= self.registers[ST] && addr <= self.registers[HT] {
-                return Err(TamError::AccessViolation);
+                return Err(TamError {
+                    kind: TamErrorKind::AccessViolation,
+                    address: Some(self.registers[CP]),
+                    message: None,
+                });
             }
             data.push_back(self.data_store[addr as usize]);
         }
@@ -94,8 +120,8 @@ mod tests {
 
         let err = result.unwrap_err();
         assert_eq!(
-            TamError::UnknownOpcode(28),
-            err,
+            TamErrorKind::UnknownOpcode(28),
+            err.kind,
             "execute returned wrong error"
         );
     }
