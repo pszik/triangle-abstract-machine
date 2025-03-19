@@ -9,6 +9,7 @@ impl TamEmulator {
     pub fn execute(&mut self, instr: TamInstruction) -> TamResult<bool> {
         match instr.op {
             0 => self.exec_load(instr)?,
+            2 => self.exec_loadi(instr)?,
             15 => return Ok(false),
             op => {
                 return Err(TamError {
@@ -73,7 +74,6 @@ impl TamEmulator {
     }
 
     fn exec_load(&mut self, instr: TamInstruction) -> TamResult<()> {
-        let mut data = VecDeque::new();
         let base_addr = self.calc_address(instr)?;
         for i in 0..instr.n {
             let addr = base_addr + (i as u16);
@@ -84,13 +84,25 @@ impl TamEmulator {
                     message: None,
                 });
             }
-            data.push_back(self.data_store[addr as usize]);
+            self.push_data(self.data_store[addr as usize])?;
         }
 
-        while !data.is_empty() {
-            self.push_data(data.pop_front().expect("data stack was unexpectedly empty"))?;
-        }
+        Ok(())
+    }
 
+    fn exec_loadi(&mut self, instr: TamInstruction) -> TamResult<()> {
+        let base_addr = self.pop_data()? as u16;
+        for i in 0..instr.n {
+            let addr = base_addr + (i as u16);
+            if addr >= self.registers[ST] && addr <= self.registers[HT] {
+                return Err(TamError {
+                    kind: TamErrorKind::AccessViolation,
+                    address: Some(self.registers[CP]),
+                    message: None,
+                });
+            }
+            self.push_data(self.data_store[addr as usize])?;
+        }
         Ok(())
     }
 }
@@ -146,6 +158,87 @@ mod tests {
         assert!(result, "execute should not have returned false");
         assert_eq!(10, emulator.data_store[3], "first value not pushed");
         assert_eq!(15, emulator.data_store[4], "second value not pushed");
+    }
+
+    #[rstest]
+    fn execute_load_bad_address_err(mut emulator: TamEmulator) {
+        let instr = TamInstruction {
+            op: 0,
+            r: SB as u8,
+            n: 1,
+            d: 20,
+        };
+        let TamError {
+            kind,
+            address,
+            message: _,
+        } = emulator
+            .execute(instr)
+            .expect_err("execute should have returned an error");
+
+        assert_eq!(TamErrorKind::AccessViolation, kind);
+        assert_eq!(Some(0), address);
+    }
+
+    #[rstest]
+    fn execute_loadi_good_address_full_stack_ok(mut emulator: TamEmulator) {
+        emulator.data_store[0..3].copy_from_slice(&[10, 20, 0]);
+        emulator.registers[ST] = 3;
+
+        let instr = TamInstruction {
+            op: 2,
+            r: 0,
+            n: 1,
+            d: 0,
+        };
+        let result = emulator
+            .execute(instr)
+            .expect("execute should not have errored");
+        assert!(result, "execute should not have returned false");
+        assert_eq!(10, emulator.data_store[2], "wrong value loaded");
+    }
+
+    #[rstest]
+    fn execute_loadi_good_address_empty_stack_stack_underflow(mut emulator: TamEmulator) {
+        let instr = TamInstruction {
+            op: 2,
+            r: 0,
+            n: 1,
+            d: 0,
+        };
+        let TamError {
+            kind,
+            address,
+            message: _,
+        } = emulator
+            .execute(instr)
+            .expect_err("execute should not have succeeded");
+
+        assert_eq!(TamErrorKind::StackUnderflow, kind);
+        assert_eq!(Some(0), address);
+    }
+
+    #[rstest]
+    fn execute_loadi_bad_address_access_violation(mut emulator: TamEmulator) {
+        emulator.data_store[0..3].copy_from_slice(&[10, 20, 30]);
+        emulator.registers[ST] = 3;
+        let instr = TamInstruction {
+            op: 2,
+            r: 0,
+            n: 1,
+            d: 0,
+        };
+
+        let TamError {
+            kind,
+            address,
+            message: _,
+        } = emulator
+            .execute(instr)
+            .expect_err("execute should not have succeeded");
+
+        assert_eq!(TamErrorKind::AccessViolation, kind);
+        assert_eq!(Some(0), address);
     }
 
     #[rstest]
