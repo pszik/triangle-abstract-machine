@@ -1,7 +1,13 @@
 [package]
 name = "tam-rs"
 version = "0.1.0"
+authors = ["Ian Knight"]
 edition = "2021"
+description = "Implementation of the Triangle Abstract Machine"
+readme = "README.md"
+license = "MIT"
+license-file = "LICENSE.md"
+categories = ["emulators"]
 
 [dependencies]
 byteorder = "1.5.0"
