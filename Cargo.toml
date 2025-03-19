@@ -6,7 +6,6 @@ edition = "2021"
 description = "Implementation of the Triangle Abstract Machine"
 readme = "README.md"
 license = "MIT"
-license-file = "LICENSE.md"
 categories = ["emulators"]
 
 [dependencies]
