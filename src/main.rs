@@ -26,9 +26,12 @@ fn main() -> TamResult<()> {
     })?;
     emu.set_code(&code)?;
 
+    let mut reader = std::io::stdin().lock();
+    let mut writer = std::io::stdout();
+
     loop {
         let instr = emu.fetch_decode()?;
-        if !emu.execute(instr)? {
+        if !emu.execute(instr, &mut reader, &mut writer)? {
             break;
         }
     }

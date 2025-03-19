@@ -1,12 +1,17 @@
-use crate::{consts::*, errors::*, instructions::TamInstruction};
-use std::collections::VecDeque;
+use std::io::{BufRead, Write};
 
 use super::TamEmulator;
+use crate::{consts::*, errors::*, instructions::TamInstruction};
 
 impl TamEmulator {
     /// Executes the given instruction and returns `Ok(true)` if execution should continue
     /// or `Ok(false)` if it should halt.
-    pub fn execute(&mut self, instr: TamInstruction) -> TamResult<bool> {
+    pub fn execute(
+        &mut self,
+        instr: TamInstruction,
+        reader: &mut impl BufRead,
+        writer: &mut impl Write,
+    ) -> TamResult<bool> {
         match instr.op {
             0 => self.exec_load(instr)?,
             2 => self.exec_loadi(instr)?,
@@ -124,15 +129,29 @@ mod tests {
         TamEmulator::new()
     }
 
+    #[fixture]
+    fn reader() -> impl BufRead {
+        std::io::stdin().lock()
+    }
+
+    #[fixture]
+    fn writer() -> impl Write {
+        std::io::stdout()
+    }
+
     #[rstest]
-    fn execute_unknown_op_err(mut emulator: TamEmulator) {
+    fn execute_unknown_op_err(
+        mut emulator: TamEmulator,
+        mut reader: impl BufRead,
+        mut writer: impl Write,
+    ) {
         let instr = TamInstruction {
             op: 28,
             r: 0,
             n: 0,
             d: 0,
         };
-        let result = emulator.execute(instr);
+        let result = emulator.execute(instr, &mut reader, &mut writer);
         if let Ok(_) = result {
             panic!("should have failed to execute");
         }
@@ -146,7 +165,11 @@ mod tests {
     }
 
     #[rstest]
-    fn execute_load_good_address_ok(mut emulator: TamEmulator) {
+    fn execute_load_good_address_ok(
+        mut emulator: TamEmulator,
+        mut reader: impl BufRead,
+        mut writer: impl Write,
+    ) {
         emulator.data_store[0] = 5;
         emulator.data_store[1] = 10;
         emulator.data_store[2] = 15;
@@ -160,7 +183,7 @@ mod tests {
         };
 
         let result = emulator
-            .execute(instr)
+            .execute(instr, &mut reader, &mut writer)
             .expect("execute should not have failed");
         assert!(result, "execute should not have returned false");
         assert_eq!(10, emulator.data_store[3], "first value not pushed");
@@ -168,7 +191,11 @@ mod tests {
     }
 
     #[rstest]
-    fn execute_load_bad_address_err(mut emulator: TamEmulator) {
+    fn execute_load_bad_address_err(
+        mut emulator: TamEmulator,
+        mut reader: impl BufRead,
+        mut writer: impl Write,
+    ) {
         let instr = TamInstruction {
             op: 0,
             r: SB as u8,
@@ -180,7 +207,7 @@ mod tests {
             address,
             message: _,
         } = emulator
-            .execute(instr)
+            .execute(instr, &mut reader, &mut writer)
             .expect_err("execute should have returned an error");
 
         assert_eq!(TamErrorKind::AccessViolation, kind);
@@ -188,7 +215,11 @@ mod tests {
     }
 
     #[rstest]
-    fn execute_loadi_good_address_full_stack_ok(mut emulator: TamEmulator) {
+    fn execute_loadi_good_address_full_stack_ok(
+        mut emulator: TamEmulator,
+        mut reader: impl BufRead,
+        mut writer: impl Write,
+    ) {
         emulator.data_store[0..3].copy_from_slice(&[10, 20, 0]);
         emulator.registers[ST] = 3;
 
@@ -199,14 +230,18 @@ mod tests {
             d: 0,
         };
         let result = emulator
-            .execute(instr)
+            .execute(instr, &mut reader, &mut writer)
             .expect("execute should not have errored");
         assert!(result, "execute should not have returned false");
         assert_eq!(10, emulator.data_store[2], "wrong value loaded");
     }
 
     #[rstest]
-    fn execute_loadi_good_address_empty_stack_stack_underflow(mut emulator: TamEmulator) {
+    fn execute_loadi_good_address_empty_stack_stack_underflow(
+        mut emulator: TamEmulator,
+        mut reader: impl BufRead,
+        mut writer: impl Write,
+    ) {
         let instr = TamInstruction {
             op: 2,
             r: 0,
@@ -218,7 +253,7 @@ mod tests {
             address,
             message: _,
         } = emulator
-            .execute(instr)
+            .execute(instr, &mut reader, &mut writer)
             .expect_err("execute should not have succeeded");
 
         assert_eq!(TamErrorKind::StackUnderflow, kind);
@@ -226,7 +261,11 @@ mod tests {
     }
 
     #[rstest]
-    fn execute_loadi_bad_address_access_violation(mut emulator: TamEmulator) {
+    fn execute_loadi_bad_address_access_violation(
+        mut emulator: TamEmulator,
+        mut reader: impl BufRead,
+        mut writer: impl Write,
+    ) {
         emulator.data_store[0..3].copy_from_slice(&[10, 20, 30]);
         emulator.registers[ST] = 3;
         let instr = TamInstruction {
@@ -241,7 +280,7 @@ mod tests {
             address,
             message: _,
         } = emulator
-            .execute(instr)
+            .execute(instr, &mut reader, &mut writer)
             .expect_err("execute should not have succeeded");
 
         assert_eq!(TamErrorKind::AccessViolation, kind);
@@ -249,14 +288,20 @@ mod tests {
     }
 
     #[rstest]
-    fn execute_halt_return_false(mut emulator: TamEmulator) {
+    fn execute_halt_return_false(
+        mut emulator: TamEmulator,
+        mut reader: impl BufRead,
+        mut writer: impl Write,
+    ) {
         let instr = TamInstruction {
             op: 15,
             r: 0,
             n: 0,
             d: 0,
         };
-        let result = emulator.execute(instr).expect("execute returned an error");
+        let result = emulator
+            .execute(instr, &mut reader, &mut writer)
+            .expect("execute returned an error");
         assert!(!result, "execute should have returned false");
     }
 }
