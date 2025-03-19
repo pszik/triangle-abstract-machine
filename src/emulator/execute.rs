@@ -23,6 +23,11 @@ impl TamEmulator {
         Ok(true)
     }
 
+    /// Pushes a value to the top of the stack and updates `ST`.
+    ///
+    /// # Returns
+    ///
+    /// Returns a stack overflow error if the push would expand the stack into the heap.
     fn push_data(&mut self, data: i16) -> TamResult<()> {
         if self.registers[ST] >= self.registers[HT] {
             return Err(TamError {
@@ -38,6 +43,11 @@ impl TamEmulator {
         Ok(())
     }
 
+    /// Removes the top value of the stack and decrements `ST`.
+    ///
+    /// # Returns
+    ///
+    /// Returns the popped value, or a stack underflow error if the stack was empty.
     fn pop_data(&mut self) -> TamResult<i16> {
         if self.registers[ST] == 0 {
             return Err(TamError {
@@ -52,6 +62,13 @@ impl TamEmulator {
         Ok(self.data_store[addr])
     }
 
+    /// Calculates an absolute address from the register value and signed argument of an
+    /// instruction.
+    ///
+    /// # Returns
+    ///
+    /// The calculated address, or an access violation error of the calculation caused an integer
+    /// underflow/overflow
     fn calc_address(&self, instr: TamInstruction) -> TamResult<u16> {
         match u16::checked_add_signed(self.registers[instr.r as usize], instr.d) {
             None => Err(TamError {
@@ -59,17 +76,7 @@ impl TamEmulator {
                 address: Some(self.registers[CP]),
                 message: None,
             }),
-            Some(addr) => {
-                if addr >= self.registers[ST] && addr <= self.registers[HT] {
-                    Err(TamError {
-                        kind: TamErrorKind::AccessViolation,
-                        address: Some(self.registers[CP]),
-                        message: None,
-                    })
-                } else {
-                    Ok(addr)
-                }
-            }
+            Some(addr) => Ok(addr),
         }
     }
 

@@ -18,11 +18,18 @@ impl TamEmulator {
             registers: [0; 16],
         };
 
-        emu.reset();
+        emu.reset_registers();
         emu
     }
 
-    /// Sets the content of this emulator's code store after zeroing it.
+    /// Sets the content of this emulator's code.
+    ///
+    /// This method clears the code store, sets it with the provided code, and sets the `CT`
+    /// register.
+    ///
+    /// # Returns
+    ///
+    /// Will return an error if the provided code is too long to fit into memory.
     pub fn set_code(&mut self, code: &[u32]) -> TamResult<()> {
         if code.len() > self.registers[PB as usize] as usize {
             return Err(TamError {
@@ -39,7 +46,15 @@ impl TamEmulator {
     }
 
     /// Resets this emulator's registers to the defaults.
-    pub fn reset(&mut self) {
+    ///
+    /// Default values are as follows:
+    ///
+    /// - `HB`, `HT`, and `PT` are set to the final address in memory
+    /// - `PB` is set to `PT` - 28
+    /// - all other registers except for `CT` are set to 0
+    ///
+    /// `CT` is untouched so as not to lose information about code length
+    pub fn reset_registers(&mut self) {
         self.registers[PT] = (MEMORY_SIZE - 1) as u16;
         self.registers[PB] = self.registers[PT] - 28;
         self.registers[HB] = (MEMORY_SIZE - 1) as u16;
