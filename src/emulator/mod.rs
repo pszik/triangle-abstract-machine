@@ -7,15 +7,17 @@ pub struct TamEmulator {
     code_store: [u32; MEMORY_SIZE],
     data_store: [i16; MEMORY_SIZE],
     registers: [u16; 16],
+    trace: bool,
 }
 
 impl TamEmulator {
     /// Creates a new emulator with default registers and zeroed memory.
-    pub fn new() -> Self {
+    pub fn new(trace: bool) -> Self {
         let mut emu = TamEmulator {
             code_store: [0; MEMORY_SIZE],
             data_store: [0; MEMORY_SIZE],
             registers: [0; 16],
+            trace,
         };
 
         emu.reset_registers();
@@ -87,7 +89,7 @@ mod tests {
 
     #[fixture]
     fn emulator() -> TamEmulator {
-        TamEmulator::new()
+        TamEmulator::new(false)
     }
 
     #[rstest]

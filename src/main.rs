@@ -1,11 +1,25 @@
 use byteorder::{ReadBytesExt, BE};
+use clap::Parser;
 use std::{
     fs::File,
     io::{Seek, SeekFrom},
+    path::PathBuf,
 };
 use tam_rs::{errors::*, TamEmulator};
 
-fn code_from_file(filename: &str) -> std::io::Result<Vec<u32>> {
+#[derive(Parser)]
+#[command(version, about, long_about=None)]
+struct CliArgs {
+    /// Name of binary file to load.
+    #[arg(value_name = "FILE")]
+    filename: PathBuf,
+
+    /// If set, print mnemonic of instructions as they are executed.
+    #[arg(long)]
+    trace: bool,
+}
+
+fn code_from_file(filename: &PathBuf) -> std::io::Result<Vec<u32>> {
     let mut file = File::open(filename)?;
 
     file.seek(SeekFrom::End(0))?;
@@ -18,8 +32,10 @@ fn code_from_file(filename: &str) -> std::io::Result<Vec<u32>> {
 }
 
 fn main() -> TamResult<()> {
-    let mut emu = TamEmulator::new();
-    let code = code_from_file("test.tam").map_err(|r| TamError {
+    let cli = CliArgs::parse();
+
+    let mut emu = TamEmulator::new(cli.trace);
+    let code = code_from_file(&cli.filename).map_err(|r| TamError {
         kind: TamErrorKind::IOError,
         address: None,
         message: Some(r.to_string()),

@@ -6,12 +6,19 @@ use crate::{consts::*, errors::*, instructions::TamInstruction};
 impl TamEmulator {
     /// Executes the given instruction and returns `Ok(true)` if execution should continue
     /// or `Ok(false)` if it should halt.
+    ///
+    /// Parameters [reader] and [writer] are used for primitive operations which interact
+    /// with input and output.
     pub fn execute(
         &mut self,
         instr: TamInstruction,
         reader: &mut impl BufRead,
         writer: &mut impl Write,
     ) -> TamResult<bool> {
+        if self.trace {
+            println!("{}", instr);
+        }
+
         match instr.op {
             0 => self.exec_load(instr)?,
             2 => self.exec_loadi(instr)?,
@@ -126,7 +133,7 @@ mod tests {
 
     #[fixture]
     fn emulator() -> TamEmulator {
-        TamEmulator::new()
+        TamEmulator::new(false)
     }
 
     #[fixture]
