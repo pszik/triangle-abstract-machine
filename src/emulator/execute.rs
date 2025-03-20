@@ -167,18 +167,11 @@ mod tests {
         mut reader: impl BufRead,
         mut writer: impl Write,
     ) {
-        let instr = TamInstruction {
-            op: 28,
-            r: 0,
-            n: 0,
-            d: 0,
-        };
-        let result = emulator.execute(instr, &mut reader, &mut writer);
-        if let Ok(_) = result {
-            panic!("should have failed to execute");
-        }
+        let instr = TamInstruction::make(28, 0, 0, 0);
+        let err = emulator
+            .execute(instr, &mut reader, &mut writer)
+            .expect_err("should have failed to execute");
 
-        let err = result.unwrap_err();
         assert_eq!(
             TamErrorKind::UnknownOpcode(28),
             err.kind,
@@ -197,16 +190,11 @@ mod tests {
         emulator.data_store[2] = 15;
         emulator.registers[ST] = 3;
 
-        let instr = TamInstruction {
-            op: 0,
-            r: SB as u8,
-            n: 2,
-            d: 1,
-        };
-
+        let instr = TamInstruction::make(0, SB as u8, 2, 1);
         let result = emulator
             .execute(instr, &mut reader, &mut writer)
             .expect("execute should not have failed");
+
         assert!(result, "execute should not have returned false");
         assert_eq!(10, emulator.data_store[3], "first value not pushed");
         assert_eq!(15, emulator.data_store[4], "second value not pushed");
@@ -218,22 +206,13 @@ mod tests {
         mut reader: impl BufRead,
         mut writer: impl Write,
     ) {
-        let instr = TamInstruction {
-            op: 0,
-            r: SB as u8,
-            n: 1,
-            d: 20,
-        };
-        let TamError {
-            kind,
-            address,
-            message: _,
-        } = emulator
+        let instr = TamInstruction::make(0, SB as u8, 1, 20);
+        let error = emulator
             .execute(instr, &mut reader, &mut writer)
             .expect_err("execute should have returned an error");
 
-        assert_eq!(TamErrorKind::AccessViolation, kind);
-        assert_eq!(Some(0), address);
+        assert_eq!(TamErrorKind::AccessViolation, error.kind);
+        assert_eq!(Some(0), error.address);
     }
 
     #[rstest]
@@ -242,12 +221,7 @@ mod tests {
         mut reader: impl BufRead,
         mut writer: impl Write,
     ) {
-        let instr = TamInstruction {
-            op: 1,
-            r: SB as u8,
-            n: 0,
-            d: 3,
-        };
+        let instr = TamInstruction::make(1, SB as u8, 0, 3);
         let result = emulator
             .execute(instr, &mut reader, &mut writer)
             .expect("execute should not have errored");
@@ -264,12 +238,7 @@ mod tests {
     ) {
         emulator.registers[ST] = 1;
         emulator.registers[HT] = 1;
-        let instr = TamInstruction {
-            op: 1,
-            r: SB as u8,
-            n: 0,
-            d: 3,
-        };
+        let instr = TamInstruction::make(1, SB as u8, 0, 3);
 
         let error = emulator
             .execute(instr, &mut reader, &mut writer)
@@ -286,12 +255,7 @@ mod tests {
         emulator.data_store[0..3].copy_from_slice(&[10, 20, 0]);
         emulator.registers[ST] = 3;
 
-        let instr = TamInstruction {
-            op: 2,
-            r: 0,
-            n: 1,
-            d: 0,
-        };
+        let instr = TamInstruction::make(2, 0, 1, 0);
         let result = emulator
             .execute(instr, &mut reader, &mut writer)
             .expect("execute should not have errored");
@@ -305,22 +269,13 @@ mod tests {
         mut reader: impl BufRead,
         mut writer: impl Write,
     ) {
-        let instr = TamInstruction {
-            op: 2,
-            r: 0,
-            n: 1,
-            d: 0,
-        };
-        let TamError {
-            kind,
-            address,
-            message: _,
-        } = emulator
+        let instr = TamInstruction::make(2, 0, 1, 0);
+        let error = emulator
             .execute(instr, &mut reader, &mut writer)
             .expect_err("execute should not have succeeded");
 
-        assert_eq!(TamErrorKind::StackUnderflow, kind);
-        assert_eq!(Some(0), address);
+        assert_eq!(TamErrorKind::StackUnderflow, error.kind);
+        assert_eq!(Some(0), error.address);
     }
 
     #[rstest]
@@ -331,23 +286,14 @@ mod tests {
     ) {
         emulator.data_store[0..3].copy_from_slice(&[10, 20, 30]);
         emulator.registers[ST] = 3;
-        let instr = TamInstruction {
-            op: 2,
-            r: 0,
-            n: 1,
-            d: 0,
-        };
+        let instr = TamInstruction::make(2, 0, 1, 0);
 
-        let TamError {
-            kind,
-            address,
-            message: _,
-        } = emulator
+        let error = emulator
             .execute(instr, &mut reader, &mut writer)
             .expect_err("execute should not have succeeded");
 
-        assert_eq!(TamErrorKind::AccessViolation, kind);
-        assert_eq!(Some(0), address);
+        assert_eq!(TamErrorKind::AccessViolation, error.kind);
+        assert_eq!(Some(0), error.address);
     }
 
     #[rstest]
@@ -356,12 +302,7 @@ mod tests {
         mut reader: impl BufRead,
         mut writer: impl Write,
     ) {
-        let instr = TamInstruction {
-            op: 3,
-            r: 0,
-            n: 0,
-            d: -45,
-        };
+        let instr = TamInstruction::make(3, 0, 0, -45);
         let result = emulator
             .execute(instr, &mut reader, &mut writer)
             .expect("execute should not have errored");
@@ -377,12 +318,7 @@ mod tests {
         mut writer: impl Write,
     ) {
         emulator.registers[HT] = 0;
-        let instr = TamInstruction {
-            op: 3,
-            r: 0,
-            n: 0,
-            d: -45,
-        };
+        let instr = TamInstruction::make(3, 0, 0, -45);
         let result = emulator
             .execute(instr, &mut reader, &mut writer)
             .expect_err("execute should have errored");
@@ -396,12 +332,7 @@ mod tests {
         mut reader: impl BufRead,
         mut writer: impl Write,
     ) {
-        let instr = TamInstruction {
-            op: 15,
-            r: 0,
-            n: 0,
-            d: 0,
-        };
+        let instr = TamInstruction::make(15, 0, 0, 0);
         let result = emulator
             .execute(instr, &mut reader, &mut writer)
             .expect("execute returned an error");

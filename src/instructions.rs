@@ -13,18 +13,19 @@ pub struct TamInstruction {
     pub d: i16,
 }
 
+impl TamInstruction {
+    pub fn make(op: u8, r: u8, n: u8, d: i16) -> TamInstruction {
+        TamInstruction { op, r, n, d }
+    }
+}
+
 impl From<u32> for TamInstruction {
     fn from(value: u32) -> Self {
         let op = (value & 0xf0000000) >> 28;
         let r = (value & 0x0f000000) >> 24;
         let n = (value & 0x00ff0000) >> 16;
         let d = value & 0x0000ffff;
-        TamInstruction {
-            op: op as u8,
-            r: r as u8,
-            n: n as u8,
-            d: d as i16,
-        }
+        TamInstruction::make(op as u8, r as u8, n as u8, d as i16)
     }
 }
 
