@@ -27,6 +27,7 @@ impl TamEmulator {
             0 => self.exec_load(instr)?,
             1 => self.exec_loada(instr)?,
             2 => self.exec_loadi(instr)?,
+            3 => self.exec_loadl(instr)?,
             15 => return Ok(false),
             op => {
                 return Err(TamError {
@@ -133,6 +134,10 @@ impl TamEmulator {
             self.push_data(self.data_store[addr as usize])?;
         }
         Ok(())
+    }
+
+    fn exec_loadl(&mut self, instr: TamInstruction) -> TamResult<()> {
+        self.push_data(instr.d)
     }
 }
 
@@ -343,6 +348,46 @@ mod tests {
 
         assert_eq!(TamErrorKind::AccessViolation, kind);
         assert_eq!(Some(0), address);
+    }
+
+    #[rstest]
+    fn execute_loadl_ok(
+        mut emulator: TamEmulator,
+        mut reader: impl BufRead,
+        mut writer: impl Write,
+    ) {
+        let instr = TamInstruction {
+            op: 3,
+            r: 0,
+            n: 0,
+            d: -45,
+        };
+        let result = emulator
+            .execute(instr, &mut reader, &mut writer)
+            .expect("execute should not have errored");
+
+        assert!(result);
+        assert_eq!(-45, emulator.data_store[0], "wrong value was loaded");
+    }
+
+    #[rstest]
+    fn execute_loadl_full_stack_stack_overflow(
+        mut emulator: TamEmulator,
+        mut reader: impl BufRead,
+        mut writer: impl Write,
+    ) {
+        emulator.registers[HT] = 0;
+        let instr = TamInstruction {
+            op: 3,
+            r: 0,
+            n: 0,
+            d: -45,
+        };
+        let result = emulator
+            .execute(instr, &mut reader, &mut writer)
+            .expect_err("execute should have errored");
+
+        assert_eq!(TamErrorKind::StackOverflow, result.kind);
     }
 
     #[rstest]
