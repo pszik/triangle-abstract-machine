@@ -21,6 +21,8 @@ class TamEmulator {
 
     void executeLoad(TamInstruction Instr);
     void executeLoada(TamInstruction Instr);
+    void executeLoadi(TamInstruction Instr);
+    void executeLoadl(TamInstruction Instr);
 
   public:
     TamInstruction fetchDecode();

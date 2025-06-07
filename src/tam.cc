@@ -77,4 +77,21 @@ void TamEmulator::executeLoada(TamInstruction Instr) {
     this->pushData(Addr);
 }
 
+void TamEmulator::executeLoadi(TamInstruction Instr) {
+    uint16_t Addr = this->popData();
+
+    for (int I = 0; I < Instr.N; ++I) {
+        int16_t Value = this->DataStore[Addr + I];
+        if (Value >= this->Registers[ST] && Value <= this->Registers[HT]) {
+            throw TamException(EK_DataAccessViolation, this->Registers[CP] - 1);
+        }
+
+        this->pushData(Value);
+    }
+}
+
+void TamEmulator::executeLoadl(TamInstruction Instr) {
+    this->pushData(Instr.D);
+}
+
 } // namespace tam
