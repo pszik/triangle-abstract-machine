@@ -1,19 +1,22 @@
 #include <algorithm>
 #include <cstdint>
-#include <iterator>
 #include <tam/error.h>
 #include <tam/tam.h>
 #include <vector>
 
 namespace tam {
 
+/// Index of code top register
 const uint8_t CT = 1;
+/// Index of stack top register
 const uint8_t ST = 4;
+/// Index of heap top register
 const uint8_t HT = 6;
+/// Index of code pointer register
 const uint8_t CP = 15;
 
 void TamEmulator::loadProgram(std::vector<uint32_t> &Program) {
-    std::copy(Program.begin(), Program.end(), std::begin(this->CodeStore));
+    std::copy(Program.begin(), Program.end(), this->CodeStore.begin());
 }
 
 TamInstruction TamEmulator::fetchDecode() {
