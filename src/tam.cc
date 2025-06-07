@@ -1,6 +1,9 @@
+#include <algorithm>
 #include <cstdint>
+#include <iterator>
 #include <tam/error.h>
 #include <tam/tam.h>
+#include <vector>
 
 namespace tam {
 
@@ -8,6 +11,10 @@ const uint8_t CT = 1;
 const uint8_t ST = 4;
 const uint8_t HT = 6;
 const uint8_t CP = 15;
+
+void TamEmulator::loadProgram(std::vector<uint32_t> &Program) {
+    std::copy(Program.begin(), Program.end(), std::begin(this->CodeStore));
+}
 
 TamInstruction TamEmulator::fetchDecode() {
     uint16_t Addr = this->Registers[CP];

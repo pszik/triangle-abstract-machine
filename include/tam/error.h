@@ -14,6 +14,7 @@ enum ExceptionKind : uint8_t {
     EK_StackUnderflow,
     EK_StackOverflow,
     EK_UnknownOpcode,
+    EK_IOError,
 };
 
 class TamException : std::exception {
@@ -42,6 +43,9 @@ class TamException : std::exception {
             break;
         case EK_UnknownOpcode:
             ss << "unknown opcode";
+            break;
+        case EK_IOError:
+            ss << "IO error";
             break;
         }
 

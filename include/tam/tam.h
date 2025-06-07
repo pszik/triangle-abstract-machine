@@ -2,6 +2,7 @@
 #define TAM_TAM_H__
 
 #include <cstdint>
+#include <vector>
 
 namespace tam {
 
@@ -25,6 +26,7 @@ class TamEmulator {
     void executeLoadl(TamInstruction Instr);
 
   public:
+    void loadProgram(std::vector<uint32_t> &Program);
     TamInstruction fetchDecode();
     bool execute(TamInstruction Instr);
 };
