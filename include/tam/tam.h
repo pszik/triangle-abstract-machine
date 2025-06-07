@@ -7,6 +7,10 @@
 
 namespace tam {
 
+typedef uint32_t TamCode;
+typedef int16_t TamData;
+typedef uint16_t TamAddr;
+
 struct TamInstruction {
     uint8_t Op, R, N;
     int16_t D;
@@ -14,12 +18,12 @@ struct TamInstruction {
 
 class TamEmulator {
   private:
-    std::array<uint32_t, 65536> CodeStore;
-    std::array<int16_t, 65536> DataStore;
-    std::array<uint16_t, 16> Registers;
+    std::array<TamCode, 65536> CodeStore;
+    std::array<TamData, 65536> DataStore;
+    std::array<TamAddr, 16> Registers;
 
-    void pushData(int16_t Value);
-    int16_t popData();
+    void pushData(TamData Value);
+    TamData popData();
 
     void executeLoad(TamInstruction Instr);
     void executeLoada(TamInstruction Instr);
@@ -33,7 +37,7 @@ class TamEmulator {
         this->Registers.fill(0);
     }
 
-    void loadProgram(std::vector<uint32_t> &Program);
+    void loadProgram(std::vector<TamCode> &Program);
     TamInstruction fetchDecode();
     bool execute(TamInstruction Instr);
 };

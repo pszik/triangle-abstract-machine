@@ -15,17 +15,17 @@ const uint8_t HT = 6;
 /// Index of code pointer register
 const uint8_t CP = 15;
 
-void TamEmulator::loadProgram(std::vector<uint32_t> &Program) {
+void TamEmulator::loadProgram(std::vector<TamCode> &Program) {
     std::copy(Program.begin(), Program.end(), this->CodeStore.begin());
 }
 
 TamInstruction TamEmulator::fetchDecode() {
-    uint16_t Addr = this->Registers[CP];
+    TamAddr Addr = this->Registers[CP];
     if (Addr >= this->Registers[CT]) {
         throw TamException(EK_CodeAccessViolation, Addr);
     }
 
-    uint32_t Code = this->CodeStore[Addr];
+    TamCode Code = this->CodeStore[Addr];
     uint8_t Op = (Code & 0xf0000000) >> 28;
     uint8_t R = (Code & 0x0f000000) >> 24;
     uint8_t N = (Code & 0x00ff0000) >> 16;
@@ -33,8 +33,8 @@ TamInstruction TamEmulator::fetchDecode() {
     return TamInstruction{Op, R, N, D};
 }
 
-inline void TamEmulator::pushData(int16_t Value) {
-    uint16_t Addr = this->Registers[ST];
+inline void TamEmulator::pushData(TamData Value) {
+    TamAddr Addr = this->Registers[ST];
     if (Addr >= this->Registers[HT]) {
         throw TamException(EK_StackOverflow, this->Registers[CP] - 1);
     }
@@ -43,8 +43,8 @@ inline void TamEmulator::pushData(int16_t Value) {
     this->Registers[ST]++;
 }
 
-inline int16_t TamEmulator::popData() {
-    uint16_t Addr = this->Registers[ST];
+inline TamData TamEmulator::popData() {
+    TamAddr Addr = this->Registers[ST];
     if (this->Registers[ST] == 0) {
         throw TamException(EK_StackUnderflow, this->Registers[CP] - 1);
     }
@@ -70,10 +70,10 @@ bool TamEmulator::execute(TamInstruction Instr) {
 }
 
 void TamEmulator::executeLoad(TamInstruction Instr) {
-    uint16_t Addr = this->Registers[Instr.R] + Instr.D;
+    TamAddr Addr = this->Registers[Instr.R] + Instr.D;
 
     for (int I = 0; I < Instr.N; ++I) {
-        int16_t Value = this->DataStore[Addr + I];
+        TamData Value = this->DataStore[Addr + I];
         if (Value >= this->Registers[ST] && Value <= this->Registers[HT]) {
             throw TamException(EK_DataAccessViolation, this->Registers[CP] - 1);
         }
@@ -83,15 +83,15 @@ void TamEmulator::executeLoad(TamInstruction Instr) {
 }
 
 void TamEmulator::executeLoada(TamInstruction Instr) {
-    uint16_t Addr = this->Registers[Instr.R] + Instr.D;
+    TamAddr Addr = this->Registers[Instr.R] + Instr.D;
     this->pushData(Addr);
 }
 
 void TamEmulator::executeLoadi(TamInstruction Instr) {
-    uint16_t Addr = this->popData();
+    TamAddr Addr = this->popData();
 
     for (int I = 0; I < Instr.N; ++I) {
-        int16_t Value = this->DataStore[Addr + I];
+        TamData Value = this->DataStore[Addr + I];
         if (Value >= this->Registers[ST] && Value <= this->Registers[HT]) {
             throw TamException(EK_DataAccessViolation, this->Registers[CP] - 1);
         }
