@@ -37,8 +37,17 @@ class TamEmulator {
         this->Registers.fill(0);
     }
 
+    /// Sets the program to be run by this emulator.
+    ///
+    /// Code words are copied into the code store, and CT, PB, and PT registers
+    /// are set.
     void loadProgram(std::vector<TamCode> &Program);
+
+    /// Obtains the next instruction to execute.
     TamInstruction fetchDecode();
+
+    /// Executes the given instruction and returns `false` if execution should
+    /// halt.
     bool execute(TamInstruction Instr);
 };
 

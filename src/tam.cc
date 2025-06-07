@@ -8,6 +8,10 @@ namespace tam {
 
 /// Index of code top register
 const uint8_t CT = 1;
+/// Index of primitive base register
+const uint8_t PB = 2;
+/// Index of primitive top register
+const uint8_t PT = 3;
 /// Index of stack top register
 const uint8_t ST = 4;
 /// Index of heap top register
@@ -16,7 +20,11 @@ const uint8_t HT = 6;
 const uint8_t CP = 15;
 
 void TamEmulator::loadProgram(std::vector<TamCode> &Program) {
+    this->CodeStore.fill(0);
     std::copy(Program.begin(), Program.end(), this->CodeStore.begin());
+    this->Registers[CT] = Program.size();
+    this->Registers[PB] = Program.size();
+    this->Registers[PT] = this->Registers[PB] + 29;
 }
 
 TamInstruction TamEmulator::fetchDecode() {
@@ -60,6 +68,12 @@ bool TamEmulator::execute(TamInstruction Instr) {
         break;
     case 1: // LOADA
         this->executeLoada(Instr);
+        break;
+    case 2: // LOADI
+        this->executeLoadi(Instr);
+        break;
+    case 3: // LOADL
+        this->executeLoadl(Instr);
         break;
     case 15: // HALT
         return false;
