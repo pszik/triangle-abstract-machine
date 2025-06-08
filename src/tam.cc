@@ -12,10 +12,14 @@ const uint8_t CT = 1;
 const uint8_t PB = 2;
 /// Index of primitive top register
 const uint8_t PT = 3;
+/// Index of stack base register
+const uint8_t SB = 4;
 /// Index of stack top register
-const uint8_t ST = 4;
+const uint8_t ST = 5;
 /// Index of heap top register
-const uint8_t HT = 6;
+const uint8_t HT = 7;
+/// Index of local base register
+const uint8_t LB = 8;
 /// Index of code pointer register
 const uint8_t CP = 15;
 
@@ -75,6 +79,13 @@ bool TamEmulator::execute(TamInstruction Instr) {
     case 3: // LOADL
         this->executeLoadl(Instr);
         break;
+    case 6: // CALL
+        if (Instr.R == PB && Instr.D > 0 && Instr.D < 29) {
+            this->executeCallPrimitive(Instr);
+        } else {
+            this->executeCall(Instr);
+        }
+        break;
     case 15: // HALT
         return false;
     default:
@@ -116,6 +127,23 @@ void TamEmulator::executeLoadi(TamInstruction Instr) {
 
 void TamEmulator::executeLoadl(TamInstruction Instr) {
     this->pushData(Instr.D);
+}
+
+void TamEmulator::executeCall(TamInstruction Instr) {
+    if (this->Registers[Instr.R] + Instr.D >= this->Registers[CT]) {
+        throw TamException(EK_CodeAccessViolation, this->Registers[CP] - 1);
+    }
+
+    TamAddr StaticLink = this->Registers[SB];
+    TamAddr DynamicLink = this->Registers[LB];
+    TamAddr ReturnAddr = this->Registers[CP];
+
+    this->pushData(StaticLink);
+    this->pushData(DynamicLink);
+    this->pushData(ReturnAddr);
+
+    this->Registers[LB] = this->Registers[ST] - 3;
+    this->Registers[CP] = this->Registers[Instr.R] + Instr.D;
 }
 
 } // namespace tam

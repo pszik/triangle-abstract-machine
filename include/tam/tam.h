@@ -29,6 +29,13 @@ class TamEmulator {
     void executeLoada(TamInstruction Instr);
     void executeLoadi(TamInstruction Instr);
     void executeLoadl(TamInstruction Instr);
+    void executeCall(TamInstruction Instr);
+    void executeCallPrimitive(TamInstruction Instr);
+
+    void primitiveGet();
+    void primitivePut();
+    void primitiveGetint();
+    void primitivePutint();
 
   public:
     TamEmulator() {
