@@ -1,5 +1,7 @@
 #include <algorithm>
+#include <cassert>
 #include <cstdint>
+#include <stack>
 #include <tam/error.h>
 #include <tam/tam.h>
 #include <vector>
@@ -127,6 +129,45 @@ void TamEmulator::executeLoadi(TamInstruction Instr) {
 
 void TamEmulator::executeLoadl(TamInstruction Instr) {
     this->pushData(Instr.D);
+}
+
+void TamEmulator::executeStore(TamInstruction Instr) {
+    std::stack<TamData> Data;
+    for (int I = 0; I < Instr.N; ++I) {
+        Data.push(this->popData());
+    }
+
+    TamAddr BaseAddr = this->Registers[Instr.R] + Instr.D;
+    for (int I = 0; I < Instr.N; ++I) {
+        TamAddr Addr = BaseAddr + I;
+        if (Addr >= this->Registers[ST] && Addr <= this->Registers[HT]) {
+            throw TamException(EK_DataAccessViolation, this->Registers[CP] - 1);
+        }
+        this->DataStore[Addr] = Data.top();
+        Data.pop();
+    }
+
+    assert(Data.empty());
+}
+
+void TamEmulator::executeStorei(TamInstruction Instr) {
+    TamAddr BaseAddr = this->popData();
+
+    std::stack<TamData> Data;
+    for (int I = 0; I < Instr.N; ++I) {
+        Data.push(this->popData());
+    }
+
+    for (int I = 0; I < Instr.N; ++I) {
+        TamAddr Addr = BaseAddr + I;
+        if (Addr >= this->Registers[ST] && Addr <= this->Registers[HT]) {
+            throw TamException(EK_DataAccessViolation, this->Registers[CP] - 1);
+        }
+        this->DataStore[Addr] = Data.top();
+        Data.pop();
+    }
+
+    assert(Data.empty());
 }
 
 void TamEmulator::executeCall(TamInstruction Instr) {
