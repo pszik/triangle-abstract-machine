@@ -187,4 +187,37 @@ void TamEmulator::executeCall(TamInstruction Instr) {
     this->Registers[CP] = this->Registers[Instr.R] + Instr.D;
 }
 
+void TamEmulator::executeReturn(TamInstruction Instr) {
+    std::stack<TamData> ReturnVal;
+    for (int I = 0; I < Instr.N; ++I) {
+        ReturnVal.push(this->popData());
+    }
+
+    TamAddr DynamicLink = this->DataStore[this->Registers[LB] + 1];
+    TamAddr ReturnAddr = this->DataStore[this->Registers[LB] + 2];
+    if (ReturnAddr >= this->Registers[CT]) {
+        throw new TamException(EK_CodeAccessViolation, this->Registers[CP] - 1);
+    }
+
+    // pop stack frame
+    while (this->Registers[ST] > this->Registers[LB]) {
+        this->popData();
+    }
+
+    // pop arguments
+    for (int I = 0; I < Instr.D; ++I) {
+        this->popData();
+    }
+
+    // push result
+    for (int I = 0; I < Instr.N; ++I) {
+        this->pushData(ReturnVal.top());
+        ReturnVal.pop();
+    }
+    assert(ReturnVal.empty());
+
+    this->Registers[LB] = DynamicLink;
+    this->Registers[CP] = ReturnAddr;
+}
+
 } // namespace tam
