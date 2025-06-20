@@ -8,7 +8,6 @@
 
 std::vector<uint32_t> readProgramFromFile(const char *Filename) {
     std::ifstream In(Filename, std::ios::binary);
-    std::vector<uint32_t> Codes;
 
     // find file size
     int FileLen;
@@ -20,6 +19,8 @@ std::vector<uint32_t> readProgramFromFile(const char *Filename) {
         throw tam::TamException(tam::EK_IOError, 0);
     }
 
+    // read instructions
+    std::vector<uint32_t> Codes;
     for (int J = 0; J < FileLen / 4; ++J) {
         int C;
         uint32_t Code = 0;
@@ -33,23 +34,23 @@ std::vector<uint32_t> readProgramFromFile(const char *Filename) {
 }
 
 int main(int Argc, const char **Argv) {
-    tam::TamEmulator emulator;
+    tam::TamEmulator Emulator;
 
     std::vector<uint32_t> Program;
     try {
         Program = readProgramFromFile(Argv[1]);
-        emulator.loadProgram(Program);
-    } catch (const std::exception &e) {
+        Emulator.loadProgram(Program);
+    } catch (const std::exception &E) {
         return 1;
     }
 
     bool Running = true;
     while (Running) {
         try {
-            tam::TamInstruction Instr = emulator.fetchDecode();
-            Running = emulator.execute(Instr);
-        } catch (const tam::TamException &e) {
-            std::cerr << e.str() << std::endl;
+            tam::TamInstruction Instr = Emulator.fetchDecode();
+            Running = Emulator.execute(Instr);
+        } catch (const tam::TamException &E) {
+            std::cerr << E.str() << std::endl;
             break;
         }
     }
