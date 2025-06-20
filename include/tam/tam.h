@@ -41,6 +41,16 @@ class TamEmulator {
     void executeJumpi(TamInstruction Instr);
     void executeJumpif(TamInstruction Instr);
 
+    void primitiveNot();
+    void primitiveAnd();
+    void primitiveOr();
+    void primitiveSucc();
+    void primitivePred();
+    void primitiveAdd();
+    void primitiveSub();
+    void primitiveMult();
+    void primitiveDiv();
+    void primitiveMod();
     void primitiveGet();
     void primitivePut();
     void primitiveGetint();
