@@ -220,4 +220,35 @@ void TamEmulator::executeReturn(TamInstruction Instr) {
     this->Registers[CP] = ReturnAddr;
 }
 
+void TamEmulator::executeJump(TamInstruction Instr) {
+    TamAddr Addr = this->Registers[Instr.R] + Instr.D;
+    if (Addr >= this->Registers[CT]) {
+        throw TamException(EK_CodeAccessViolation, this->Registers[CP] - 1);
+    }
+
+    this->Registers[CP] = Addr;
+}
+
+void TamEmulator::executeJumpi(TamInstruction Instr) {
+    TamAddr Addr = this->popData();
+    if (Addr >= this->Registers[CT]) {
+        throw TamException(EK_CodeAccessViolation, this->Registers[CP] - 1);
+    }
+
+    this->Registers[CP] = Addr;
+}
+
+void TamEmulator::executeJumpif(TamInstruction Instr) {
+    TamData Value = this->popData();
+    if (Value != Instr.N) {
+        return;
+    }
+
+    TamAddr Addr = this->Registers[Instr.R] + Instr.D;
+    if (Addr >= this->Registers[CT]) {
+        throw TamException(EK_CodeAccessViolation, this->Registers[CP] - 1);
+    }
+
+    this->Registers[CP] = Addr;
+}
 } // namespace tam
