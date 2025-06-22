@@ -1,3 +1,4 @@
+#include <stack>
 #include <tam/tam.h>
 
 #include <cassert>
@@ -43,11 +44,41 @@ void TamEmulator::executeCallPrimitive(TamInstruction Instr) {
     case 12:
         this->primitiveMod();
         break;
+    case 13:
+        this->primitiveLt();
+        break;
+    case 14:
+        this->primitiveLe();
+        break;
+    case 15:
+        this->primitiveGe();
+        break;
+    case 16:
+        this->primitiveGt();
+        break;
+    case 17:
+        this->primitiveEq();
+        break;
+    case 18:
+        this->primitiveNe();
+        break;
+    case 19:
+        this->primitiveEol();
+        break;
+    case 20:
+        this->primitiveEof();
+        break;
     case 21:
         this->primitiveGet();
         break;
     case 22:
         this->primitivePut();
+        break;
+    case 23:
+        this->primitiveGeteol();
+        break;
+    case 24:
+        this->primitivePuteol();
         break;
     case 25:
         this->primitiveGetint();
@@ -64,13 +95,13 @@ void TamEmulator::primitiveNot() {
 }
 
 void TamEmulator::primitiveAnd() {
-    TamData Op1 = this->popData(), Op2 = this->popData();
-    this->pushData(Op1 * Op2 == 0 ? 0 : 1);
+    TamData Op2 = this->popData(), Op1 = this->popData();
+    this->pushData(Op1 * Op2 ? 1 : 0);
 }
 
 void TamEmulator::primitiveOr() {
-    TamData Op1 = this->popData(), Op2 = this->popData();
-    this->pushData(Op1 + Op2 == 0 && Op1 != -Op2 ? 0 : 1);
+    TamData Op2 = this->popData(), Op1 = this->popData();
+    this->pushData(Op1 + Op2 || Op1 == -Op2 ? 1 : 0);
 }
 
 void TamEmulator::primitiveSucc() {
@@ -89,32 +120,90 @@ void TamEmulator::primitiveNeg() {
 }
 
 void TamEmulator::primitiveAdd() {
-    TamData Arg1 = this->popData(), Arg2 = this->popData();
+    TamData Arg2 = this->popData(), Arg1 = this->popData();
     this->pushData(Arg1 + Arg2);
 }
 
 void TamEmulator::primitiveSub() {
-    TamData Arg1 = this->popData(), Arg2 = this->popData();
+    TamData Arg2 = this->popData(), Arg1 = this->popData();
     this->pushData(Arg1 - Arg2);
 }
 void TamEmulator::primitiveMult() {
-    TamData Arg1 = this->popData(), Arg2 = this->popData();
+    TamData Arg2 = this->popData(), Arg1 = this->popData();
     this->pushData(Arg1 * Arg2);
 }
 
 void TamEmulator::primitiveDiv() {
-    TamData Arg1 = this->popData(), Arg2 = this->popData();
+    TamData Arg2 = this->popData(), Arg1 = this->popData();
     this->pushData(Arg1 / Arg2);
 }
 
 void TamEmulator::primitiveMod() {
-    TamData Arg1 = this->popData(), Arg2 = this->popData();
+    TamData Arg2 = this->popData(), Arg1 = this->popData();
     this->pushData(Arg1 % Arg2);
 }
 
+void TamEmulator::primitiveLt() {
+    TamData Arg2 = this->popData(), Arg1 = this->popData();
+    this->pushData(Arg1 < Arg2 ? 1 : 0);
+}
+
+void TamEmulator::primitiveLe() {
+    TamData Arg2 = this->popData(), Arg1 = this->popData();
+    this->pushData(Arg1 <= Arg2 ? 1 : 0);
+}
+
+void TamEmulator::primitiveGe() {
+    TamData Arg2 = this->popData(), Arg1 = this->popData();
+    this->pushData(Arg1 >= Arg2 ? 1 : 0);
+}
+
+void TamEmulator::primitiveGt() {
+    TamData Arg2 = this->popData(), Arg1 = this->popData();
+    this->pushData(Arg1 > Arg2 ? 1 : 0);
+}
+
+void TamEmulator::primitiveEq() {
+    TamData Width = this->popData();
+    std::stack<TamData> Arg1, Arg2;
+
+    for (int I = 0; I < Width; ++I) {
+        Arg2.push(this->popData());
+    }
+
+    for (int I = 0; I < Width; ++I) {
+        Arg1.push(this->popData());
+    }
+
+    this->pushData(Arg1 == Arg2 ? 1 : 0);
+}
+
+void TamEmulator::primitiveNe() {
+    TamData Width = this->popData();
+    std::stack<TamData> Arg1, Arg2;
+
+    for (int I = 0; I < Width; ++I) {
+        Arg2.push(this->popData());
+    }
+
+    for (int I = 0; I < Width; ++I) {
+        Arg1.push(this->popData());
+    }
+
+    this->pushData(Arg1 != Arg2 ? 1 : 0);
+}
+
+void TamEmulator::primitiveEol() {
+    char C = std::cin.peek();
+    this->pushData(C == '\n' ? 1 : 0);
+}
+
+void TamEmulator::primitiveEof() { this->pushData(std::cin.eof() ? 1 : 0); }
+
 void TamEmulator::primitiveGet() {
+    TamAddr Addr = this->popData();
     char C = std::cin.get();
-    this->pushData(C);
+    this->DataStore[Addr] = C;
 }
 
 void TamEmulator::primitivePut() {
@@ -122,10 +211,20 @@ void TamEmulator::primitivePut() {
     std::cout << C;
 }
 
+void TamEmulator::primitiveGeteol() {
+    char C;
+    while (C != '\n') {
+        std::cin >> C;
+    }
+}
+
+void TamEmulator::primitivePuteol() { std::cout << std::endl; }
+
 void TamEmulator::primitiveGetint() {
+    TamAddr Addr = this->popData();
     TamData N;
     std::cin >> N;
-    this->pushData(N);
+    this->DataStore[Addr] = N;
 }
 
 void TamEmulator::primitivePutint() {

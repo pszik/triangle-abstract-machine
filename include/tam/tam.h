@@ -52,8 +52,18 @@ class TamEmulator {
     void primitiveMult();
     void primitiveDiv();
     void primitiveMod();
+    void primitiveLt();
+    void primitiveLe();
+    void primitiveGe();
+    void primitiveGt();
+    void primitiveEq();
+    void primitiveNe();
+    void primitiveEol();
+    void primitiveEof();
     void primitiveGet();
     void primitivePut();
+    void primitiveGeteol();
+    void primitivePuteol();
     void primitiveGetint();
     void primitivePutint();
 
