@@ -11,46 +11,105 @@ void TamEmulator::executeCallPrimitive(TamInstruction Instr) {
     case 1:
         break;
     case 2:
-        primitiveNot();
+        this->primitiveNot();
         break;
     case 3:
-        primitiveAnd();
+        this->primitiveAnd();
         break;
     case 4:
-        primitiveOr();
+        this->primitiveOr();
         break;
     case 5:
-        primitiveSucc();
+        this->primitiveSucc();
         break;
     case 6:
-        primitivePred();
+        this->primitivePred();
+        break;
+    case 7:
+        this->primitiveNeg();
+        break;
+    case 8:
+        this->primitiveAdd();
+        break;
+    case 9:
+        this->primitiveSub();
+        break;
+    case 10:
+        this->primitiveMult();
+        break;
+    case 11:
+        this->primitiveDiv();
+        break;
+    case 12:
+        this->primitiveMod();
+        break;
+    case 21:
+        this->primitiveGet();
+        break;
+    case 22:
+        this->primitivePut();
+        break;
+    case 25:
+        this->primitiveGetint();
+        break;
+    case 26:
+        this->primitivePutint();
         break;
     }
 }
 
 void TamEmulator::primitiveNot() {
     TamData Value = this->popData();
-    this->pushData(-Value);
+    this->pushData(Value ? 0 : 1);
 }
 
 void TamEmulator::primitiveAnd() {
-    TamData op1 = this->popData(), op2 = this->popData();
-    this->pushData(op1 * op2 == 0 ? 0 : 1);
+    TamData Op1 = this->popData(), Op2 = this->popData();
+    this->pushData(Op1 * Op2 == 0 ? 0 : 1);
 }
 
 void TamEmulator::primitiveOr() {
-    TamData op1 = this->popData(), op2 = this->popData();
-    this->pushData(op1 + op2 == 0 && op1 != -op2 ? 0 : 1);
+    TamData Op1 = this->popData(), Op2 = this->popData();
+    this->pushData(Op1 + Op2 == 0 && Op1 != -Op2 ? 0 : 1);
 }
 
 void TamEmulator::primitiveSucc() {
-    TamData op = this->popData();
-    this->pushData(op + 1);
+    TamData Op = this->popData();
+    this->pushData(Op + 1);
 }
 
 void TamEmulator::primitivePred() {
-    TamData op = this->popData();
-    this->pushData(op - 1);
+    TamData Op = this->popData();
+    this->pushData(Op - 1);
+}
+
+void TamEmulator::primitiveNeg() {
+    TamData Op = this->popData();
+    this->pushData(-Op);
+}
+
+void TamEmulator::primitiveAdd() {
+    TamData Arg1 = this->popData(), Arg2 = this->popData();
+    this->pushData(Arg1 + Arg2);
+}
+
+void TamEmulator::primitiveSub() {
+    TamData Arg1 = this->popData(), Arg2 = this->popData();
+    this->pushData(Arg1 - Arg2);
+}
+void TamEmulator::primitiveMult() {
+    TamData Arg1 = this->popData(), Arg2 = this->popData();
+    this->pushData(Arg1 * Arg2);
+}
+
+void TamEmulator::primitiveDiv() {
+    TamData Arg1 = this->popData(), Arg2 = this->popData();
+    this->pushData(Arg1 / Arg2);
+}
+
+void TamEmulator::primitiveMod() {
+    TamData Arg1 = this->popData(), Arg2 = this->popData();
+    this->pushData(Arg1 % Arg2);
 }
 
 void TamEmulator::primitiveGet() {

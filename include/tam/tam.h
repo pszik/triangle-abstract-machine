@@ -46,6 +46,7 @@ class TamEmulator {
     void primitiveOr();
     void primitiveSucc();
     void primitivePred();
+    void primitiveNeg();
     void primitiveAdd();
     void primitiveSub();
     void primitiveMult();
