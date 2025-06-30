@@ -1,8 +1,7 @@
-#include <stack>
-#include <tam/tam.h>
-
 #include <cassert>
 #include <iostream>
+#include <stack>
+#include <tam/tam.h>
 
 namespace tam {
 

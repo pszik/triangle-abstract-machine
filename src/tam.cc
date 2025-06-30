@@ -47,7 +47,7 @@ TamInstruction TamEmulator::fetchDecode() {
     return TamInstruction{Op, R, N, D};
 }
 
-inline void TamEmulator::pushData(TamData Value) {
+void TamEmulator::pushData(TamData Value) {
     TamAddr Addr = this->Registers[ST];
     if (Addr >= this->Registers[HT]) {
         throw TamException(EK_StackOverflow, this->Registers[CP] - 1);
@@ -57,7 +57,7 @@ inline void TamEmulator::pushData(TamData Value) {
     this->Registers[ST]++;
 }
 
-inline TamData TamEmulator::popData() {
+TamData TamEmulator::popData() {
     TamAddr Addr = this->Registers[ST];
     if (this->Registers[ST] == 0) {
         throw TamException(EK_StackUnderflow, this->Registers[CP] - 1);
