@@ -81,12 +81,39 @@ bool TamEmulator::execute(TamInstruction Instr) {
     case 3: // LOADL
         this->executeLoadl(Instr);
         break;
+    case 4: // STORE
+        this->executeStore(Instr);
+        break;
+    case 5: // STOREI
+        this->executeStorei(Instr);
+        break;
     case 6: // CALL
         if (Instr.R == PB && Instr.D > 0 && Instr.D < 29) {
             this->executeCallPrimitive(Instr);
         } else {
             this->executeCall(Instr);
         }
+        break;
+    case 7: // CALLI
+        this->executeCalli(Instr);
+        break;
+    case 8: // RETURN
+        this->executeReturn(Instr);
+        break;
+    case 10: // PUSH
+        this->executePush(Instr);
+        break;
+    case 11: // POP
+        this->executePop(Instr);
+        break;
+    case 12: // JUMP
+        this->executeJump(Instr);
+        break;
+    case 13: // JUMPI
+        this->executeJumpi(Instr);
+        break;
+    case 14: // JUMPIF
+        this->executeJumpif(Instr);
         break;
     case 15: // HALT
         return false;
@@ -187,6 +214,25 @@ void TamEmulator::executeCall(TamInstruction Instr) {
     this->Registers[CP] = this->Registers[Instr.R] + Instr.D;
 }
 
+void TamEmulator::executeCalli(TamInstruction Instr) {
+    TamAddr CallAddress = this->popData();
+    TamAddr StaticLink = this->popData();
+
+    if (CallAddress >= this->Registers[CT]) {
+        throw TamException(EK_CodeAccessViolation, this->Registers[CP] - 1);
+    }
+
+    TamAddr DynamicLink = this->Registers[LB];
+    TamAddr ReturnAddr = this->Registers[CP];
+
+    this->pushData(StaticLink);
+    this->pushData(DynamicLink);
+    this->pushData(ReturnAddr);
+
+    this->Registers[LB] = this->Registers[ST] - 3;
+    this->Registers[CP] = CallAddress;
+}
+
 void TamEmulator::executeReturn(TamInstruction Instr) {
     std::stack<TamData> ReturnVal;
     for (int I = 0; I < Instr.N; ++I) {
@@ -218,6 +264,29 @@ void TamEmulator::executeReturn(TamInstruction Instr) {
 
     this->Registers[LB] = DynamicLink;
     this->Registers[CP] = ReturnAddr;
+}
+
+void TamEmulator::executePush(TamInstruction Instr) {
+    if (this->Registers[ST] + Instr.D >= this->Registers[HT]) {
+        throw new TamException(EK_StackOverflow, this->Registers[CT] - 1);
+    }
+    this->Registers[ST] += Instr.D;
+}
+
+void TamEmulator::executePop(TamInstruction Instr) {
+    std::stack<TamData> Data;
+    for (int I = 0; I < Instr.N; ++I) {
+        Data.push(this->popData());
+    }
+
+    for (int I = 0; I < Instr.D; ++I) {
+        this->popData();
+    }
+
+    while (!Data.empty()) {
+        this->pushData(Data.top());
+        Data.pop();
+    }
 }
 
 void TamEmulator::executeJump(TamInstruction Instr) {
