@@ -27,13 +27,32 @@ typedef uint32_t TamCode;
 typedef int16_t TamData;
 typedef uint16_t TamAddr;
 
+/// Index of code top register
+const uint8_t CT = 1;
+/// Index of primitive base register
+const uint8_t PB = 2;
+/// Index of primitive top register
+const uint8_t PT = 3;
+/// Index of stack base register
+const uint8_t SB = 4;
+/// Index of stack top register
+const uint8_t ST = 5;
+/// Index of heap base register
+const uint8_t HB = 6;
+/// Index of heap top register
+const uint8_t HT = 7;
+/// Index of local base register
+const uint8_t LB = 8;
+/// Index of code pointer register
+const uint8_t CP = 15;
+
 struct TamInstruction {
     uint8_t Op, R, N;
     int16_t D;
 };
 
 class TamEmulator {
-  private:
+  protected:
     std::array<TamCode, 65536> CodeStore;
     std::array<TamData, 65536> DataStore;
     std::array<TamAddr, 16> Registers;
@@ -84,23 +103,37 @@ class TamEmulator {
     void primitivePutint();
 
   public:
+    /// Constructs a new emulator.
+    ///
+    /// On creation, all memory is zeroed and registers are set to default
+    /// values. Registers default to 0 except for HB and HT, which default to
+    /// the highest address.
     TamEmulator() {
         this->CodeStore.fill(0);
         this->DataStore.fill(0);
         this->Registers.fill(0);
+
+        this->Registers[HB] = 65535;
+        this->Registers[HT] = 65535;
     }
 
     /// Sets the program to be run by this emulator.
     ///
     /// Code words are copied into the code store, and CT, PB, and PT registers
     /// are set.
+    ///
+    /// \param Program program code to load
     void loadProgram(std::vector<TamCode> &Program);
 
     /// Obtains the next instruction to execute.
+    ///
+    /// \return the instruction
     TamInstruction fetchDecode();
 
     /// Executes the given instruction and returns `false` if execution should
     /// halt.
+    ///
+    /// \p Instr instruction to execute
     bool execute(TamInstruction Instr);
 };
 

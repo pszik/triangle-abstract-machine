@@ -24,23 +24,6 @@
 
 namespace tam {
 
-/// Index of code top register
-const uint8_t CT = 1;
-/// Index of primitive base register
-const uint8_t PB = 2;
-/// Index of primitive top register
-const uint8_t PT = 3;
-/// Index of stack base register
-const uint8_t SB = 4;
-/// Index of stack top register
-const uint8_t ST = 5;
-/// Index of heap top register
-const uint8_t HT = 7;
-/// Index of local base register
-const uint8_t LB = 8;
-/// Index of code pointer register
-const uint8_t CP = 15;
-
 void TamEmulator::loadProgram(std::vector<TamCode> &Program) {
     this->CodeStore.fill(0);
     std::copy(Program.begin(), Program.end(), this->CodeStore.begin());
@@ -140,14 +123,15 @@ bool TamEmulator::execute(TamInstruction Instr) {
 }
 
 void TamEmulator::executeLoad(TamInstruction Instr) {
-    TamAddr Addr = this->Registers[Instr.R] + Instr.D;
+    TamAddr BaseAddr = this->Registers[Instr.R] + Instr.D;
 
     for (int I = 0; I < Instr.N; ++I) {
-        TamData Value = this->DataStore[Addr + I];
-        if (Value >= this->Registers[ST] && Value <= this->Registers[HT]) {
+        TamAddr Addr = BaseAddr + I;
+        if (Addr >= this->Registers[ST] && Addr <= this->Registers[HT]) {
             throw TamException(EK_DataAccessViolation, this->Registers[CP] - 1);
         }
 
+        TamData Value = this->DataStore[Addr];
         this->pushData(Value);
     }
 }
@@ -158,14 +142,15 @@ void TamEmulator::executeLoada(TamInstruction Instr) {
 }
 
 void TamEmulator::executeLoadi(TamInstruction Instr) {
-    TamAddr Addr = this->popData();
+    TamAddr BaseAddr = this->popData();
 
     for (int I = 0; I < Instr.N; ++I) {
-        TamData Value = this->DataStore[Addr + I];
-        if (Value >= this->Registers[ST] && Value <= this->Registers[HT]) {
+        TamAddr Addr = BaseAddr + I;
+        if (Addr >= this->Registers[ST] && Addr <= this->Registers[HT]) {
             throw TamException(EK_DataAccessViolation, this->Registers[CP] - 1);
         }
 
+        TamData Value = this->DataStore[Addr];
         this->pushData(Value);
     }
 }
