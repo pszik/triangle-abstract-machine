@@ -14,6 +14,8 @@
  * with tam-cpp. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "CLI/CLI.hpp"
+#include <CLI/CLI.hpp>
 #include <cstdint>
 #include <exception>
 #include <fstream>
@@ -22,7 +24,7 @@
 #include <tam/tam.h>
 #include <vector>
 
-std::vector<uint32_t> readProgramFromFile(const char *Filename) {
+std::vector<uint32_t> readProgramFromFile(std::string &Filename) {
     std::ifstream In(Filename, std::ios::binary);
 
     // find file size
@@ -49,14 +51,24 @@ std::vector<uint32_t> readProgramFromFile(const char *Filename) {
     return Codes;
 }
 
-int main(int Argc, const char **Argv) {
-    tam::TamEmulator Emulator;
+int main(int Argc, char **Argv) {
+    CLI::App App{"TAM CPP emulator"};
+    Argv = App.ensure_utf8(Argv);
 
-    std::vector<uint32_t> Program;
+    std::string Filename;
+    App.add_option("BINFILE", Filename, "Binary file to run")
+        ->required()
+        ->check(CLI::ExistingFile);
+
+    CLI11_PARSE(App, Argc, Argv);
+
+    tam::TamEmulator Emulator;
     try {
-        Program = readProgramFromFile(Argv[1]);
+        std::vector<uint32_t> Program;
+        Program = readProgramFromFile(Filename);
         Emulator.loadProgram(Program);
     } catch (const std::exception &E) {
+        std::cerr << E.what() << std::endl;
         return 1;
     }
 
@@ -67,7 +79,7 @@ int main(int Argc, const char **Argv) {
             Running = Emulator.execute(Instr);
         } catch (const tam::TamException &E) {
             std::cerr << E.str() << std::endl;
-            break;
+            return 2;
         }
     }
 }
