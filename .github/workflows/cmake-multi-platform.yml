@@ -85,7 +85,7 @@ jobs:
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
       # Execute tests defined by the CMake configuration. Note that --build-config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ${{ steps.strings.outputs.test-executable }} > test-output.txt
+      run: ${{ steps.strings.outputs.test-executable }} > ${{ steps.strings.outputs.test-output-path }}
 
     - name: Save test results 
       uses: actions/upload-artifact@v4 
