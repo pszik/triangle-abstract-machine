@@ -2,9 +2,9 @@
 #include <tam/tam.h>
 #include <vector>
 
-class IntegrationTest : public testing::Test, protected tam::TamEmulator {};
+#include "integration_test.h"
 
-TEST_F(IntegrationTest, LoadProgramTest) {
+TEST_F(EmulatorTest, TestLoadProgram) {
     std::vector<tam::TamCode> Code;
     Code.push_back(0x12345678);
     Code.push_back(0x9abcdef0);
@@ -20,7 +20,7 @@ TEST_F(IntegrationTest, LoadProgramTest) {
     EXPECT_EQ(32, this->Registers[tam::PT]);
 }
 
-TEST_F(IntegrationTest, SimpleCycleTest) {
+TEST_F(EmulatorTest, TestSimpleCycle) {
     this->CodeStore[0] = 0x08020000;
     this->DataStore[0] = 0x1234;
     this->DataStore[1] = 0x5678;

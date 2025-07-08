@@ -9,8 +9,8 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-add_executable(integration_tests integration_tests.cc)
-target_link_libraries(integration_tests tam GTest::gtest_main)
+add_executable(tests integration_tests.cc execute_tests.cc)
+target_link_libraries(tests tam GTest::gtest_main)
 
 include(GoogleTest)
-gtest_discover_tests(integration_tests)
+gtest_discover_tests(tests)
