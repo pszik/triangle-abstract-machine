@@ -80,5 +80,5 @@ jobs:
     - name: Save test results 
       uses: actions/upload-artifact@v4 
       with:
-        name: test-output 
-        path: build/test-output_${{matrix.os}}_${{matrix.compiler}}.txt
+        name: test-output_${{matrix.os}}_${{matrix.c_compiler}}.txt
+        path: build/test-output.txt
