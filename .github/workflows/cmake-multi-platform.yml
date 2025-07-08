@@ -54,9 +54,14 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
         if [[ ${{ matrix.os }} = "windows-latest" ]]; then 
-          echo "test-executable=${{ github.workspace }}\build\test\tests.exe" >> "$GITHUB_OUTPUT"
+          echo "test-executable=${{ github.workspace }}\build\test\Release\tests.exe" >> "$GITHUB_OUTPUT"
         else
           echo "test-executable=${{ github.workspace }}/build/test/tests" >> "$GITHUB_OUTPUT"
+        fi
+        if [[ ${{ matrix.os }} = "windows-latest" ]]; then 
+          echo "test-output-path=${{ github.workspace }}\test-output.txt" >> "$GITHUB_OUTPUT"
+        else
+          echo "test-output-path=${{ github.workspace }}/test-output.txt" >> "$GITHUB_OUTPUT"
         fi
 
     - name: Configure CLI11
@@ -86,4 +91,4 @@ jobs:
       uses: actions/upload-artifact@v4 
       with:
         name: test-output_${{matrix.os}}_${{matrix.c_compiler}}.txt
-        path: build/test-output.txt
+        path: ${{ steps.strings.outputs.test-output-path }}
