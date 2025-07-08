@@ -81,4 +81,4 @@ jobs:
       uses: actions/upload-artifact@v4 
       with:
         name: test-output 
-        path: build/test-output.txt
+        path: build/test-output_${{matrix.os}}_${{matrix.compiler}}.txt
