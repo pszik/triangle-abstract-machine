@@ -53,6 +53,11 @@ jobs:
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+        if [[ ${{ matrix.os }} = "windows-latest" ]]; then 
+          echo "test-executable=${{ github.workspace }}\build\test\tests.exe" >> "$GITHUB_OUTPUT"
+        else
+          echo "test-executable=${{ github.workspace }}/build/test/tests" >> "$GITHUB_OUTPUT"
+        fi
 
     - name: Configure CLI11
       run: git submodule init && git submodule update
@@ -75,7 +80,7 @@ jobs:
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
       # Execute tests defined by the CMake configuration. Note that --build-config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: test/tests > test-output.txt
+      run: ${{ steps.strings.outputs.test-executable }} > test-output.txt
 
     - name: Save test results 
       uses: actions/upload-artifact@v4 
