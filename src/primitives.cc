@@ -14,6 +14,7 @@
  * with tam-cpp. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "tam/error.h"
 #include <cassert>
 #include <iostream>
 #include <stack>
@@ -205,35 +206,59 @@ void TamEmulator::primitiveNe() {
         Arg1.push(this->popData());
     }
 
+    assert(Arg1.size() == Arg2.size());
     this->pushData(Arg1 != Arg2 ? 1 : 0);
 }
 
 void TamEmulator::primitiveEol() {
+    if (!std::cin) {
+        throw TamException(EK_IOError, 0);
+    }
     char C = std::cin.peek();
     this->pushData(C == '\n' ? 1 : 0);
 }
 
-void TamEmulator::primitiveEof() { this->pushData(std::cin.eof() ? 1 : 0); }
+void TamEmulator::primitiveEof() {
+    if (!std::cin) {
+        throw TamException(EK_IOError, 0);
+    }
+    this->pushData(std::cin.eof() ? 1 : 0);
+}
 
 void TamEmulator::primitiveGet() {
+    if (!std::cin) {
+        throw TamException(EK_IOError, 0);
+    }
     TamAddr Addr = this->popData();
     char C = std::cin.get();
     this->DataStore[Addr] = C;
 }
 
 void TamEmulator::primitivePut() {
+    if (!std::cout) {
+        throw TamException(EK_IOError, 0);
+    }
     char C = this->popData();
     std::cout << C;
 }
 
 void TamEmulator::primitiveGeteol() {
+    if (!std::cin) {
+        throw TamException(EK_IOError, 0);
+    }
+
     char C;
     while (C != '\n') {
         std::cin >> C;
     }
 }
 
-void TamEmulator::primitivePuteol() { std::cout << std::endl; }
+void TamEmulator::primitivePuteol() {
+    if (!std::cout) {
+        throw TamException(EK_IOError, 0);
+    }
+    std::cout << std::endl;
+}
 
 void TamEmulator::primitiveGetint() {
     TamAddr Addr = this->popData();
@@ -243,6 +268,9 @@ void TamEmulator::primitiveGetint() {
 }
 
 void TamEmulator::primitivePutint() {
+    if (!std::cout) {
+        throw TamException(EK_IOError, 0);
+    }
     TamData N = this->popData();
     std::cout << N;
 }

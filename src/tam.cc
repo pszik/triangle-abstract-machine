@@ -40,8 +40,11 @@ TamInstruction TamEmulator::fetchDecode() {
 
     TamCode Code = this->CodeStore[Addr];
     uint8_t Op = (Code & 0xf0000000) >> 28;
+    assert(Op <= 0xf);
     uint8_t R = (Code & 0x0f000000) >> 24;
+    assert(R <= 0xf);
     uint8_t N = (Code & 0x00ff0000) >> 16;
+    assert(N <= 0xff);
     int16_t D = Code & 0x0000ffff;
     return TamInstruction{Op, R, N, D};
 }
@@ -54,6 +57,7 @@ void TamEmulator::pushData(TamData Value) {
 
     this->DataStore[Addr] = Value;
     this->Registers[ST]++;
+    assert(this->DataStore[Addr] == Value);
 }
 
 TamData TamEmulator::popData() {
@@ -67,6 +71,7 @@ TamData TamEmulator::popData() {
 }
 
 bool TamEmulator::execute(TamInstruction Instr) {
+    assert(Instr.Op <= 15);
     switch (Instr.Op) {
     case 0: // LOAD
         this->executeLoad(Instr);
@@ -204,8 +209,11 @@ void TamEmulator::executeCall(TamInstruction Instr) {
     }
 
     TamAddr StaticLink = this->Registers[SB];
+    assert(StaticLink < this->Registers[ST]);
     TamAddr DynamicLink = this->Registers[LB];
+    assert(DynamicLink < this->Registers[ST]);
     TamAddr ReturnAddr = this->Registers[CP];
+    assert(ReturnAddr < this->Registers[CT]);
 
     this->pushData(StaticLink);
     this->pushData(DynamicLink);
@@ -218,13 +226,16 @@ void TamEmulator::executeCall(TamInstruction Instr) {
 void TamEmulator::executeCalli(TamInstruction Instr) {
     TamAddr CallAddress = this->popData();
     TamAddr StaticLink = this->popData();
+    assert(StaticLink < this->Registers[ST]);
 
     if (CallAddress >= this->Registers[CT]) {
         throw TamException(EK_CodeAccessViolation, this->Registers[CP] - 1);
     }
 
     TamAddr DynamicLink = this->Registers[LB];
+    assert(DynamicLink < this->Registers[ST]);
     TamAddr ReturnAddr = this->Registers[CP];
+    assert(ReturnAddr < this->Registers[CT]);
 
     this->pushData(StaticLink);
     this->pushData(DynamicLink);
@@ -264,7 +275,9 @@ void TamEmulator::executeReturn(TamInstruction Instr) {
     assert(ReturnVal.empty());
 
     this->Registers[LB] = DynamicLink;
+    assert(this->Registers[LB] == DynamicLink);
     this->Registers[CP] = ReturnAddr;
+    assert(this->Registers[CP] == ReturnAddr);
 }
 
 void TamEmulator::executePush(TamInstruction Instr) {
@@ -288,6 +301,8 @@ void TamEmulator::executePop(TamInstruction Instr) {
         this->pushData(Data.top());
         Data.pop();
     }
+
+    assert(Data.empty());
 }
 
 void TamEmulator::executeJump(TamInstruction Instr) {
@@ -297,6 +312,7 @@ void TamEmulator::executeJump(TamInstruction Instr) {
     }
 
     this->Registers[CP] = Addr;
+    assert(this->Registers[CP] == Addr);
 }
 
 void TamEmulator::executeJumpi(TamInstruction Instr) {
@@ -306,6 +322,7 @@ void TamEmulator::executeJumpi(TamInstruction Instr) {
     }
 
     this->Registers[CP] = Addr;
+    assert(this->Registers[CP] == Addr);
 }
 
 void TamEmulator::executeJumpif(TamInstruction Instr) {
@@ -313,6 +330,7 @@ void TamEmulator::executeJumpif(TamInstruction Instr) {
     if (Value != Instr.N) {
         return;
     }
+    assert(Value == Instr.N);
 
     TamAddr Addr = this->Registers[Instr.R] + Instr.D;
     if (Addr >= this->Registers[CT]) {
@@ -320,5 +338,6 @@ void TamEmulator::executeJumpif(TamInstruction Instr) {
     }
 
     this->Registers[CP] = Addr;
+    assert(this->Registers[CP] == Addr);
 }
 } // namespace tam
