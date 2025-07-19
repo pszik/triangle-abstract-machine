@@ -78,7 +78,7 @@ int main(int Argc, char **Argv) {
             tam::TamInstruction Instr = Emulator.fetchDecode();
             Running = Emulator.execute(Instr);
         } catch (const tam::TamException &E) {
-            std::cerr << E.str() << std::endl;
+            std::cerr << E.what() << std::endl;
             return 2;
         }
     }

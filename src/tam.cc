@@ -239,25 +239,29 @@ void TamEmulator::executeReturn(TamInstruction Instr) {
     for (int I = 0; I < Instr.N; ++I) {
         ReturnVal.push(this->popData());
     }
+    assert(ReturnVal.size() == Instr.N);
 
     TamAddr DynamicLink = this->DataStore[this->Registers[LB] + 1];
     TamAddr ReturnAddr = this->DataStore[this->Registers[LB] + 2];
     if (ReturnAddr >= this->Registers[CT]) {
-        throw new TamException(EK_CodeAccessViolation, this->Registers[CP] - 1);
+        throw TamException(EK_CodeAccessViolation, this->Registers[CP] - 1);
     }
 
     // pop stack frame
     while (this->Registers[ST] > this->Registers[LB]) {
         this->popData();
     }
+    assert(this->Registers[ST] == this->Registers[LB]);
 
     // pop arguments
     for (int I = 0; I < Instr.D; ++I) {
         this->popData();
     }
+    assert(this->Registers[ST] == this->Registers[LB] - Instr.D);
 
     // push result
     for (int I = 0; I < Instr.N; ++I) {
+        assert(!ReturnVal.empty());
         this->pushData(ReturnVal.top());
         ReturnVal.pop();
     }
@@ -269,7 +273,7 @@ void TamEmulator::executeReturn(TamInstruction Instr) {
 
 void TamEmulator::executePush(TamInstruction Instr) {
     if (this->Registers[ST] + Instr.D >= this->Registers[HT]) {
-        throw new TamException(EK_StackOverflow, this->Registers[CT] - 1);
+        throw TamException(EK_StackOverflow, this->Registers[CT] - 1);
     }
     this->Registers[ST] += Instr.D;
 }

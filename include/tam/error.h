@@ -35,16 +35,12 @@ enum ExceptionKind : uint8_t {
 
 class TamException : std::exception {
   private:
-    const ExceptionKind Kind;
-    const uint16_t Addr;
+    std::string Message;
 
   public:
-    TamException(ExceptionKind Kind, uint16_t Addr) : Kind(Kind), Addr(Addr) {}
-
-    /// Returns a human readable string describing this exception.
-    std::string str() const {
+    TamException(ExceptionKind Kind, uint16_t Addr) : std::exception() {
         std::stringstream ss;
-        switch (this->Kind) {
+        switch (Kind) {
         case EK_CodeAccessViolation:
             ss << "code access violation";
             break;
@@ -65,9 +61,11 @@ class TamException : std::exception {
             break;
         }
 
-        ss << " at loc " << this->Kind;
-        return ss.str();
+        ss << " at loc " << Addr;
+        this->Message = ss.str();
     }
+
+    const char *what() const throw() override { return this->Message.c_str(); }
 };
 
 } // namespace tam
