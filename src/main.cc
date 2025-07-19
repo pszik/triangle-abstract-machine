@@ -34,7 +34,7 @@ std::vector<uint32_t> readProgramFromFile(std::string &Filename) {
     In.seekg(0, In.beg);
 
     if (FileLen % 4 != 0) {
-        throw tam::TamException(tam::EK_IOError, 0);
+        throw tam::runtimeError(tam::EK_IOError, 0);
     }
 
     // read instructions
@@ -77,8 +77,8 @@ int main(int Argc, char **Argv) {
         try {
             tam::TamInstruction Instr = Emulator.fetchDecode();
             Running = Emulator.execute(Instr);
-        } catch (const tam::TamException &E) {
-            std::cerr << E.str() << std::endl;
+        } catch (const std::exception &E) {
+            std::cerr << E.what() << std::endl;
             return 2;
         }
     }
