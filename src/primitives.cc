@@ -212,7 +212,7 @@ void TamEmulator::primitiveNe() {
 
 void TamEmulator::primitiveEol() {
     if (!std::cin) {
-        throw TamException(EK_IOError, 0);
+        throw runtimeError(EK_IOError, 0);
     }
     char C = std::cin.peek();
     this->pushData(C == '\n' ? 1 : 0);
@@ -220,14 +220,14 @@ void TamEmulator::primitiveEol() {
 
 void TamEmulator::primitiveEof() {
     if (!std::cin) {
-        throw TamException(EK_IOError, 0);
+        throw runtimeError(EK_IOError, 0);
     }
     this->pushData(std::cin.eof() ? 1 : 0);
 }
 
 void TamEmulator::primitiveGet() {
     if (!std::cin) {
-        throw TamException(EK_IOError, 0);
+        throw runtimeError(EK_IOError, 0);
     }
     TamAddr Addr = this->popData();
     char C = std::cin.get();
@@ -236,7 +236,7 @@ void TamEmulator::primitiveGet() {
 
 void TamEmulator::primitivePut() {
     if (!std::cout) {
-        throw TamException(EK_IOError, 0);
+        throw runtimeError(EK_IOError, 0);
     }
     char C = this->popData();
     std::cout << C;
@@ -244,7 +244,7 @@ void TamEmulator::primitivePut() {
 
 void TamEmulator::primitiveGeteol() {
     if (!std::cin) {
-        throw TamException(EK_IOError, 0);
+        throw runtimeError(EK_IOError, 0);
     }
 
     char C;
@@ -255,7 +255,7 @@ void TamEmulator::primitiveGeteol() {
 
 void TamEmulator::primitivePuteol() {
     if (!std::cout) {
-        throw TamException(EK_IOError, 0);
+        throw runtimeError(EK_IOError, 0);
     }
     std::cout << std::endl;
 }
@@ -269,7 +269,7 @@ void TamEmulator::primitiveGetint() {
 
 void TamEmulator::primitivePutint() {
     if (!std::cout) {
-        throw TamException(EK_IOError, 0);
+        throw runtimeError(EK_IOError, 0);
     }
     TamData N = this->popData();
     std::cout << N;
