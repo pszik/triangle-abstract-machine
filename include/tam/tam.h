@@ -20,6 +20,7 @@
 #include <array>
 #include <cstdint>
 #include <map>
+#include <string>
 #include <vector>
 
 namespace tam {
@@ -150,6 +151,11 @@ class TamEmulator {
     ///
     /// \p Instr instruction to execute
     bool execute(TamInstruction Instr);
+
+    /// Return a string representing the current contents of the stack.
+    ///
+    /// \return the stack
+    std::string getSnapshot();
 };
 
 } // namespace tam

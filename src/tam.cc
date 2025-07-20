@@ -17,6 +17,8 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <iomanip>
+#include <sstream>
 #include <stack>
 #include <tam/error.h>
 #include <tam/tam.h>
@@ -125,6 +127,19 @@ bool TamEmulator::execute(TamInstruction Instr) {
         throw runtimeError(EK_UnknownOpcode, this->Registers[CP] - 1);
     }
     return true;
+}
+
+std::string TamEmulator::getSnapshot() {
+    std::stringstream ss;
+
+    ss << "[";
+    for (int I = 0; I < this->Registers[ST]; ++I) {
+        ss << std::hex << std::setw(4) << std::setfill('0')
+           << this->DataStore[I] << ",";
+    }
+    ss << "]";
+
+    return ss.str();
 }
 
 void TamEmulator::executeLoad(TamInstruction Instr) {

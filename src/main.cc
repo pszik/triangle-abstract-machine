@@ -56,6 +56,8 @@ int main(int Argc, char **Argv) {
     Argv = App.ensure_utf8(Argv);
 
     std::string Filename;
+    bool Trace;
+    App.add_option("-t,--trace", Trace, "Print trace of execution");
     App.add_option("BINFILE", Filename, "Binary file to run")
         ->required()
         ->check(CLI::ExistingFile);
@@ -73,13 +75,17 @@ int main(int Argc, char **Argv) {
     }
 
     bool Running = true;
-    while (Running) {
+    do {
         try {
             tam::TamInstruction Instr = Emulator.fetchDecode();
+
             Running = Emulator.execute(Instr);
+            if (Trace) {
+                std::cout << Emulator.getSnapshot() << std::endl;
+            }
         } catch (const std::exception &E) {
             std::cerr << E.what() << std::endl;
             return 2;
         }
-    }
+    } while (Running);
 }
