@@ -67,7 +67,8 @@ class TamEmulator {
 
     /// Attempt to free the allocated block beginning at `Addr`.
     /// \p Addr start address of block
-    void free(TamAddr Addr);
+    /// \p Size expected size of block
+    void free(TamAddr Addr, TamData Size);
 
     void pushData(TamData Value);
     TamData popData();
@@ -113,6 +114,8 @@ class TamEmulator {
     void primitivePuteol();
     void primitiveGetint();
     void primitivePutint();
+    void primitiveNew();
+    void primitiveDispose();
 
   public:
     /// Constructs a new emulator.

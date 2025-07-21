@@ -31,7 +31,7 @@ TEST_F(EmulatorTest, FreeEndOfHeap) {
     this->Registers[tam::HT] = 65533;
     this->AllocatedBlocks[65534] = 2;
 
-    ASSERT_NO_THROW({ this->free(65534); });
+    ASSERT_NO_THROW({ this->free(65534, 2); });
     EXPECT_FALSE(this->AllocatedBlocks.count(65534));
     EXPECT_EQ(65535, this->Registers[tam::HT]);
 }
@@ -41,7 +41,7 @@ TEST_F(EmulatorTest, FreeMiddleOfHeap) {
     this->AllocatedBlocks[65531] = 2;
     this->AllocatedBlocks[65533] = 3;
 
-    ASSERT_NO_THROW({ this->free(65533); });
+    ASSERT_NO_THROW({ this->free(65533, 3); });
     EXPECT_EQ(65530, this->Registers[tam::HT]) << "HT unexpectedly changed";
     EXPECT_FALSE(this->AllocatedBlocks.count(65533));
     EXPECT_TRUE(this->FreeBlocks.count(65533));

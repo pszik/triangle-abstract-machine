@@ -102,6 +102,12 @@ void TamEmulator::executeCallPrimitive(TamInstruction Instr) {
     case 26:
         this->primitivePutint();
         break;
+    case 27:
+        this->primitiveNew();
+        break;
+    case 28:
+        this->primitiveDispose();
+        break;
     }
 }
 
@@ -273,6 +279,18 @@ void TamEmulator::primitivePutint() {
     }
     TamData N = this->popData();
     std::cout << N;
+}
+
+void TamEmulator::primitiveNew() {
+    TamData N = this->popData();
+    TamAddr Addr = this->allocate(N);
+    this->pushData(Addr);
+}
+
+void TamEmulator::primitiveDispose() {
+    TamAddr Addr = this->popData();
+    TamData Size = this->popData();
+    this->free(Addr, Size);
 }
 
 } // namespace tam

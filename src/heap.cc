@@ -51,7 +51,7 @@ TamAddr TamEmulator::allocate(int N) {
     return this->Registers[HT] + 1;
 }
 
-void TamEmulator::free(TamAddr Addr) {
+void TamEmulator::free(TamAddr Addr, TamData Size) {
     if (Addr <= this->Registers[HT]) {
         throw runtimeError(EK_DataAccessViolation, this->Registers[CP] - 1);
     }
@@ -66,6 +66,10 @@ void TamEmulator::free(TamAddr Addr) {
 
         if (BlockIter->first != Addr) {
             continue;
+        }
+
+        if (BlockIter->second != Size) {
+            throw runtimeError(EK_DataAccessViolation, this->Registers[CP] - 1);
         }
 
         this->AllocatedBlocks.erase(BlockIter);
