@@ -19,6 +19,7 @@
 
 #include <array>
 #include <cstdint>
+#include <map>
 #include <vector>
 
 namespace tam {
@@ -56,6 +57,17 @@ class TamEmulator {
     std::array<TamCode, 65536> CodeStore;
     std::array<TamData, 65536> DataStore;
     std::array<TamAddr, 16> Registers;
+
+    std::map<TamAddr, int> AllocatedBlocks, FreeBlocks;
+
+    /// Attempt to allocate `n` words of memory on the heap.
+    /// \p N size of requested block
+    /// \return address of first word in the block
+    TamAddr allocate(int N);
+
+    /// Attempt to free the allocated block beginning at `Addr`.
+    /// \p Addr start address of block
+    void free(TamAddr Addr);
 
     void pushData(TamData Value);
     TamData popData();
