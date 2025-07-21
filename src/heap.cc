@@ -56,19 +56,27 @@ void TamEmulator::free(TamAddr Addr) {
         throw runtimeError(EK_DataAccessViolation, this->Registers[CP] - 1);
     }
 
+    if (!this->AllocatedBlocks.count(Addr)) {
+        throw runtimeError(EK_DataAccessViolation, this->Registers[CP] - 1);
+    }
+
     for (auto BlockIter = this->AllocatedBlocks.begin();
          BlockIter != this->AllocatedBlocks.end(); ++BlockIter) {
         assert(BlockIter->first > this->Registers[HT]);
 
-        if (BlockIter->first == Addr) {
-            this->AllocatedBlocks.erase(BlockIter);
-            if (Addr == this->Registers[HT] + 1) {
-                this->Registers[HT] += BlockIter->second;
-            } else {
-                this->FreeBlocks.emplace(BlockIter->first, BlockIter->second);
-            }
-            break;
+        if (BlockIter->first != Addr) {
+            continue;
         }
+
+        this->AllocatedBlocks.erase(BlockIter);
+        if (Addr == this->Registers[HT] + 1) {
+            // block on top of heap, shrink heap
+            this->Registers[HT] += BlockIter->second;
+        } else {
+            // mark block as available
+            this->FreeBlocks.emplace(BlockIter->first, BlockIter->second);
+        }
+        break;
     }
 }
 

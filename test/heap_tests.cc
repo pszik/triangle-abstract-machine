@@ -26,3 +26,24 @@ TEST_F(EmulatorTest, HeapAllocateReuseBlock) {
         << "Leftover heap not marked as free";
     EXPECT_EQ(1, this->FreeBlocks[65535]) << "Unallocated block has wrong size";
 }
+
+TEST_F(EmulatorTest, FreeEndOfHeap) {
+    this->Registers[tam::HT] = 65533;
+    this->AllocatedBlocks[65534] = 2;
+
+    ASSERT_NO_THROW({ this->free(65534); });
+    EXPECT_FALSE(this->AllocatedBlocks.count(65534));
+    EXPECT_EQ(65535, this->Registers[tam::HT]);
+}
+
+TEST_F(EmulatorTest, FreeMiddleOfHeap) {
+    this->Registers[tam::HT] = 65530;
+    this->AllocatedBlocks[65531] = 2;
+    this->AllocatedBlocks[65533] = 3;
+
+    ASSERT_NO_THROW({ this->free(65533); });
+    EXPECT_EQ(65530, this->Registers[tam::HT]) << "HT unexpectedly changed";
+    EXPECT_FALSE(this->AllocatedBlocks.count(65533));
+    EXPECT_TRUE(this->FreeBlocks.count(65533));
+    EXPECT_EQ(3, this->FreeBlocks[65533]);
+}
