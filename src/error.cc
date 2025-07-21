@@ -18,6 +18,9 @@ const std::runtime_error runtimeError(ExceptionKind Kind, uint16_t Addr) {
     case EK_StackUnderflow:
         ss << "stack underflow";
         break;
+    case EK_HeapOverflow:
+        ss << "heap overflow";
+        break;
     case EK_UnknownOpcode:
         ss << "unknown opcode";
         break;

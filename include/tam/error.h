@@ -27,6 +27,7 @@ enum ExceptionKind : uint8_t {
     EK_DataAccessViolation,
     EK_StackUnderflow,
     EK_StackOverflow,
+    EK_HeapOverflow,
     EK_UnknownOpcode,
     EK_IOError,
 };

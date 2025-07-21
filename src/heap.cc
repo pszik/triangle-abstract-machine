@@ -14,8 +14,9 @@
  * with tam-cpp. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "tam/error.h"
+#include <cassert>
 #include <map>
+#include <tam/error.h>
 #include <tam/tam.h>
 
 namespace tam {
@@ -24,20 +25,28 @@ TamAddr TamEmulator::allocate(int N) {
     // try to find unallocated space inside heap
     for (auto BlockIter = this->FreeBlocks.begin();
          BlockIter != this->FreeBlocks.end(); ++BlockIter) {
-        if (BlockIter->second >= N) {
-            TamAddr BlockStart = BlockIter->first;
+        assert(BlockIter->first > this->Registers[HT]);
 
-            this->AllocatedBlocks.emplace(BlockStart, N);
-            this->FreeBlocks.erase(BlockIter);
-            if (BlockIter->second > N) {
-                this->FreeBlocks.emplace(BlockStart + N, BlockIter->second - N);
-            }
-            return BlockStart;
+        if (BlockIter->second < N) {
+            // block not big enough
+            continue;
         }
+
+        TamAddr BlockStart = BlockIter->first;
+
+        this->AllocatedBlocks.emplace(BlockStart, N);
+        this->FreeBlocks.erase(BlockIter);
+        if (BlockIter->second > N) {
+            this->FreeBlocks.emplace(BlockStart + N, BlockIter->second - N);
+        }
+        return BlockStart;
     }
 
     // expand heap
     this->Registers[HT] -= N;
+    if (this->Registers[HT] <= this->Registers[ST]) {
+        throw runtimeError(EK_HeapOverflow, this->Registers[CP] - 1);
+    }
     this->AllocatedBlocks.emplace(this->Registers[HT] + 1, N);
     return this->Registers[HT] + 1;
 }
@@ -49,6 +58,8 @@ void TamEmulator::free(TamAddr Addr) {
 
     for (auto BlockIter = this->AllocatedBlocks.begin();
          BlockIter != this->AllocatedBlocks.end(); ++BlockIter) {
+        assert(BlockIter->first > this->Registers[HT]);
+
         if (BlockIter->first == Addr) {
             this->AllocatedBlocks.erase(BlockIter);
             if (Addr == this->Registers[HT] + 1) {
