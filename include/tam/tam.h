@@ -29,6 +29,9 @@ typedef uint32_t TamCode;
 typedef int16_t TamData;
 typedef uint16_t TamAddr;
 
+const int MEM_SIZE = 65536;
+const int MAX_ADDR = MEM_SIZE - 1;
+
 /// Index of code top register
 const uint8_t CT = 1;
 /// Index of primitive base register
@@ -152,9 +155,10 @@ class TamEmulator {
     /// \p Instr instruction to execute
     bool execute(TamInstruction Instr);
 
-    /// Return a string representing the current contents of the stack.
+    /// Return a string representing the current contents of the stack and any
+    /// allocated blocks on the heap.
     ///
-    /// \return the stack
+    /// \return the stack and heap contents
     std::string getSnapshot();
 };
 

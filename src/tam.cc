@@ -131,13 +131,26 @@ bool TamEmulator::execute(TamInstruction Instr) {
 
 std::string TamEmulator::getSnapshot() {
     std::stringstream ss;
+    ss << std::hex << std::setfill('0');
 
-    ss << "[";
+    ss << "stack";
     for (int I = 0; I < this->Registers[ST]; ++I) {
-        ss << std::hex << std::setw(4) << std::setfill('0')
-           << this->DataStore[I] << ",";
+        if (I % 8 == 0) {
+            ss << std::endl;
+        }
+        ss << std::setw(4) << this->DataStore[I] << " ";
     }
-    ss << "]";
+    ss << std::endl;
+
+    for (auto Block : this->AllocatedBlocks) {
+        ss << "heap " << std::setw(4) << Block.first;
+        for (int I = 0; I < Block.second; ++I) {
+            if (I % 8 == 0) {
+                ss << std::endl;
+            }
+            ss << std::setw(4) << this->DataStore[Block.first + I] << " ";
+        }
+    }
 
     return ss.str();
 }
