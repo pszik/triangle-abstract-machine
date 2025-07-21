@@ -20,6 +20,7 @@
 #include <exception>
 #include <fstream>
 #include <iostream>
+#include <string>
 #include <tam/error.h>
 #include <tam/tam.h>
 #include <vector>
@@ -56,8 +57,11 @@ int main(int Argc, char **Argv) {
     Argv = App.ensure_utf8(Argv);
 
     std::string Filename;
-    bool Trace;
-    App.add_option("-t,--trace", Trace, "Print trace of execution");
+    bool Trace, Step;
+    App.add_flag("-t,--trace", Trace, "Print trace of execution");
+    App.add_flag("-s, --step", Step,
+                 "Press RETURN to advance after each instruction (no effect "
+                 "unless trace also given)");
     App.add_option("BINFILE", Filename, "Binary file to run")
         ->required()
         ->check(CLI::ExistingFile);
@@ -82,6 +86,10 @@ int main(int Argc, char **Argv) {
             Running = Emulator.execute(Instr);
             if (Trace) {
                 std::cout << Emulator.getSnapshot() << std::endl;
+            }
+            if (Trace && Step) {
+                std::string s;
+                std::getline(std::cin, s);
             }
         } catch (const std::exception &E) {
             std::cerr << E.what() << std::endl;
