@@ -1,58 +1,62 @@
 #include <cstring>
-#include <string>
+#include <tam/cli.h>
 
-static char **parseFilename(char **Argv, std::string *Filename);
-static char **parseTrace(char **Argv, bool *Trace, bool *Step);
-static char **parseTrace1(char **Argv, bool *Trace);
-static char **parseTrace2(char **Argv, bool *Step);
-static char **parseStep(char **Argv, bool *Trace, bool *Step);
-static char **parseStep1(char **Argv, bool *Trace);
-static char **parseStep2(char **Argv, bool *Step);
+namespace tam {
 
-void parseCli(char **Argv, std::string *Filename, bool *Trace, bool *Step) {
-    if (strcmp(Argv[0], "-t") == 0 || strcmp(Argv[0], "--trace") == 0) {
-        Argv = parseTrace(Argv, Trace, Step);
-    } else if (strcmp(Argv[0], "-t") == 0 || strcmp(Argv[0], "--trace") == 0) {
-        Argv = parseStep(Argv, Trace, Step);
+static CliArgs *parse1(const char **Argv);
+static CliArgs *parse2(const char **Argv);
+static CliArgs *parse3(const char **Argv);
+
+CliArgs *parseCli(int Argc, const char **Argv) {
+    switch (Argc) {
+    case 2:
+        return parse1(Argv + 1);
+        break;
+    case 3:
+        return parse2(Argv + 1);
+        break;
+    case 4:
+        return parse3(Argv + 1);
+        break;
+    default:
+        return nullptr;
     }
-    parseFilename(Argv, Filename);
 }
 
-static char **parseFilename(char **Argv, std::string *Filename) {
-    *Filename = std::string(Argv[0]);
-    return Argv + 1;
+static bool isTraceArg(const char *Arg) {
+    return (strcmp(Arg, "-t") == 0 || strcmp(Arg, "--trace") == 0);
 }
 
-static char **parseTrace(char **Argv, bool *Trace, bool *Step) {
-    Argv = parseTrace1(Argv, Trace);
-    return parseTrace2(Argv, Step);
+static bool isStepArg(const char *Arg) {
+    return (strcmp(Arg, "-s") == 0 || strcmp(Arg, "--step") == 0);
 }
 
-static char **parseTrace1(char **Argv, bool *Trace) {
-    *Trace = (strcmp(Argv[0], "-t") == 0 || strcmp(Argv[0], "--trace") == 0);
-    return Argv + 1;
-}
-
-static char **parseTrace2(char **Argv, bool *Step) {
-    if (strcmp(Argv[0], "-s") == 0 || strcmp(Argv[0], "--step") == 0) {
-        return parseStep1(Argv, Step);
+static CliArgs *parse1(const char **Argv) {
+    if (isTraceArg(Argv[0]) || isStepArg(Argv[0])) {
+        return nullptr;
     }
-    return Argv;
+    return new CliArgs{std::string(Argv[0]), false, false};
 }
 
-static char **parseStep(char **Argv, bool *Trace, bool *Step) {
-    Argv = parseStep1(Argv, Step);
-    return parseStep2(Argv, Trace);
-}
-
-static char **parseStep1(char **Argv, bool *Step) {
-    *Step = (strcmp(Argv[0], "-s") == 0 || strcmp(Argv[0], "--step") == 0);
-    return Argv + 1;
-}
-
-static char **parseStep2(char **Argv, bool *Trace) {
-    if (strcmp(Argv[0], "-t") == 0 || strcmp(Argv[0], "--trace") == 0) {
-        return parseTrace1(Argv, Trace);
+static CliArgs *parse2(const char **Argv) {
+    if (isTraceArg(Argv[0])) {
+        return new CliArgs{std::string(Argv[1]), true, false};
+    } else if (isStepArg(Argv[0])) {
+        return new CliArgs{std::string(Argv[1]), false, true};
+    } else if (strcmp(Argv[0], "-ts") == 0 || strcmp(Argv[0], "-st") == 0) {
+        return new CliArgs{std::string(Argv[2]), true, true};
+    } else {
+        return nullptr;
     }
-    return Argv;
 }
+
+static CliArgs *parse3(const char **Argv) {
+    if ((isTraceArg(Argv[0]) && isStepArg(Argv[1])) ||
+        (isStepArg(Argv[0]) && isTraceArg(Argv[1]))) {
+        return new CliArgs{std::string(Argv[2]), true, true};
+    } else {
+        return nullptr;
+    }
+}
+
+} // namespace tam

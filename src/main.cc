@@ -19,11 +19,10 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <tam/cli.h>
 #include <tam/error.h>
 #include <tam/tam.h>
 #include <vector>
-
-void parseCli(char **Argv, std::string *Filename, bool *Trace, bool *Step);
 
 std::vector<uint32_t> readProgramFromFile(std::string &Filename) {
     std::ifstream In(Filename, std::ios::binary);
@@ -52,19 +51,23 @@ std::vector<uint32_t> readProgramFromFile(std::string &Filename) {
     return Codes;
 }
 
-int main(int Argc, char **Argv) {
-    std::string Filename;
-    bool Trace, Step;
-    parseCli(Argv + 1, &Filename, &Trace, &Step);
+int main(int Argc, const char **Argv) {
+    tam::CliArgs *Args = tam::parseCli(Argc, Argv);
+    if (!Args) {
+        std::cout << "Usage: tam [-t | --trace] [-s | --step] FILENAME"
+                  << std::endl;
+        return 1;
+    }
 
     tam::TamEmulator Emulator;
     try {
         std::vector<uint32_t> Program;
-        Program = readProgramFromFile(Filename);
+        Program = readProgramFromFile(Args->Filename);
         Emulator.loadProgram(Program);
     } catch (const std::exception &E) {
         std::cerr << E.what() << std::endl;
-        return 1;
+        delete Args;
+        return 2;
     }
 
     bool Running = true;
@@ -73,16 +76,19 @@ int main(int Argc, char **Argv) {
             tam::TamInstruction Instr = Emulator.fetchDecode();
 
             Running = Emulator.execute(Instr);
-            if (Trace) {
+            if (Args->Trace) {
                 std::cout << Emulator.getSnapshot() << std::endl;
             }
-            if (Trace && Step) {
+            if (Args->Trace && Args->Step) {
                 std::string s;
                 std::getline(std::cin, s);
             }
         } catch (const std::exception &E) {
             std::cerr << E.what() << std::endl;
-            return 2;
+            delete Args;
+            return 3;
         }
     } while (Running);
+
+    delete Args;
 }
