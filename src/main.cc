@@ -14,8 +14,6 @@
  * with tam-cpp. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "CLI/CLI.hpp"
-#include <CLI/CLI.hpp>
 #include <cstdint>
 #include <exception>
 #include <fstream>
@@ -24,6 +22,8 @@
 #include <tam/error.h>
 #include <tam/tam.h>
 #include <vector>
+
+void parseCli(char **Argv, std::string *Filename, bool *Trace, bool *Step);
 
 std::vector<uint32_t> readProgramFromFile(std::string &Filename) {
     std::ifstream In(Filename, std::ios::binary);
@@ -53,20 +53,9 @@ std::vector<uint32_t> readProgramFromFile(std::string &Filename) {
 }
 
 int main(int Argc, char **Argv) {
-    CLI::App App{"TAM CPP emulator"};
-    Argv = App.ensure_utf8(Argv);
-
     std::string Filename;
     bool Trace, Step;
-    App.add_flag("-t,--trace", Trace, "Print trace of execution");
-    App.add_flag("-s, --step", Step,
-                 "Press RETURN to advance after each instruction (no effect "
-                 "unless trace also given)");
-    App.add_option("BINFILE", Filename, "Binary file to run")
-        ->required()
-        ->check(CLI::ExistingFile);
-
-    CLI11_PARSE(App, Argc, Argv);
+    parseCli(Argv + 1, &Filename, &Trace, &Step);
 
     tam::TamEmulator Emulator;
     try {
