@@ -16,15 +16,17 @@
 
 #include <cstdint>
 #include <exception>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <optional>
 #include <string>
 #include <tam/cli.h>
 #include <tam/error.h>
 #include <tam/tam.h>
 #include <vector>
 
-std::vector<uint32_t> readProgramFromFile(std::string &Filename) {
+static std::vector<uint32_t> readProgramFromFile(std::string &Filename) {
     std::ifstream In(Filename, std::ios::binary);
 
     // find file size
@@ -51,10 +53,35 @@ std::vector<uint32_t> readProgramFromFile(std::string &Filename) {
     return Codes;
 }
 
+static void printHelpMessage() {
+    std::cout << "Usage: tam [OPTIONS] FILENAME" << std::endl
+              << std::endl
+              << "Options:" << std::endl
+              << "  -t,--trace        print the stack and allocated heap "
+                 "after each instruction"
+              << std::endl
+              << "  -s,--step         press RETURN to advance after each "
+                 "instruction"
+              << std::endl
+              << "                    (only if trace is also given)"
+              << std::endl
+              << "  -h,--help         print this help message" << std::endl;
+}
+
 int main(int Argc, const char **Argv) {
-    tam::CliArgs *Args = tam::parseCli(Argc, Argv);
+    std::optional<tam::CliArgs> Args = tam::parseCli(Argc, Argv);
     if (!Args) {
-        std::cout << "Usage: tam [-t | --trace] [-s | --step] FILENAME"
+        printHelpMessage();
+        return 1;
+    }
+
+    if (Args->Help) {
+        printHelpMessage();
+        return 0;
+    }
+
+    if (!std::filesystem::exists(Args->Filename)) {
+        std::cout << "Binary file " << Args->Filename << " not found"
                   << std::endl;
         return 1;
     }
@@ -66,7 +93,6 @@ int main(int Argc, const char **Argv) {
         Emulator.loadProgram(Program);
     } catch (const std::exception &E) {
         std::cerr << E.what() << std::endl;
-        delete Args;
         return 2;
     }
 
@@ -85,10 +111,7 @@ int main(int Argc, const char **Argv) {
             }
         } catch (const std::exception &E) {
             std::cerr << E.what() << std::endl;
-            delete Args;
             return 3;
         }
     } while (Running);
-
-    delete Args;
 }

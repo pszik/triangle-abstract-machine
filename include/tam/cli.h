@@ -1,16 +1,17 @@
 #ifndef TAM_CLI_H__
 #define TAM_CLI_H__
 
+#include <optional>
 #include <string>
 
 namespace tam {
 
 struct CliArgs {
     std::string Filename;
-    bool Trace, Step;
+    bool Trace, Step, Help;
 };
 
-CliArgs *parseCli(int Argc, const char **Argv);
+std::optional<CliArgs> parseCli(int Argc, const char **Argv);
 
 } // namespace tam
 
