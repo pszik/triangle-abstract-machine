@@ -5,12 +5,15 @@ This is an emulator for the Triangle Abstract Machine (TAM) defined by Watt and 
 It is invoked from the command line using the command `tam`. It expects a single argument,
 which is the name of the binary file to load and run:
 
-```shell
-$ tam program.tam 
- output of program here 
 ```
+Usage: tam [OPTIONS] FILENAME
 
-Note that the file extension is arbitrary.
+Options:
+  -t,--trace        print the stack and allocated heap after each instruction
+  -s,--step         press RETURN to advance after each instruction
+                    (only if trace is also given)
+  -h,--help         print this help message
+```
 
 ## Building TAM 
 
