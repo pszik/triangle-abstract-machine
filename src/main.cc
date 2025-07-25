@@ -14,6 +14,9 @@
  * with tam-cpp. If not, see <https://www.gnu.org/licenses/>.
  */
 
+/// @file main.cc
+/// Entry point for the program.
+
 #include <cstdint>
 #include <exception>
 #include <filesystem>
@@ -26,6 +29,13 @@
 #include <tam/tam.h>
 #include <vector>
 
+/// Load a TAM program from a file.
+///
+/// This function does not verify that the bytes read from the file form valid
+/// TAM bytecode.
+///
+/// @param Filename name of file to read from
+/// @return a vector of 32-bit code words
 static std::vector<uint32_t> readProgramFromFile(std::string &Filename) {
     std::ifstream In(Filename, std::ios::binary);
 

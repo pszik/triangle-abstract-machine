@@ -14,6 +14,9 @@
  * with tam-cpp. If not, see <https://www.gnu.org/licenses/>.
  */
 
+/// @file error.h
+/// Defines the interface for creating TAM-specific errors.
+
 #ifndef TAM_ERROR_H__
 #define TAM_ERROR_H__
 
@@ -23,15 +26,21 @@
 namespace tam {
 
 enum ExceptionKind : uint8_t {
-    EK_CodeAccessViolation,
-    EK_DataAccessViolation,
-    EK_StackUnderflow,
-    EK_StackOverflow,
-    EK_HeapOverflow,
-    EK_UnknownOpcode,
-    EK_IOError,
+    EK_CodeAccessViolation, ///< Attempt to access out-of-bounds address in code
+                            ///< memory
+    EK_DataAccessViolation, ///< Attempt to access out-of-bounds address in data
+                            ///< memory
+    EK_StackUnderflow,      ///< Stack attempted to grow into the heap
+    EK_StackOverflow,       ///< Stack attempted to shrink past 0
+    EK_HeapOverflow,        ///< Heap attempted to grow into the stack
+    EK_UnknownOpcode,       ///< An unrecognised opcode was given to execute
+    EK_IOError,             ///< A problem occurred with reading or writing
 };
 
+/// Construct a runtime error.
+///
+/// The error message will report the kind of error and the value of the code
+/// pointer when the error occurred.
 const std::runtime_error runtimeError(ExceptionKind Kind, uint16_t Addr);
 
 } // namespace tam

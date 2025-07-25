@@ -14,6 +14,9 @@
  * with tam-cpp. If not, see <https://www.gnu.org/licenses/>.
  */
 
+/// @file heap.cc
+/// Implements logic for managing the heap on a TAM emulator.
+
 #include <cassert>
 #include <map>
 #include <tam/error.h>

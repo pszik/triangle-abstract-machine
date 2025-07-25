@@ -14,6 +14,9 @@
  * with tam-cpp. If not, see <https://www.gnu.org/licenses/>.
  */
 
+/// @file tam.cc
+/// Implements all methods of the TAM emulator except primitives.
+
 #include <algorithm>
 #include <cassert>
 #include <cstdint>

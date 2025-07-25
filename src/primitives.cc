@@ -14,6 +14,9 @@
  * with tam-cpp. If not, see <https://www.gnu.org/licenses/>.
  */
 
+/// @file primitives.cc
+/// Implements the primitive TAM routines.
+
 #include "tam/error.h"
 #include <cassert>
 #include <iostream>

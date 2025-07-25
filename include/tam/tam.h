@@ -14,6 +14,9 @@
  * with tam-cpp. If not, see <https://www.gnu.org/licenses/>.
  */
 
+/// @file tam.h
+/// Defines the interface for TAM instructions and the emulator itself.
+
 #ifndef TAM_TAM_H__
 #define TAM_TAM_H__
 
@@ -29,52 +32,86 @@ typedef uint32_t TamCode;
 typedef int16_t TamData;
 typedef uint16_t TamAddr;
 
+/// Number of addressable words in memory.
+///
 const int MEM_SIZE = 65536;
+/// Index of highest-addressed word in memory.
+///
 const int MAX_ADDR = MEM_SIZE - 1;
 
 /// Index of code top register
+///
 const uint8_t CT = 1;
 /// Index of primitive base register
+///
 const uint8_t PB = 2;
 /// Index of primitive top register
+///
 const uint8_t PT = 3;
 /// Index of stack base register
+///
 const uint8_t SB = 4;
 /// Index of stack top register
+///
 const uint8_t ST = 5;
 /// Index of heap base register
+///
 const uint8_t HB = 6;
 /// Index of heap top register
+///
 const uint8_t HT = 7;
 /// Index of local base register
+///
 const uint8_t LB = 8;
 /// Index of code pointer register
+///
 const uint8_t CP = 15;
 
+/// A single TAM instruction.
+///
 struct TamInstruction {
-    uint8_t Op, R, N;
-    int16_t D;
+    uint8_t Op; ///< Opcode
+    uint8_t R;  ///< Register
+    uint8_t N;  ///< Unsigned operand
+    int16_t D;  ///< Signed operand
 };
 
+/// A TAM emulator.
+///
 class TamEmulator {
   protected:
-    std::array<TamCode, 65536> CodeStore;
-    std::array<TamData, 65536> DataStore;
-    std::array<TamAddr, 16> Registers;
+    std::array<TamCode, 65536> CodeStore; ///< Stores code words
+    std::array<TamData, 65536> DataStore; ///< Stores data words
+    std::array<TamAddr, 16> Registers;    ///< Stores register values
 
-    std::map<TamAddr, int> AllocatedBlocks, FreeBlocks;
+    std::map<TamAddr, int>
+        AllocatedBlocks, ///< Records blocks of heap memory in use
+        FreeBlocks;      ///< Records blocks of unused heap memory
 
-    /// Attempt to allocate `n` words of memory on the heap.
-    /// \p N size of requested block
-    /// \return address of first word in the block
+    /// Attempt to allocate some memory on the heap.
+    ///
+    /// @param N size of requested block
+    /// @return address of first word in the block
     TamAddr allocate(int N);
 
     /// Attempt to free the allocated block beginning at `Addr`.
-    /// \p Addr start address of block
-    /// \p Size expected size of block
+    ///
+    /// @param Addr start address of block
+    /// @param Size expected size of block
     void free(TamAddr Addr, TamData Size);
 
+    /// Push a value to the top of the stack.
+    ///
+    /// This method updates the stack top register.
+    /// @param Value value to push
     void pushData(TamData Value);
+
+    /// Remove and return the top value of the stack.
+    ///
+    /// This method updates the stack top register, but does not actually delete
+    /// the value that was stored. It will remain until overwritten by a future
+    /// call.
+    /// @return the data
     TamData popData();
 
     void executeLoad(TamInstruction Instr);
@@ -122,7 +159,7 @@ class TamEmulator {
     void primitiveDispose();
 
   public:
-    /// Constructs a new emulator.
+    /// Construct a new emulator.
     ///
     /// On creation, all memory is zeroed and registers are set to default
     /// values. Registers default to 0 except for HB and HT, which default to
@@ -141,24 +178,26 @@ class TamEmulator {
     /// Code words are copied into the code store, and CT, PB, and PT registers
     /// are set.
     ///
-    /// \param Program program code to load
+    /// @param Program program code to load
     void loadProgram(std::vector<TamCode> &Program);
 
     /// Obtains the next instruction to execute.
     ///
-    /// \return the instruction
+    /// This method also increments the code pointer register.
+    ///
+    /// @return the instruction
     TamInstruction fetchDecode();
 
     /// Executes the given instruction and returns `false` if execution should
     /// halt.
     ///
-    /// \p Instr instruction to execute
+    /// @param Instr instruction to execute
     bool execute(TamInstruction Instr);
 
     /// Return a string representing the current contents of the stack and any
     /// allocated blocks on the heap.
     ///
-    /// \return the stack and heap contents
+    /// @return the stack and heap contents
     std::string getSnapshot();
 };
 
