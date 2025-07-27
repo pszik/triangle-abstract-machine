@@ -7,9 +7,5 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS Yes)
 
 add_subdirectory(src)
 add_subdirectory(test)
+add_subdirectory(docs)
 
-find_package(Doxygen)
-if(Doxygen_FOUND)
-  set(DOXYGEN_JAVADOC_AUTOBRIEF Yes)
-  doxygen_add_docs(docs ${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/include)
-endif()
