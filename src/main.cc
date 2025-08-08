@@ -83,6 +83,21 @@ static void printHelpMessage() {
               << "  -h,--help         print this help message" << std::endl;
 }
 
+static bool cpuCycle(tam::TamEmulator &Emulator, bool Trace, bool Step) {
+    const tam::TamInstruction Instr = Emulator.fetchDecode();
+    bool Running = Emulator.execute(Instr);
+
+    if (Trace)
+        std::cout << Emulator.getSnapshot() << std::endl;
+
+    if (Trace && Step) {
+        std::string buf;
+        std::getline(std::cin, buf);
+    }
+
+    return Running;
+}
+
 int main(int Argc, const char **Argv) {
     std::optional<tam::CliArgs> Args = tam::parseCli(Argc, Argv);
     if (!Args) {
@@ -95,8 +110,8 @@ int main(int Argc, const char **Argv) {
         return 0;
     }
 
-    if (!std::filesystem::exists(Args->Filename)) {
-        std::cout << "Binary file " << Args->Filename << " not found"
+    if (!std::filesystem::is_regular_file(Args->Filename)) {
+        std::cout << "Binary file '" << Args->Filename << "' not found"
                   << std::endl;
         return 1;
     }
@@ -112,20 +127,13 @@ int main(int Argc, const char **Argv) {
     }
 
     bool Running = true;
-    std::string buf;
     do {
         try {
-            const tam::TamInstruction Instr = Emulator.fetchDecode();
-            Running = Emulator.execute(Instr);
-            if (Args->Trace) {
-                std::cout << Emulator.getSnapshot() << std::endl;
-            }
-            if (Args->Trace && Args->Step) {
-                std::getline(std::cin, buf);
-            }
+            Running = cpuCycle(Emulator, Args->Trace, Args->Step);
         } catch (const std::exception &E) {
             std::cerr << E.what() << std::endl;
             return 3;
         }
     } while (Running);
+    return 0;
 }

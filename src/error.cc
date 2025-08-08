@@ -24,12 +24,14 @@
 
 #include <tam/error.h>
 
+#include <iomanip>
 #include <sstream>
 
 using namespace tam;
 
 const std::runtime_error tam::runtimeError(ExceptionKind Kind, uint16_t Addr) {
     std::stringstream ss;
+    ss << "runtime error: ";
 
     switch (Kind) {
     case EK_CodeAccessViolation:
@@ -56,7 +58,7 @@ const std::runtime_error tam::runtimeError(ExceptionKind Kind, uint16_t Addr) {
     }
 
     if (Kind != EK_IOError)
-        ss << " at loc " << Addr;
+        ss << " at loc " << std::hex << std::setw(4) << Addr;
 
     return std::runtime_error(ss.str());
 }

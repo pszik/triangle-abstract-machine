@@ -38,26 +38,24 @@ tam::TamAddr tam::TamEmulator::allocate(int N) {
          BlockIter != this->FreeBlocks.end(); ++BlockIter) {
         assert(BlockIter->first > this->Registers[HT]);
 
-        if (BlockIter->second < N) {
-            // block not big enough
+        if (BlockIter->second < N) // block not big enough
             continue;
-        }
 
         TamAddr BlockStart = BlockIter->first;
 
         this->AllocatedBlocks.emplace(BlockStart, N);
         this->FreeBlocks.erase(BlockIter);
-        if (BlockIter->second > N) {
+        if (BlockIter->second > N)
             this->FreeBlocks.emplace(BlockStart + N, BlockIter->second - N);
-        }
+
         return BlockStart;
     }
 
     // expand heap
     this->Registers[HT] -= N;
-    if (this->Registers[HT] <= this->Registers[ST]) {
+    if (this->Registers[HT] <= this->Registers[ST])
         throw runtimeError(EK_HeapOverflow, this->Registers[CP] - 1);
-    }
+
     this->AllocatedBlocks.emplace(this->Registers[HT] + 1, N);
     return this->Registers[HT] + 1;
 }
@@ -77,10 +75,10 @@ void tam::TamEmulator::free(TamAddr Addr, TamData Size) {
          BlockIter != E; ++BlockIter) {
         assert(BlockIter->first > this->Registers[HT]);
 
-        if (BlockIter->first != Addr)
+        if (BlockIter->first != Addr) // not the specified block
             continue;
 
-        if (BlockIter->second != Size)
+        if (BlockIter->second != Size) // block does not have specified size
             throw runtimeError(EK_DataAccessViolation, this->Registers[CP] - 1);
 
         this->AllocatedBlocks.erase(BlockIter);

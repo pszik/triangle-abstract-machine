@@ -213,13 +213,11 @@ void tam::TamEmulator::primitiveNe() {
     TamData Width = this->popData();
     std::stack<TamData> Arg1, Arg2;
 
-    for (int I = 0; I < Width; ++I) {
+    for (int I = 0; I < Width; ++I)
         Arg2.push(this->popData());
-    }
 
-    for (int I = 0; I < Width; ++I) {
+    for (int I = 0; I < Width; ++I)
         Arg1.push(this->popData());
-    }
 
     assert(Arg1.size() == Arg2.size());
     this->pushData(Arg1 != Arg2 ? 1 : 0);
@@ -275,9 +273,7 @@ void tam::TamEmulator::primitivePuteol() {
 
 void tam::TamEmulator::primitiveGetint() {
     TamAddr Addr = this->popData();
-    TamData N;
-    std::cin >> N;
-    this->DataStore[Addr] = N;
+    std::cin >> this->DataStore[Addr];
 }
 
 void tam::TamEmulator::primitivePutint() {
