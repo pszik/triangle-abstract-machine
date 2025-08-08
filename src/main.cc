@@ -1,21 +1,30 @@
-/*
- * This file is part of tam-cpp, copyright (c) Ian Knight 2025.
- *
- * tam-cpp is free software: you can redistribute it and/or modify it under the
- * terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
- *
- * tam-cpp is distributed in the hope that it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with tam-cpp. If not, see <https://www.gnu.org/licenses/>.
- */
-
+//===-----------------------------------------------------------------------===//
+//
+// This file is part of tam-cpp, copyright (c) Ian Knight 2025.
+//
+// tam-cpp is free software: you can redistribute it and/or modify it under the
+// terms of the GNU General Public License as published by the Free Software
+// Foundation, either version 3 of the License, or (at your option) any later
+// version.
+//
+// tam-cpp is distributed in the hope that it will be useful, but WITHOUT ANY
+// WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+// A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with tam-cpp. If not, see <https://www.gnu.org/licenses/>.
+//
+//===-----------------------------------------------------------------------===//
+//
 /// @file main.cc
-/// Entry point for the program.
+/// This file defines the entry point of the program, along with some auxiliary
+/// functions. All file IO is handled in this file.
+//
+//===-----------------------------------------------------------------------===//
+
+#include <tam/cli.h>
+#include <tam/error.h>
+#include <tam/tam.h>
 
 #include <cstdint>
 #include <exception>
@@ -24,9 +33,6 @@
 #include <iostream>
 #include <optional>
 #include <string>
-#include <tam/cli.h>
-#include <tam/error.h>
-#include <tam/tam.h>
 #include <vector>
 
 /// Load a TAM program from a file.
@@ -45,9 +51,8 @@ static std::vector<uint32_t> readProgramFromFile(std::string &Filename) {
     FileLen = In.tellg();
     In.seekg(0, In.beg);
 
-    if (FileLen % 4 != 0) {
+    if (FileLen % 4 != 0)
         throw tam::runtimeError(tam::EK_IOError, 0);
-    }
 
     // read instructions
     std::vector<uint32_t> Codes;
@@ -107,17 +112,16 @@ int main(int Argc, const char **Argv) {
     }
 
     bool Running = true;
+    std::string buf;
     do {
         try {
-            tam::TamInstruction Instr = Emulator.fetchDecode();
-
+            const tam::TamInstruction Instr = Emulator.fetchDecode();
             Running = Emulator.execute(Instr);
             if (Args->Trace) {
                 std::cout << Emulator.getSnapshot() << std::endl;
             }
             if (Args->Trace && Args->Step) {
-                std::string s;
-                std::getline(std::cin, s);
+                std::getline(std::cin, buf);
             }
         } catch (const std::exception &E) {
             std::cerr << E.what() << std::endl;

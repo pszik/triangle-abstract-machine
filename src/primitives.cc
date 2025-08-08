@@ -1,31 +1,38 @@
-/*
- * This file is part of tam-cpp, copyright (c) Ian Knight 2025.
- *
- * tam-cpp is free software: you can redistribute it and/or modify it under the
- * terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
- *
- * tam-cpp is distributed in the hope that it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with tam-cpp. If not, see <https://www.gnu.org/licenses/>.
- */
-
+//===-----------------------------------------------------------------------===//
+//
+// This file is part of tam-cpp, copyright (c) Ian Knight 2025.
+//
+// tam-cpp is free software: you can redistribute it and/or modify it under the
+// terms of the GNU General Public License as published by the Free Software
+// Foundation, either version 3 of the License, or (at your option) any later
+// version.
+//
+// tam-cpp is distributed in the hope that it will be useful, but WITHOUT ANY
+// WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+// A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with tam-cpp. If not, see <https://www.gnu.org/licenses/>.
+//
+//===-----------------------------------------------------------------------===//
+//
 /// @file primitives.cc
-/// Implements the primitive TAM routines.
+/// This file defines all the methods for executing primitive operations
+/// in `TamEmulator`.
+//
+//===-----------------------------------------------------------------------===//
 
-#include "tam/error.h"
+#include <tam/tam.h>
+
+#include <tam/error.h>
+
 #include <cassert>
 #include <iostream>
 #include <stack>
-#include <tam/tam.h>
 
-namespace tam {
+using namespace tam;
 
-void TamEmulator::executeCallPrimitive(TamInstruction Instr) {
+void tam::TamEmulator::executeCallPrimitive(TamInstruction Instr) {
     assert(Instr.D > 0 && Instr.D < 29);
     switch (Instr.D) {
     case 1:
@@ -114,96 +121,95 @@ void TamEmulator::executeCallPrimitive(TamInstruction Instr) {
     }
 }
 
-void TamEmulator::primitiveNot() {
+void tam::TamEmulator::primitiveNot() {
     TamData Value = this->popData();
     this->pushData(Value ? 0 : 1);
 }
 
-void TamEmulator::primitiveAnd() {
+void tam::TamEmulator::primitiveAnd() {
     TamData Op2 = this->popData(), Op1 = this->popData();
     this->pushData(Op1 * Op2 ? 1 : 0);
 }
 
-void TamEmulator::primitiveOr() {
+void tam::TamEmulator::primitiveOr() {
     TamData Op2 = this->popData(), Op1 = this->popData();
     this->pushData(Op1 + Op2 || Op1 == -Op2 ? 1 : 0);
 }
 
-void TamEmulator::primitiveSucc() {
+void tam::TamEmulator::primitiveSucc() {
     TamData Op = this->popData();
     this->pushData(Op + 1);
 }
 
-void TamEmulator::primitivePred() {
+void tam::TamEmulator::primitivePred() {
     TamData Op = this->popData();
     this->pushData(Op - 1);
 }
 
-void TamEmulator::primitiveNeg() {
+void tam::TamEmulator::primitiveNeg() {
     TamData Op = this->popData();
     this->pushData(-Op);
 }
 
-void TamEmulator::primitiveAdd() {
+void tam::TamEmulator::primitiveAdd() {
     TamData Arg2 = this->popData(), Arg1 = this->popData();
     this->pushData(Arg1 + Arg2);
 }
 
-void TamEmulator::primitiveSub() {
+void tam::TamEmulator::primitiveSub() {
     TamData Arg2 = this->popData(), Arg1 = this->popData();
     this->pushData(Arg1 - Arg2);
 }
-void TamEmulator::primitiveMult() {
+void tam::TamEmulator::primitiveMult() {
     TamData Arg2 = this->popData(), Arg1 = this->popData();
     this->pushData(Arg1 * Arg2);
 }
 
-void TamEmulator::primitiveDiv() {
+void tam::TamEmulator::primitiveDiv() {
     TamData Arg2 = this->popData(), Arg1 = this->popData();
     this->pushData(Arg1 / Arg2);
 }
 
-void TamEmulator::primitiveMod() {
+void tam::TamEmulator::primitiveMod() {
     TamData Arg2 = this->popData(), Arg1 = this->popData();
     this->pushData(Arg1 % Arg2);
 }
 
-void TamEmulator::primitiveLt() {
+void tam::TamEmulator::primitiveLt() {
     TamData Arg2 = this->popData(), Arg1 = this->popData();
     this->pushData(Arg1 < Arg2 ? 1 : 0);
 }
 
-void TamEmulator::primitiveLe() {
+void tam::TamEmulator::primitiveLe() {
     TamData Arg2 = this->popData(), Arg1 = this->popData();
     this->pushData(Arg1 <= Arg2 ? 1 : 0);
 }
 
-void TamEmulator::primitiveGe() {
+void tam::TamEmulator::primitiveGe() {
     TamData Arg2 = this->popData(), Arg1 = this->popData();
     this->pushData(Arg1 >= Arg2 ? 1 : 0);
 }
 
-void TamEmulator::primitiveGt() {
+void tam::TamEmulator::primitiveGt() {
     TamData Arg2 = this->popData(), Arg1 = this->popData();
     this->pushData(Arg1 > Arg2 ? 1 : 0);
 }
 
-void TamEmulator::primitiveEq() {
+void tam::TamEmulator::primitiveEq() {
     TamData Width = this->popData();
     std::stack<TamData> Arg1, Arg2;
 
-    for (int I = 0; I < Width; ++I) {
+    for (int I = 0; I < Width; ++I)
         Arg2.push(this->popData());
-    }
 
-    for (int I = 0; I < Width; ++I) {
+    for (int I = 0; I < Width; ++I)
         Arg1.push(this->popData());
-    }
 
+    assert(Arg1.size() == Arg2.size());
     this->pushData(Arg1 == Arg2 ? 1 : 0);
 }
 
-void TamEmulator::primitiveNe() {
+void tam::TamEmulator::primitiveNe() {
     TamData Width = this->popData();
     std::stack<TamData> Arg1, Arg2;
 
@@ -219,81 +225,77 @@ void TamEmulator::primitiveNe() {
     this->pushData(Arg1 != Arg2 ? 1 : 0);
 }
 
-void TamEmulator::primitiveEol() {
-    if (!std::cin) {
+void tam::TamEmulator::primitiveEol() {
+    if (!std::cin)
         throw runtimeError(EK_IOError, 0);
-    }
+
     char C = std::cin.peek();
     this->pushData(C == '\n' ? 1 : 0);
 }
 
-void TamEmulator::primitiveEof() {
-    if (!std::cin) {
+void tam::TamEmulator::primitiveEof() {
+    if (!std::cin)
         throw runtimeError(EK_IOError, 0);
-    }
+
     this->pushData(std::cin.eof() ? 1 : 0);
 }
 
-void TamEmulator::primitiveGet() {
-    if (!std::cin) {
+void tam::TamEmulator::primitiveGet() {
+    if (!std::cin)
         throw runtimeError(EK_IOError, 0);
-    }
+
     TamAddr Addr = this->popData();
     char C = std::cin.get();
     this->DataStore[Addr] = C;
 }
 
-void TamEmulator::primitivePut() {
-    if (!std::cout) {
+void tam::TamEmulator::primitivePut() {
+    if (!std::cout)
         throw runtimeError(EK_IOError, 0);
-    }
+
     char C = this->popData();
     std::cout << C;
 }
 
-void TamEmulator::primitiveGeteol() {
-    if (!std::cin) {
+void tam::TamEmulator::primitiveGeteol() {
+    if (!std::cin)
         throw runtimeError(EK_IOError, 0);
-    }
 
     char C;
-    while (C != '\n') {
+    while (C != '\n')
         std::cin >> C;
-    }
 }
 
-void TamEmulator::primitivePuteol() {
+void tam::TamEmulator::primitivePuteol() {
     if (!std::cout) {
         throw runtimeError(EK_IOError, 0);
     }
     std::cout << std::endl;
 }
 
-void TamEmulator::primitiveGetint() {
+void tam::TamEmulator::primitiveGetint() {
     TamAddr Addr = this->popData();
     TamData N;
     std::cin >> N;
     this->DataStore[Addr] = N;
 }
 
-void TamEmulator::primitivePutint() {
-    if (!std::cout) {
+void tam::TamEmulator::primitivePutint() {
+    if (!std::cout)
         throw runtimeError(EK_IOError, 0);
-    }
+
     TamData N = this->popData();
     std::cout << N;
 }
 
-void TamEmulator::primitiveNew() {
+void tam::TamEmulator::primitiveNew() {
     TamData N = this->popData();
     TamAddr Addr = this->allocate(N);
     this->pushData(Addr);
 }
 
-void TamEmulator::primitiveDispose() {
+void tam::TamEmulator::primitiveDispose() {
     TamAddr Addr = this->popData();
     TamData Size = this->popData();
     this->free(Addr, Size);
 }
-
-} // namespace tam

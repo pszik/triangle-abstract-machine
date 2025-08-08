@@ -1,21 +1,27 @@
-/*
- * This file is part of tam-cpp, copyright (c) Ian Knight 2025.
- *
- * tam-cpp is free software: you can redistribute it and/or modify it under the
- * terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
- *
- * tam-cpp is distributed in the hope that it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with tam-cpp. If not, see <https://www.gnu.org/licenses/>.
- */
-
+//===-----------------------------------------------------------------------===//
+//
+// This file is part of tam-cpp, copyright (c) Ian Knight 2025.
+//
+// tam-cpp is free software: you can redistribute it and/or modify it under the
+// terms of the GNU General Public License as published by the Free Software
+// Foundation, either version 3 of the License, or (at your option) any later
+// version.
+//
+// tam-cpp is distributed in the hope that it will be useful, but WITHOUT ANY
+// WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+// A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with tam-cpp. If not, see <https://www.gnu.org/licenses/>.
+//
+//===-----------------------------------------------------------------------===//
+//
 /// @file tam.h
-/// Defines the interface for TAM instructions and the emulator itself.
+/// This file declares the core of the TAM interface. It declares the
+/// `TamEmulator` class itself, along with the `TamInstruction` class used to
+/// pass instructions.
+//
+//===-----------------------------------------------------------------------===//
 
 #ifndef TAM_TAM_H__
 #define TAM_TAM_H__
@@ -34,38 +40,38 @@ typedef uint16_t TamAddr;
 
 /// Number of addressable words in memory.
 ///
-const int MEM_SIZE = 65536;
+constexpr const int MEM_SIZE = 65536;
 /// Index of highest-addressed word in memory.
 ///
-const int MAX_ADDR = MEM_SIZE - 1;
+constexpr const int MAX_ADDR = MEM_SIZE - 1;
 
 /// Index of code top register
 ///
-const uint8_t CT = 1;
+constexpr const uint8_t CT = 1;
 /// Index of primitive base register
 ///
-const uint8_t PB = 2;
+constexpr const uint8_t PB = 2;
 /// Index of primitive top register
 ///
-const uint8_t PT = 3;
+constexpr const uint8_t PT = 3;
 /// Index of stack base register
 ///
-const uint8_t SB = 4;
+constexpr const uint8_t SB = 4;
 /// Index of stack top register
 ///
-const uint8_t ST = 5;
+constexpr const uint8_t ST = 5;
 /// Index of heap base register
 ///
-const uint8_t HB = 6;
+constexpr const uint8_t HB = 6;
 /// Index of heap top register
 ///
-const uint8_t HT = 7;
+constexpr const uint8_t HT = 7;
 /// Index of local base register
 ///
-const uint8_t LB = 8;
+constexpr const uint8_t LB = 8;
 /// Index of code pointer register
 ///
-const uint8_t CP = 15;
+constexpr const uint8_t CP = 15;
 
 /// A single TAM instruction.
 ///
@@ -78,6 +84,10 @@ struct TamInstruction {
 
 /// A TAM emulator.
 ///
+/// The emulator class is responsible for simulating all operations that would
+/// happen on a physical CPU. Methods are provided for the fetch-decode-execute
+/// cycle, and all methods will directly update registers and memory
+/// appropriately.
 class TamEmulator {
   protected:
     std::array<TamCode, MEM_SIZE> CodeStore; ///< Stores code words
@@ -114,21 +124,21 @@ class TamEmulator {
     /// @return the data
     TamData popData();
 
-    void executeLoad(TamInstruction Instr);
-    void executeLoada(TamInstruction Instr);
-    void executeLoadi(TamInstruction Instr);
-    void executeLoadl(TamInstruction Instr);
-    void executeStore(TamInstruction Instr);
-    void executeStorei(TamInstruction Instr);
-    void executeCall(TamInstruction Instr);
-    void executeCallPrimitive(TamInstruction Instr);
-    void executeCalli(TamInstruction Instr);
-    void executeReturn(TamInstruction Instr);
-    void executePush(TamInstruction Instr);
-    void executePop(TamInstruction Instr);
-    void executeJump(TamInstruction Instr);
-    void executeJumpi(TamInstruction Instr);
-    void executeJumpif(TamInstruction Instr);
+    void executeLoad(const TamInstruction Instr);
+    void executeLoada(const TamInstruction Instr);
+    void executeLoadi(const TamInstruction Instr);
+    void executeLoadl(const TamInstruction Instr);
+    void executeStore(const TamInstruction Instr);
+    void executeStorei(const TamInstruction Instr);
+    void executeCall(const TamInstruction Instr);
+    void executeCallPrimitive(const TamInstruction Instr);
+    void executeCalli(const TamInstruction Instr);
+    void executeReturn(const TamInstruction Instr);
+    void executePush(const TamInstruction Instr);
+    void executePop(const TamInstruction Instr);
+    void executeJump(const TamInstruction Instr);
+    void executeJumpi(const TamInstruction Instr);
+    void executeJumpif(const TamInstruction Instr);
 
     void primitiveNot();
     void primitiveAnd();
@@ -162,43 +172,48 @@ class TamEmulator {
     /// Construct a new emulator.
     ///
     /// On creation, all memory is zeroed and registers are set to default
-    /// values. Registers default to 0 except for HB and HT, which default to
-    /// the highest address.
+    /// values. Registers default to 0 except for `HB`` and `HT`, which default
+    /// to the highest address.
     TamEmulator() {
         this->CodeStore.fill(0);
         this->DataStore.fill(0);
         this->Registers.fill(0);
 
-        this->Registers[HB] = 65535;
-        this->Registers[HT] = 65535;
+        this->Registers[HB] = MAX_ADDR;
+        this->Registers[HT] = MAX_ADDR;
     }
 
     /// Sets the program to be run by this emulator.
     ///
     /// Code words are copied into the code store, and CT, PB, and PT registers
-    /// are set.
+    /// are set accordingly.
     ///
     /// @param Program program code to load
+    /// @throws std::runtime_exception if the provided program is too large to
+    /// fit in memory
     void loadProgram(const std::vector<TamCode> &Program);
 
     /// Obtains the next instruction to execute.
     ///
-    /// This method also increments the code pointer register.
+    /// This method increments the code pointer as part of its operation.
     ///
     /// @return the instruction
-    TamInstruction fetchDecode();
+    /// @throws std::runtime_exception if the code pointer pointed outside of
+    /// allocated code memory
+    const TamInstruction fetchDecode();
 
-    /// Executes the given instruction and returns `false` if execution should
-    /// halt.
+    /// Executes the given instruction.
     ///
     /// @param Instr instruction to execute
-    bool execute(TamInstruction Instr);
+    /// @return `true` if execution should continue, `false` if not
+    /// @throws std::runtime_exception if any error occurred during execution
+    bool execute(const TamInstruction Instr);
 
     /// Return a string representing the current contents of the stack and any
     /// allocated blocks on the heap.
     ///
     /// @return the stack and heap contents
-    const std::string getSnapshot();
+    const std::string getSnapshot() const;
 };
 
 } // namespace tam
