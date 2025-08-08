@@ -1,5 +1,8 @@
 #include "integration_test.h"
+
 #include <tam/tam.h>
+
+using namespace tam;
 
 TEST_F(EmulatorTest, GetSnapshotTest) {
     DataVec Data = {123, 456, 789, 11112, 11415};
