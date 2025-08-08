@@ -29,7 +29,7 @@
 
 namespace tam {
 
-void TamEmulator::loadProgram(std::vector<TamCode> &Program) {
+void TamEmulator::loadProgram(const std::vector<TamCode> &Program) {
     this->CodeStore.fill(0);
     std::copy(Program.begin(), Program.end(), this->CodeStore.begin());
     this->Registers[CT] = Program.size();
@@ -132,7 +132,7 @@ bool TamEmulator::execute(TamInstruction Instr) {
     return true;
 }
 
-std::string TamEmulator::getSnapshot() {
+const std::string TamEmulator::getSnapshot() {
     std::stringstream ss;
     ss << std::hex << std::setfill('0');
 

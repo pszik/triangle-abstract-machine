@@ -80,9 +80,9 @@ struct TamInstruction {
 ///
 class TamEmulator {
   protected:
-    std::array<TamCode, 65536> CodeStore; ///< Stores code words
-    std::array<TamData, 65536> DataStore; ///< Stores data words
-    std::array<TamAddr, 16> Registers;    ///< Stores register values
+    std::array<TamCode, MEM_SIZE> CodeStore; ///< Stores code words
+    std::array<TamData, MEM_SIZE> DataStore; ///< Stores data words
+    std::array<TamAddr, 16> Registers;       ///< Stores register values
 
     std::map<TamAddr, int>
         AllocatedBlocks, ///< Records blocks of heap memory in use
@@ -179,7 +179,7 @@ class TamEmulator {
     /// are set.
     ///
     /// @param Program program code to load
-    void loadProgram(std::vector<TamCode> &Program);
+    void loadProgram(const std::vector<TamCode> &Program);
 
     /// Obtains the next instruction to execute.
     ///
@@ -198,7 +198,7 @@ class TamEmulator {
     /// allocated blocks on the heap.
     ///
     /// @return the stack and heap contents
-    std::string getSnapshot();
+    const std::string getSnapshot();
 };
 
 } // namespace tam
