@@ -1,6 +1,10 @@
 #include "integration_test.h"
-#include <gtest/gtest.h>
+
 #include <tam/tam.h>
+
+#include <gtest/gtest.h>
+
+using namespace tam;
 
 TEST_F(EmulatorTest, TestLoadOk) {
     std::vector<tam::TamData> Data = {1, 2, 3, 4, 5};
@@ -114,4 +118,68 @@ TEST_F(EmulatorTest, TestReturnOk) {
     EXPECT_EQ(4, this->Registers[tam::ST]);
     EXPECT_EQ(1, this->Registers[tam::LB]);
     EXPECT_EQ(2, this->Registers[tam::CP]);
+}
+
+TEST_F(EmulatorTest, TestPushOk) {
+    tam::TamInstruction Instr = {10, 0, 0, 3};
+    ASSERT_NO_THROW({ this->execute(Instr); });
+    EXPECT_EQ(3, this->Registers[tam::ST]) << "ST not incremented";
+}
+
+TEST_F(EmulatorTest, TestPopOk) {
+    DataVec Data = {10, 20, 30, 40, 50};
+    this->setData(Data);
+
+    tam::TamInstruction Instr = {11, 0, 2, 3};
+    ASSERT_NO_THROW({ this->execute(Instr); });
+
+    EXPECT_EQ(2, this->Registers[tam::ST]) << "Stack not correct size";
+    EXPECT_EQ(40, this->DataStore[0]);
+    EXPECT_EQ(50, this->DataStore[1]);
+}
+
+TEST_F(EmulatorTest, TestJumpOk) {
+    this->Registers[tam::CT] = 20;
+    this->Registers[tam::CP] = 10;
+
+    tam::TamInstruction Instr = {12, tam::SB, 0, 5};
+    ASSERT_NO_THROW({ this->execute(Instr); });
+
+    EXPECT_EQ(5, this->Registers[tam::CP]);
+}
+
+TEST_F(EmulatorTest, TestJumpiOk) {
+    DataVec Data = {10, 20, 30, 1};
+    this->setData(Data);
+    this->Registers[tam::CT] = 20;
+
+    tam::TamInstruction Instr = {13, 0, 0, 0};
+    ASSERT_NO_THROW({ this->execute(Instr); });
+
+    EXPECT_EQ(3, this->Registers[tam::ST]);
+    EXPECT_EQ(1, this->Registers[tam::CP]);
+}
+
+TEST_F(EmulatorTest, TestJumpifCmpPassOk) {
+    DataVec Data = {10, 20, 30, 2};
+    this->setData(Data);
+    this->Registers[tam::CT] = 20;
+
+    tam::TamInstruction Instr = {14, tam::SB, 2, 4};
+    ASSERT_NO_THROW({ this->execute(Instr); });
+
+    EXPECT_EQ(3, this->Registers[tam::ST]);
+    EXPECT_EQ(4, this->Registers[tam::CP]);
+}
+
+TEST_F(EmulatorTest, TestJumpifCmpFailOk) {
+    DataVec Data = {10, 20, 30, 7};
+    this->setData(Data);
+    this->Registers[tam::CT] = 20;
+
+    tam::TamInstruction Instr = {14, tam::SB, 2, 4};
+    ASSERT_NO_THROW({ this->execute(Instr); });
+
+    EXPECT_EQ(3, this->Registers[tam::ST]);
+    EXPECT_EQ(0, this->Registers[tam::CP]);
 }

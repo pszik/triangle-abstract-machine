@@ -1,8 +1,11 @@
-#include <gtest/gtest.h>
+#include "integration_test.h"
+
 #include <tam/tam.h>
+
+#include <gtest/gtest.h>
 #include <vector>
 
-#include "integration_test.h"
+using namespace tam;
 
 TEST_F(EmulatorTest, TestLoadProgram) {
     std::vector<tam::TamCode> Code;

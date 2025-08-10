@@ -1,7 +1,11 @@
 #include "integration_test.h"
+
+#include <tam/tam.h>
+
 #include <gtest/gtest.h>
 #include <map>
-#include <tam/tam.h>
+
+using namespace tam;
 
 TEST_F(EmulatorTest, HeapAllocateExpandHeap) {
     ASSERT_NO_THROW({ this->allocate(3); });
