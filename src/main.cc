@@ -52,7 +52,7 @@ static std::vector<uint32_t> readProgramFromFile(std::string &Filename) {
     In.seekg(0, In.beg);
 
     if (FileLen % 4 != 0)
-        throw tam::runtimeError(tam::EK_IOError, 0);
+        throw tam::ioError("program file contained incomplete instruction");
 
     // read instructions
     std::vector<uint32_t> Codes;
@@ -111,8 +111,8 @@ int main(int Argc, const char **Argv) {
     }
 
     if (!std::filesystem::is_regular_file(Args->Filename)) {
-        std::cout << "Binary file '" << Args->Filename << "' not found"
-                  << std::endl;
+        std::cerr << "error: io error: file '" << Args->Filename
+                  << "' not found" << std::endl;
         return 1;
     }
 

@@ -41,6 +41,7 @@ typedef uint16_t TamAddr;
 /// Number of addressable words in memory.
 ///
 constexpr const int MEM_SIZE = 65536;
+
 /// Index of highest-addressed word in memory.
 ///
 constexpr const int MAX_ADDR = MEM_SIZE - 1;
@@ -48,27 +49,35 @@ constexpr const int MAX_ADDR = MEM_SIZE - 1;
 /// Index of code top register
 ///
 constexpr const uint8_t CT = 1;
+
 /// Index of primitive base register
 ///
 constexpr const uint8_t PB = 2;
+
 /// Index of primitive top register
 ///
 constexpr const uint8_t PT = 3;
+
 /// Index of stack base register
 ///
 constexpr const uint8_t SB = 4;
+
 /// Index of stack top register
 ///
 constexpr const uint8_t ST = 5;
+
 /// Index of heap base register
 ///
 constexpr const uint8_t HB = 6;
+
 /// Index of heap top register
 ///
 constexpr const uint8_t HT = 7;
+
 /// Index of local base register
 ///
 constexpr const uint8_t LB = 8;
+
 /// Index of code pointer register
 ///
 constexpr const uint8_t CP = 15;
@@ -113,6 +122,7 @@ class TamEmulator {
     /// Push a value to the top of the stack.
     ///
     /// This method updates the stack top register.
+    ///
     /// @param Value value to push
     void pushData(TamData Value);
 
@@ -121,6 +131,7 @@ class TamEmulator {
     /// This method updates the stack top register, but does not actually delete
     /// the value that was stored. It will remain until overwritten by a future
     /// call.
+    ///
     /// @return the data
     TamData popData();
 

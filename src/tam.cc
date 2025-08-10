@@ -37,6 +37,9 @@
 using namespace tam;
 
 void TamEmulator::loadProgram(const std::vector<TamCode> &Program) {
+    if (Program.size() > MEM_SIZE)
+        throw tam::ioError("program file too large");
+
     this->CodeStore.fill(0);
     std::copy(Program.begin(), Program.end(), this->CodeStore.begin());
     this->Registers[CT] = Program.size();

@@ -225,7 +225,7 @@ void tam::TamEmulator::primitiveNe() {
 
 void tam::TamEmulator::primitiveEol() {
     if (!std::cin)
-        throw runtimeError(EK_IOError, 0);
+        throw tam::ioError("failed to get stdin");
 
     char C = std::cin.peek();
     this->pushData(C == '\n' ? 1 : 0);
@@ -233,14 +233,14 @@ void tam::TamEmulator::primitiveEol() {
 
 void tam::TamEmulator::primitiveEof() {
     if (!std::cin)
-        throw runtimeError(EK_IOError, 0);
+        throw tam::ioError("failed to get stdin");
 
     this->pushData(std::cin.eof() ? 1 : 0);
 }
 
 void tam::TamEmulator::primitiveGet() {
     if (!std::cin)
-        throw runtimeError(EK_IOError, 0);
+        throw tam::ioError("failed to get stdin");
 
     TamAddr Addr = this->popData();
     char C = std::cin.get();
@@ -249,7 +249,7 @@ void tam::TamEmulator::primitiveGet() {
 
 void tam::TamEmulator::primitivePut() {
     if (!std::cout)
-        throw runtimeError(EK_IOError, 0);
+        throw tam::ioError("failed to get stdout");
 
     char C = this->popData();
     std::cout << C;
@@ -257,7 +257,7 @@ void tam::TamEmulator::primitivePut() {
 
 void tam::TamEmulator::primitiveGeteol() {
     if (!std::cin)
-        throw runtimeError(EK_IOError, 0);
+        throw tam::ioError("failed to get stdin");
 
     char C;
     while (C != '\n')
@@ -265,9 +265,9 @@ void tam::TamEmulator::primitiveGeteol() {
 }
 
 void tam::TamEmulator::primitivePuteol() {
-    if (!std::cout) {
-        throw runtimeError(EK_IOError, 0);
-    }
+    if (!std::cout)
+        throw ioError("failed to get stdout");
+
     std::cout << std::endl;
 }
 
@@ -278,7 +278,7 @@ void tam::TamEmulator::primitiveGetint() {
 
 void tam::TamEmulator::primitivePutint() {
     if (!std::cout)
-        throw runtimeError(EK_IOError, 0);
+        throw ioError("failed to get stdout");
 
     TamData N = this->popData();
     std::cout << N;

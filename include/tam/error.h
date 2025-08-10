@@ -41,7 +41,6 @@ enum ExceptionKind : uint8_t {
     EK_StackOverflow,       ///< Stack attempted to shrink past 0
     EK_HeapOverflow,        ///< Heap attempted to grow into the stack
     EK_UnknownOpcode,       ///< An unrecognised opcode was given to execute
-    EK_IOError,             ///< A problem occurred with reading or writing
 };
 
 /// Construct a runtime error.
@@ -52,6 +51,14 @@ enum ExceptionKind : uint8_t {
 /// @param Kind the kind of error to construct
 /// @param Addr address of the instruction that caused the error
 const std::runtime_error runtimeError(ExceptionKind Kind, uint16_t Addr);
+
+/// Construct a runtime error relating to an IO problem.
+///
+/// This function direcly constructs a runtime error using the provided
+/// message.
+///
+/// @param Message specific cause of the error
+const std::runtime_error ioError(const char *Message);
 
 } // namespace tam
 #endif // TAM_ERROR_H__

@@ -22,6 +22,7 @@
 //
 //===-----------------------------------------------------------------------===//
 
+#include <stdexcept>
 #include <tam/error.h>
 
 #include <iomanip>
@@ -31,7 +32,7 @@ using namespace tam;
 
 const std::runtime_error tam::runtimeError(ExceptionKind Kind, uint16_t Addr) {
     std::stringstream ss;
-    ss << "runtime error: ";
+    ss << "error: ";
 
     switch (Kind) {
     case EK_CodeAccessViolation:
@@ -52,13 +53,16 @@ const std::runtime_error tam::runtimeError(ExceptionKind Kind, uint16_t Addr) {
     case EK_UnknownOpcode:
         ss << "unknown opcode";
         break;
-    case EK_IOError:
-        ss << "IO error";
-        break;
     }
 
-    if (Kind != EK_IOError)
-        ss << " at loc " << std::hex << std::setw(4) << Addr;
+    ss << ": error at loc " << std::hex << std::setw(4) << std::setfill('0')
+       << Addr;
 
+    return std::runtime_error(ss.str());
+}
+
+const std::runtime_error tam::ioError(const char *Message) {
+    std::stringstream ss;
+    ss << "error: IO error: " << Message;
     return std::runtime_error(ss.str());
 }
