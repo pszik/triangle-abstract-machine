@@ -17,77 +17,75 @@
 //===-----------------------------------------------------------------------===//
 //
 /// @file heap.cc
-/// This file defines the `allocate` and `free` methods of `TamEmulator`.
+/// This file defines the `Allocate` and `free` methods of `TamEmulator`.
 //
 //===-----------------------------------------------------------------------===//
-
-#include <tam/tam.h>
-
-#include <tam/error.h>
 
 #include <cassert>
 #include <map>
 
-using namespace tam;
+#include "tam/error.h"
+#include "tam/tam.h"
 
 /// Iterates through all existing free blocks in the heap to try and find one of
 /// the correct size. If none is found, the heap is expanded.
-tam::TamAddr tam::TamEmulator::allocate(int N) {
+tam::TamAddr tam::TamEmulator::Allocate(int n) {
     // try to find unallocated space inside heap
-    for (auto BlockIter = this->FreeBlocks.begin();
-         BlockIter != this->FreeBlocks.end(); ++BlockIter) {
-        assert(BlockIter->first > this->Registers[HT]);
+    for (auto block_iter = this->free_blocks.begin(),
+              iter_end = this->free_blocks.end();
+         block_iter != iter_end; ++block_iter) {
+        assert(block_iter->first > this->registers[HT]);
 
-        if (BlockIter->second < N) // block not big enough
+        if (block_iter->second < n)  // block not big enough
             continue;
 
-        TamAddr BlockStart = BlockIter->first;
+        TamAddr block_start = block_iter->first;
 
-        this->AllocatedBlocks.emplace(BlockStart, N);
-        this->FreeBlocks.erase(BlockIter);
-        if (BlockIter->second > N)
-            this->FreeBlocks.emplace(BlockStart + N, BlockIter->second - N);
+        this->allocated_blocks.emplace(block_start, n);
+        this->free_blocks.erase(block_iter);
+        if (block_iter->second > n)
+            this->free_blocks.emplace(block_start + n, block_iter->second - n);
 
-        return BlockStart;
+        return block_start;
     }
 
     // expand heap
-    this->Registers[HT] -= N;
-    if (this->Registers[HT] <= this->Registers[ST])
-        throw runtimeError(EK_HeapOverflow, this->Registers[CP] - 1);
+    this->registers[HT] -= n;
+    if (this->registers[HT] <= this->registers[ST])
+        throw RuntimeError(kHeapOverflow, this->registers[CP] - 1);
 
-    this->AllocatedBlocks.emplace(this->Registers[HT] + 1, N);
-    return this->Registers[HT] + 1;
+    this->allocated_blocks.emplace(this->registers[HT] + 1, n);
+    return this->registers[HT] + 1;
 }
 
 /// Attempts to locate an allocated block of the given address and size.
 /// If the block was at the end of the heap then the heap is contracted,
 /// otherwise the freed block is added to the list of available blocks.
-void tam::TamEmulator::free(TamAddr Addr, TamData Size) {
-    if (Addr <= this->Registers[HT])
-        throw runtimeError(EK_DataAccessViolation, this->Registers[CP] - 1);
+void tam::TamEmulator::Free(TamAddr addr, TamData size) {
+    if (addr <= this->registers[HT])
+        throw RuntimeError(kDataAccessViolation, this->registers[CP] - 1);
 
-    if (!this->AllocatedBlocks.count(Addr))
-        throw runtimeError(EK_DataAccessViolation, this->Registers[CP] - 1);
+    if (!this->allocated_blocks.count(addr))
+        throw RuntimeError(kDataAccessViolation, this->registers[CP] - 1);
 
-    for (auto BlockIter = this->AllocatedBlocks.begin(),
-              E = this->AllocatedBlocks.end();
-         BlockIter != E; ++BlockIter) {
-        assert(BlockIter->first > this->Registers[HT]);
+    for (auto block_iter = this->allocated_blocks.begin(),
+              iter_end = this->allocated_blocks.end();
+         block_iter != iter_end; ++block_iter) {
+        assert(block_iter->first > this->registers[HT]);
 
-        if (BlockIter->first != Addr) // not the specified block
+        if (block_iter->first != addr)  // not the specified block
             continue;
 
-        if (BlockIter->second != Size) // block does not have specified size
-            throw runtimeError(EK_DataAccessViolation, this->Registers[CP] - 1);
+        if (block_iter->second != size)  // block does not have specified size
+            throw RuntimeError(kDataAccessViolation, this->registers[CP] - 1);
 
-        this->AllocatedBlocks.erase(BlockIter);
-        if (Addr == this->Registers[HT] + 1) {
+        this->allocated_blocks.erase(block_iter);
+        if (addr == this->registers[HT] + 1) {
             // block on top of heap, shrink heap
-            this->Registers[HT] += BlockIter->second;
+            this->registers[HT] += block_iter->second;
         } else {
             // mark block as available
-            this->FreeBlocks.emplace(BlockIter->first, BlockIter->second);
+            this->free_blocks.emplace(block_iter->first, block_iter->second);
         }
         break;
     }

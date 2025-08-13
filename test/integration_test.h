@@ -13,30 +13,30 @@ class EmulatorTest : public testing::Test, protected tam::TamEmulator {
   protected:
     void setCode(CodeVec &Code) {
         assert(Code.size() < 65536);
-        this->CodeStore.fill(0);
+        this->code_store.fill(0);
 
-        std::copy(Code.begin(), Code.end(), this->CodeStore.begin());
+        std::copy(Code.begin(), Code.end(), this->code_store.begin());
         for (int I = 0; I < Code.size(); ++I) {
-            assert(Code[I] == this->CodeStore[I]);
+            assert(Code[I] == this->code_store[I]);
         }
 
-        this->Registers[tam::CT] = Code.size();
-        this->Registers[tam::PB] = this->Registers[tam::CT];
-        this->Registers[tam::PT] = this->Registers[tam::PB] + 29;
-        assert(this->Registers[tam::CT] == Code.size());
+        this->registers[tam::CT] = Code.size();
+        this->registers[tam::PB] = this->registers[tam::CT];
+        this->registers[tam::PT] = this->registers[tam::PB] + 29;
+        assert(this->registers[tam::CT] == Code.size());
     }
 
     void setData(DataVec &Data) {
         assert(Data.size() < 65536);
-        this->DataStore.fill(0);
+        this->data_store.fill(0);
 
-        std::copy(Data.begin(), Data.end(), this->DataStore.begin());
+        std::copy(Data.begin(), Data.end(), this->data_store.begin());
         for (int I = 0; I < Data.size(); ++I) {
-            assert(Data[I] == this->DataStore[I]);
+            assert(Data[I] == this->data_store[I]);
         }
 
-        this->Registers[tam::ST] = Data.size();
-        assert(this->Registers[tam::ST] == Data.size());
+        this->registers[tam::ST] = Data.size();
+        assert(this->registers[tam::ST] == Data.size());
     }
 };
 

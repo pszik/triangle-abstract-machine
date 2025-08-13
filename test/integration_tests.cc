@@ -13,31 +13,31 @@ TEST_F(EmulatorTest, TestLoadProgram) {
     Code.push_back(0x9abcdef0);
     Code.push_back(0xfedcba98);
 
-    ASSERT_NO_THROW({ this->loadProgram(Code); });
+    ASSERT_NO_THROW({ this->LoadProgram(Code); });
 
-    EXPECT_EQ(0x12345678, this->CodeStore[0]);
-    EXPECT_EQ(0x9abcdef0, this->CodeStore[1]);
-    EXPECT_EQ(0xfedcba98, this->CodeStore[2]);
-    EXPECT_EQ(3, this->Registers[tam::CT]);
-    EXPECT_EQ(3, this->Registers[tam::PB]);
-    EXPECT_EQ(32, this->Registers[tam::PT]);
+    EXPECT_EQ(0x12345678, this->code_store[0]);
+    EXPECT_EQ(0x9abcdef0, this->code_store[1]);
+    EXPECT_EQ(0xfedcba98, this->code_store[2]);
+    EXPECT_EQ(3, this->registers[tam::CT]);
+    EXPECT_EQ(3, this->registers[tam::PB]);
+    EXPECT_EQ(32, this->registers[tam::PT]);
 }
 
 TEST_F(EmulatorTest, TestSimpleCycle) {
-    this->CodeStore[0] = 0x08020000;
-    this->DataStore[0] = 0x1234;
-    this->DataStore[1] = 0x5678;
-    this->DataStore[2] = 0x9abc;
+    this->code_store[0] = 0x08020000;
+    this->data_store[0] = 0x1234;
+    this->data_store[1] = 0x5678;
+    this->data_store[2] = 0x9abc;
 
-    this->Registers[tam::CT] = 1;
-    this->Registers[tam::CP] = 0;
-    this->Registers[tam::ST] = 3;
+    this->registers[tam::CT] = 1;
+    this->registers[tam::CP] = 0;
+    this->registers[tam::ST] = 3;
 
     ASSERT_NO_THROW({
-        tam::TamInstruction Instr = this->fetchDecode();
-        this->execute(Instr);
+        tam::TamInstruction Instr = this->FetchDecode();
+        this->Execute(Instr);
     });
 
-    EXPECT_EQ(0x1234, this->DataStore[3]);
-    EXPECT_EQ(0x5678, this->DataStore[4]);
+    EXPECT_EQ(0x1234, this->data_store[3]);
+    EXPECT_EQ(0x5678, this->data_store[4]);
 }

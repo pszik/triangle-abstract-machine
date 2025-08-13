@@ -22,10 +22,6 @@
 //
 //===-----------------------------------------------------------------------===//
 
-#include <tam/cli.h>
-#include <tam/error.h>
-#include <tam/tam.h>
-
 #include <cstdint>
 #include <exception>
 #include <filesystem>
@@ -35,40 +31,43 @@
 #include <string>
 #include <vector>
 
+#include "tam/cli.h"
+#include "tam/error.h"
+#include "tam/tam.h"
+
 /// Load a TAM program from a file.
 ///
 /// This function does not verify that the bytes read from the file form valid
 /// TAM bytecode.
 ///
-/// @param Filename name of file to read from
+/// @param filename name of file to read from
 /// @return a vector of 32-bit code words
-static std::vector<uint32_t> readProgramFromFile(std::string &Filename) {
-    std::ifstream In(Filename, std::ios::binary);
+static std::vector<uint32_t> ReadProgramFromFile(std::string &filename) {
+    std::ifstream in_stream(filename, std::ios::binary);
 
     // find file size
-    int FileLen;
-    In.seekg(0, In.end);
-    FileLen = In.tellg();
-    In.seekg(0, In.beg);
+    in_stream.seekg(0, in_stream.end);
+    int file_len = in_stream.tellg();
+    in_stream.seekg(0, in_stream.beg);
 
-    if (FileLen % 4 != 0)
-        throw tam::ioError("program file contained incomplete instruction");
+    if (file_len % 4 != 0)
+        throw tam::IoError("program file contained incomplete instruction");
 
     // read instructions
-    std::vector<uint32_t> Codes;
-    for (int J = 0; J < FileLen / 4; ++J) {
-        int C;
-        uint32_t Code = 0;
-        for (int I = 0; I < 4; ++I) {
-            C = In.get();
-            Code = (Code << 8) | C;
+    std::vector<uint32_t> codes;
+    for (int j = 0; j < file_len / 4; ++j) {
+        int c;
+        uint32_t code = 0;
+        for (int i = 0; i < 4; ++i) {
+            c = in_stream.get();
+            code = (code << 8) | c;
         }
-        Codes.push_back(Code);
+        codes.push_back(code);
     }
-    return Codes;
+    return codes;
 }
 
-static void printHelpMessage() {
+static void PrintHelpMessage() {
     std::cout << "Usage: tam [OPTIONS] FILENAME" << std::endl
               << std::endl
               << "Options:" << std::endl
@@ -83,57 +82,55 @@ static void printHelpMessage() {
               << "  -h,--help         print this help message" << std::endl;
 }
 
-static bool cpuCycle(tam::TamEmulator &Emulator, bool Trace, bool Step) {
-    const tam::TamInstruction Instr = Emulator.fetchDecode();
-    bool Running = Emulator.execute(Instr);
+static bool CpuCycle(tam::TamEmulator &emulator, bool trace, bool step) {
+    const tam::TamInstruction Instr = emulator.FetchDecode();
+    bool running = emulator.Execute(Instr);
 
-    if (Trace)
-        std::cout << Emulator.getSnapshot() << std::endl;
+    if (trace) std::cout << emulator.GetSnapshot() << std::endl;
 
-    if (Trace && Step) {
+    if (trace && step) {
         std::string buf;
         std::getline(std::cin, buf);
     }
 
-    return Running;
+    return running;
 }
 
-int main(int Argc, const char **Argv) {
-    std::optional<tam::CliArgs> Args = tam::parseCli(Argc, Argv);
-    if (!Args) {
-        printHelpMessage();
+int main(int argc, const char **argv) {
+    std::optional<tam::CliArgs> args = tam::ParseCli(argc, argv);
+    if (!args) {
+        PrintHelpMessage();
         return 1;
     }
 
-    if (Args->Help) {
-        printHelpMessage();
+    if (args->help) {
+        PrintHelpMessage();
         return 0;
     }
 
-    if (!std::filesystem::is_regular_file(Args->Filename)) {
-        std::cerr << "error: io error: file '" << Args->Filename
+    if (!std::filesystem::is_regular_file(args->filename)) {
+        std::cerr << "error: io error: file '" << args->filename
                   << "' not found" << std::endl;
         return 1;
     }
 
-    tam::TamEmulator Emulator;
+    tam::TamEmulator emulator;
     try {
-        std::vector<uint32_t> Program;
-        Program = readProgramFromFile(Args->Filename);
-        Emulator.loadProgram(Program);
+        std::vector<uint32_t> program = ReadProgramFromFile(args->filename);
+        emulator.LoadProgram(program);
     } catch (const std::exception &E) {
         std::cerr << E.what() << std::endl;
         return 2;
     }
 
-    bool Running = true;
+    bool running = true;
     do {
         try {
-            Running = cpuCycle(Emulator, Args->Trace, Args->Step);
+            running = CpuCycle(emulator, args->trace, args->step);
         } catch (const std::exception &E) {
             std::cerr << E.what() << std::endl;
             return 3;
         }
-    } while (Running);
+    } while (running);
     return 0;
 }

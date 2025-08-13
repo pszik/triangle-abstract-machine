@@ -17,52 +17,50 @@
 //===-----------------------------------------------------------------------===//
 //
 /// @file error.cc
-/// This file defines the `runtimeError` function for constructing exception
+/// This file defines the `RuntimeError` function for constructing exception
 /// objects during runtime.
 //
 //===-----------------------------------------------------------------------===//
 
-#include <stdexcept>
-#include <tam/error.h>
+#include "tam/error.h"
 
 #include <iomanip>
 #include <sstream>
+#include <stdexcept>
 
-using namespace tam;
-
-const std::runtime_error tam::runtimeError(ExceptionKind Kind, uint16_t Addr) {
+const std::runtime_error tam::RuntimeError(ExceptionKind kind, uint16_t addr) {
     std::stringstream ss;
     ss << "error: ";
 
-    switch (Kind) {
-    case EK_CodeAccessViolation:
-        ss << "code access violation";
-        break;
-    case EK_DataAccessViolation:
-        ss << "data access violation";
-        break;
-    case EK_StackOverflow:
-        ss << "stack overflow";
-        break;
-    case EK_StackUnderflow:
-        ss << "stack underflow";
-        break;
-    case EK_HeapOverflow:
-        ss << "heap overflow";
-        break;
-    case EK_UnknownOpcode:
-        ss << "unknown opcode";
-        break;
+    switch (kind) {
+        case kCodeAccessViolation:
+            ss << "code access violation";
+            break;
+        case kDataAccessViolation:
+            ss << "data access violation";
+            break;
+        case kStackOverflow:
+            ss << "stack overflow";
+            break;
+        case kStackUnderflow:
+            ss << "stack underflow";
+            break;
+        case kHeapOverflow:
+            ss << "heap overflow";
+            break;
+        case kUnknownOpcode:
+            ss << "unknown opcode";
+            break;
     }
 
     ss << ": error at loc " << std::hex << std::setw(4) << std::setfill('0')
-       << Addr;
+       << addr;
 
     return std::runtime_error(ss.str());
 }
 
-const std::runtime_error tam::ioError(const char *Message) {
+const std::runtime_error tam::IoError(const char *message) {
     std::stringstream ss;
-    ss << "error: IO error: " << Message;
+    ss << "error: IO error: " << message;
     return std::runtime_error(ss.str());
 }

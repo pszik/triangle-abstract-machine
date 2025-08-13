@@ -40,11 +40,11 @@ typedef uint16_t TamAddr;
 
 /// Number of addressable words in memory.
 ///
-constexpr const int MEM_SIZE = 65536;
+constexpr const int kMemSize = 65536;
 
 /// Index of highest-addressed word in memory.
 ///
-constexpr const int MAX_ADDR = MEM_SIZE - 1;
+constexpr const int kMaxAddr = kMemSize - 1;
 
 /// Index of code top register
 ///
@@ -85,10 +85,10 @@ constexpr const uint8_t CP = 15;
 /// A single TAM instruction.
 ///
 struct TamInstruction {
-    uint8_t Op; ///< Opcode
-    uint8_t R;  ///< Register
-    uint8_t N;  ///< Unsigned operand
-    int16_t D;  ///< Signed operand
+    uint8_t op;  ///< Opcode
+    uint8_t r;   ///< Register
+    uint8_t n;   ///< Unsigned operand
+    int16_t d;   ///< Signed operand
 };
 
 /// A TAM emulator.
@@ -98,100 +98,19 @@ struct TamInstruction {
 /// cycle, and all methods will directly update registers and memory
 /// appropriately.
 class TamEmulator {
-  protected:
-    std::array<TamCode, MEM_SIZE> CodeStore; ///< Stores code words
-    std::array<TamData, MEM_SIZE> DataStore; ///< Stores data words
-    std::array<TamAddr, 16> Registers;       ///< Stores register values
-
-    std::map<TamAddr, int>
-        AllocatedBlocks, ///< Records blocks of heap memory in use
-        FreeBlocks;      ///< Records blocks of unused heap memory
-
-    /// Attempt to allocate some memory on the heap.
-    ///
-    /// @param N size of requested block
-    /// @return address of first word in the block
-    TamAddr allocate(int N);
-
-    /// Attempt to free the allocated block beginning at `Addr`.
-    ///
-    /// @param Addr start address of block
-    /// @param Size expected size of block
-    void free(TamAddr Addr, TamData Size);
-
-    /// Push a value to the top of the stack.
-    ///
-    /// This method updates the stack top register.
-    ///
-    /// @param Value value to push
-    void pushData(TamData Value);
-
-    /// Remove and return the top value of the stack.
-    ///
-    /// This method updates the stack top register, but does not actually delete
-    /// the value that was stored. It will remain until overwritten by a future
-    /// call.
-    ///
-    /// @return the data
-    TamData popData();
-
-    void executeLoad(const TamInstruction Instr);
-    void executeLoada(const TamInstruction Instr);
-    void executeLoadi(const TamInstruction Instr);
-    void executeLoadl(const TamInstruction Instr);
-    void executeStore(const TamInstruction Instr);
-    void executeStorei(const TamInstruction Instr);
-    void executeCall(const TamInstruction Instr);
-    void executeCallPrimitive(const TamInstruction Instr);
-    void executeCalli(const TamInstruction Instr);
-    void executeReturn(const TamInstruction Instr);
-    void executePush(const TamInstruction Instr);
-    void executePop(const TamInstruction Instr);
-    void executeJump(const TamInstruction Instr);
-    void executeJumpi(const TamInstruction Instr);
-    void executeJumpif(const TamInstruction Instr);
-
-    void primitiveNot();
-    void primitiveAnd();
-    void primitiveOr();
-    void primitiveSucc();
-    void primitivePred();
-    void primitiveNeg();
-    void primitiveAdd();
-    void primitiveSub();
-    void primitiveMult();
-    void primitiveDiv();
-    void primitiveMod();
-    void primitiveLt();
-    void primitiveLe();
-    void primitiveGe();
-    void primitiveGt();
-    void primitiveEq();
-    void primitiveNe();
-    void primitiveEol();
-    void primitiveEof();
-    void primitiveGet();
-    void primitivePut();
-    void primitiveGeteol();
-    void primitivePuteol();
-    void primitiveGetint();
-    void primitivePutint();
-    void primitiveNew();
-    void primitiveDispose();
-
-  public:
+   public:
     /// Construct a new emulator.
     ///
     /// On creation, all memory is zeroed and registers are set to default
     /// values. Registers default to 0 except for `HB`` and `HT`, which default
     /// to the highest address.
     TamEmulator() {
-        this->CodeStore.fill(0);
-        this->DataStore.fill(0);
-        this->Registers.fill(0);
+        this->code_store.fill(0);
+        this->data_store.fill(0);
+        this->registers.fill(0);
 
-        this->Registers[HB] = MAX_ADDR;
-        this->Registers[HT] = MAX_ADDR;
+        this->registers[HB] = kMaxAddr;
+        this->registers[HT] = kMaxAddr;
     }
 
     /// Sets the program to be run by this emulator.
@@ -199,10 +118,10 @@ class TamEmulator {
     /// Code words are copied into the code store, and CT, PB, and PT registers
     /// are set accordingly.
     ///
-    /// @param Program program code to load
+    /// @param program program code to load
     /// @throws std::runtime_exception if the provided program is too large to
     /// fit in memory
-    void loadProgram(const std::vector<TamCode> &Program);
+    void LoadProgram(const std::vector<TamCode> &program);
 
     /// Obtains the next instruction to execute.
     ///
@@ -211,22 +130,103 @@ class TamEmulator {
     /// @return the instruction
     /// @throws std::runtime_exception if the code pointer pointed outside of
     /// allocated code memory
-    const TamInstruction fetchDecode();
+    const TamInstruction FetchDecode();
 
     /// Executes the given instruction.
     ///
-    /// @param Instr instruction to execute
+    /// @param instr instruction to execute
     /// @return `true` if execution should continue, `false` if not
     /// @throws std::runtime_exception if any error occurred during execution
-    bool execute(const TamInstruction Instr);
+    bool Execute(const TamInstruction instr);
 
     /// Return a string representing the current contents of the stack and any
     /// allocated blocks on the heap.
     ///
     /// @return the stack and heap contents
-    const std::string getSnapshot() const;
+    const std::string GetSnapshot() const;
+
+   protected:
+    std::array<TamCode, kMemSize> code_store;  ///< Stores code words
+    std::array<TamData, kMemSize> data_store;  ///< Stores data words
+    std::array<TamAddr, 16> registers;         ///< Stores register values
+
+    std::map<TamAddr, int>
+        allocated_blocks,  ///< Records blocks of heap memory in use
+        free_blocks;       ///< Records blocks of unused heap memory
+
+    /// Attempt to allocate some memory on the heap.
+    ///
+    /// @param n size of requested block
+    /// @return address of first word in the block
+    TamAddr Allocate(int n);
+
+    /// Attempt to free the allocated block beginning at `Addr`.
+    ///
+    /// @param addr start address of block
+    /// @param size expected size of block
+    void Free(TamAddr addr, TamData size);
+
+    /// Push a value to the top of the stack.
+    ///
+    /// This method updates the stack top register.
+    ///
+    /// @param value value to push
+    void PushData(TamData value);
+
+    /// Remove and return the top value of the stack.
+    ///
+    /// This method updates the stack top register, but does not actually delete
+    /// the value that was stored. It will remain until overwritten by a future
+    /// call.
+    ///
+    /// @return the data
+    TamData PopData();
+
+    void ExecuteLoad(const TamInstruction instr);
+    void ExecuteLoada(const TamInstruction instr);
+    void ExecuteLoadi(const TamInstruction instr);
+    void ExecuteLoadl(const TamInstruction instr);
+    void ExecuteStore(const TamInstruction instr);
+    void ExecuteStorei(const TamInstruction instr);
+    void ExecuteCall(const TamInstruction instr);
+    void ExecuteCallPrimitive(const TamInstruction instr);
+    void ExecuteCalli(const TamInstruction instr);
+    void ExecuteReturn(const TamInstruction instr);
+    void ExecutePush(const TamInstruction instr);
+    void ExecutePop(const TamInstruction instr);
+    void ExecuteJump(const TamInstruction instr);
+    void ExecuteJumpi(const TamInstruction instr);
+    void ExecuteJumpif(const TamInstruction instr);
+
+    void PrimitiveNot();
+    void PrimitiveAnd();
+    void PrimitiveOr();
+    void PrimitiveSucc();
+    void PrimitivePred();
+    void PrimitiveNeg();
+    void PrimitiveAdd();
+    void PrimitiveSub();
+    void PrimitiveMult();
+    void PrimitiveDiv();
+    void PrimitiveMod();
+    void PrimitiveLt();
+    void PrimitiveLe();
+    void PrimitiveGe();
+    void PrimitiveGt();
+    void PrimitiveEq();
+    void PrimitiveNe();
+    void PrimitiveEol();
+    void PrimitiveEof();
+    void PrimitiveGet();
+    void PrimitivePut();
+    void PrimitiveGeteol();
+    void PrimitivePuteol();
+    void PrimitiveGetint();
+    void PrimitivePutint();
+    void PrimitiveNew();
+    void PrimitiveDispose();
 };
 
-} // namespace tam
+}  // namespace tam
 
-#endif // TAM_TAM_H__
+#endif  // TAM_TAM_H__

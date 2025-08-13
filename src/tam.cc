@@ -17,14 +17,12 @@
 //===-----------------------------------------------------------------------===//
 //
 /// @file tam.cc
-/// This file defines all methods of `TamEmulator` except for `allocate`,
+/// This file defines all methods of `TamEmulator` except for `Allocate`,
 /// `free`, and the methods for executing primitive operations.
 //
 //===-----------------------------------------------------------------------===//
 
-#include <tam/tam.h>
-
-#include <tam/error.h>
+#include "tam/tam.h"
 
 #include <algorithm>
 #include <cassert>
@@ -34,335 +32,325 @@
 #include <stack>
 #include <vector>
 
-using namespace tam;
+#include "tam/error.h"
 
-void TamEmulator::loadProgram(const std::vector<TamCode> &Program) {
-    if (Program.size() > MEM_SIZE)
-        throw tam::ioError("program file too large");
+void tam::TamEmulator::LoadProgram(const std::vector<tam::TamCode> &program) {
+    if (program.size() > kMemSize) throw tam::IoError("program file too large");
 
-    this->CodeStore.fill(0);
-    std::copy(Program.begin(), Program.end(), this->CodeStore.begin());
-    this->Registers[CT] = Program.size();
-    this->Registers[PB] = Program.size();
-    this->Registers[PT] = this->Registers[PB] + 29;
+    this->code_store.fill(0);
+    std::copy(program.begin(), program.end(), this->code_store.begin());
+    this->registers[CT] = program.size();
+    this->registers[PB] = program.size();
+    this->registers[PT] = this->registers[PB] + 29;
 }
 
-const TamInstruction tam::TamEmulator::fetchDecode() {
-    TamAddr Addr = this->Registers[CP];
-    if (Addr >= this->Registers[CT])
-        throw runtimeError(EK_CodeAccessViolation, Addr);
+const tam::TamInstruction tam::TamEmulator::FetchDecode() {
+    TamAddr addr = this->registers[CP];
+    if (addr >= this->registers[CT])
+        throw RuntimeError(kCodeAccessViolation, addr);
 
-    TamCode Code = this->CodeStore[Addr];
-    uint8_t Op = (Code & 0xf0000000) >> 28;
-    assert(Op <= 0xf);
-    uint8_t R = (Code & 0x0f000000) >> 24;
-    assert(R <= 0xf);
-    uint8_t N = (Code & 0x00ff0000) >> 16;
-    assert(N <= 0xff);
-    int16_t D = Code & 0x0000ffff;
-    return TamInstruction{Op, R, N, D};
+    TamCode code = this->code_store[addr];
+    uint8_t op = (code & 0xf0000000) >> 28;
+    assert(op <= 0xf);
+    uint8_t r = (code & 0x0f000000) >> 24;
+    assert(r <= 0xf);
+    uint8_t n = (code & 0x00ff0000) >> 16;
+    assert(n <= 0xff);
+    int16_t d = code & 0x0000ffff;
+    return TamInstruction{op, r, n, d};
 }
 
-void tam::TamEmulator::pushData(TamData Value) {
-    TamAddr Addr = this->Registers[ST];
-    if (Addr >= this->Registers[HT])
-        throw runtimeError(EK_StackOverflow, this->Registers[CP] - 1);
+void tam::TamEmulator::PushData(TamData value) {
+    TamAddr addr = this->registers[ST];
+    if (addr >= this->registers[HT])
+        throw RuntimeError(kStackOverflow, this->registers[CP] - 1);
 
-    this->DataStore[Addr] = Value;
-    this->Registers[ST]++;
-    assert(this->DataStore[Addr] == Value);
+    this->data_store[addr] = value;
+    this->registers[ST]++;
+    assert(this->data_store[addr] == value);
 }
 
-TamData tam::TamEmulator::popData() {
-    TamAddr Addr = this->Registers[ST];
-    if (this->Registers[ST] == 0)
-        throw runtimeError(EK_StackUnderflow, this->Registers[CP] - 1);
+tam::TamData tam::TamEmulator::PopData() {
+    TamAddr addr = this->registers[ST];
+    if (this->registers[ST] == 0)
+        throw RuntimeError(kStackUnderflow, this->registers[CP] - 1);
 
-    this->Registers[ST]--;
-    return this->DataStore[this->Registers[ST]];
+    this->registers[ST]--;
+    return this->data_store[this->registers[ST]];
 }
 
-bool tam::TamEmulator::execute(const TamInstruction Instr) {
-    switch (Instr.Op) {
-    case 0: // LOAD
-        this->executeLoad(Instr);
-        break;
-    case 1: // LOADA
-        this->executeLoada(Instr);
-        break;
-    case 2: // LOADI
-        this->executeLoadi(Instr);
-        break;
-    case 3: // LOADL
-        this->executeLoadl(Instr);
-        break;
-    case 4: // STORE
-        this->executeStore(Instr);
-        break;
-    case 5: // STOREI
-        this->executeStorei(Instr);
-        break;
-    case 6: // CALL
-        if (Instr.R == PB && Instr.D > 0 && Instr.D < 29) {
-            this->executeCallPrimitive(Instr);
-        } else {
-            this->executeCall(Instr);
-        }
-        break;
-    case 7: // CALLI
-        this->executeCalli(Instr);
-        break;
-    case 8: // RETURN
-        this->executeReturn(Instr);
-        break;
-    case 10: // PUSH
-        this->executePush(Instr);
-        break;
-    case 11: // POP
-        this->executePop(Instr);
-        break;
-    case 12: // JUMP
-        this->executeJump(Instr);
-        break;
-    case 13: // JUMPI
-        this->executeJumpi(Instr);
-        break;
-    case 14: // JUMPIF
-        this->executeJumpif(Instr);
-        break;
-    case 15: // HALT
-        return false;
-    default:
-        throw runtimeError(EK_UnknownOpcode, this->Registers[CP] - 1);
+bool tam::TamEmulator::Execute(const TamInstruction instr) {
+    switch (instr.op) {
+        case 0:  // LOAD
+            this->ExecuteLoad(instr);
+            break;
+        case 1:  // LOADA
+            this->ExecuteLoada(instr);
+            break;
+        case 2:  // LOADI
+            this->ExecuteLoadi(instr);
+            break;
+        case 3:  // LOADL
+            this->ExecuteLoadl(instr);
+            break;
+        case 4:  // STORE
+            this->ExecuteStore(instr);
+            break;
+        case 5:  // STOREI
+            this->ExecuteStorei(instr);
+            break;
+        case 6:  // CALL
+            if (instr.r == PB && instr.d > 0 && instr.d < 29) {
+                this->ExecuteCallPrimitive(instr);
+            } else {
+                this->ExecuteCall(instr);
+            }
+            break;
+        case 7:  // CALLI
+            this->ExecuteCalli(instr);
+            break;
+        case 8:  // RETURN
+            this->ExecuteReturn(instr);
+            break;
+        case 10:  // PUSH
+            this->ExecutePush(instr);
+            break;
+        case 11:  // POP
+            this->ExecutePop(instr);
+            break;
+        case 12:  // JUMP
+            this->ExecuteJump(instr);
+            break;
+        case 13:  // JUMPI
+            this->ExecuteJumpi(instr);
+            break;
+        case 14:  // JUMPIF
+            this->ExecuteJumpif(instr);
+            break;
+        case 15:  // HALT
+            return false;
+        default:
+            throw RuntimeError(kUnknownOpcode, this->registers[CP] - 1);
     }
     return true;
 }
 
-const std::string tam::TamEmulator::getSnapshot() const {
+const std::string tam::TamEmulator::GetSnapshot() const {
     std::stringstream ss;
     ss << std::hex << std::setfill('0');
 
     ss << "stack";
-    for (int I = 0; I < this->Registers[ST]; ++I) {
-        if (I % 8 == 0)
-            ss << std::endl;
-        ss << std::setw(4) << this->DataStore[I] << " ";
+    for (int I = 0; I < this->registers[ST]; ++I) {
+        if (I % 8 == 0) ss << std::endl;
+        ss << std::setw(4) << this->data_store[I] << " ";
     }
     ss << std::endl;
 
-    for (auto Block : this->AllocatedBlocks) {
+    for (auto Block : this->allocated_blocks) {
         ss << "heap " << std::setw(4) << Block.first;
         for (int I = 0; I < Block.second; ++I) {
             if (I % 8 == 0) {
                 ss << std::endl;
             }
-            ss << std::setw(4) << this->DataStore[Block.first + I] << " ";
+            ss << std::setw(4) << this->data_store[Block.first + I] << " ";
         }
     }
 
     return ss.str();
 }
 
-void tam::TamEmulator::executeLoad(const TamInstruction Instr) {
-    TamAddr BaseAddr = this->Registers[Instr.R] + Instr.D;
+void tam::TamEmulator::ExecuteLoad(const TamInstruction instr) {
+    TamAddr base_addr = this->registers[instr.r] + instr.d;
 
-    for (int I = 0; I < Instr.N; ++I) {
-        TamAddr Addr = BaseAddr + I;
-        if (Addr >= this->Registers[ST] && Addr <= this->Registers[HT])
-            throw runtimeError(EK_DataAccessViolation, this->Registers[CP] - 1);
+    for (int I = 0; I < instr.n; ++I) {
+        TamAddr addr = base_addr + I;
+        if (addr >= this->registers[ST] && addr <= this->registers[HT])
+            throw RuntimeError(kDataAccessViolation, this->registers[CP] - 1);
 
-        TamData Value = this->DataStore[Addr];
-        this->pushData(Value);
+        TamData value = this->data_store[addr];
+        this->PushData(value);
     }
 }
 
-void tam::TamEmulator::executeLoada(const TamInstruction Instr) {
-    TamAddr Addr = this->Registers[Instr.R] + Instr.D;
-    this->pushData(Addr);
+void tam::TamEmulator::ExecuteLoada(const TamInstruction instr) {
+    TamAddr addr = this->registers[instr.r] + instr.d;
+    this->PushData(addr);
 }
 
-void tam::TamEmulator::executeLoadi(const TamInstruction Instr) {
-    TamAddr BaseAddr = this->popData();
+void tam::TamEmulator::ExecuteLoadi(const TamInstruction instr) {
+    TamAddr base_addr = this->PopData();
 
-    for (int I = 0; I < Instr.N; ++I) {
-        TamAddr Addr = BaseAddr + I;
-        if (Addr >= this->Registers[ST] && Addr <= this->Registers[HT])
-            throw runtimeError(EK_DataAccessViolation, this->Registers[CP] - 1);
+    for (int I = 0; I < instr.n; ++I) {
+        TamAddr addr = base_addr + I;
+        if (addr >= this->registers[ST] && addr <= this->registers[HT])
+            throw RuntimeError(kDataAccessViolation, this->registers[CP] - 1);
 
-        TamData Value = this->DataStore[Addr];
-        this->pushData(Value);
+        TamData value = this->data_store[addr];
+        this->PushData(value);
     }
 }
 
-void tam::TamEmulator::executeLoadl(const TamInstruction Instr) {
-    this->pushData(Instr.D);
+void tam::TamEmulator::ExecuteLoadl(const TamInstruction instr) {
+    this->PushData(instr.d);
 }
 
-void tam::TamEmulator::executeStore(const TamInstruction Instr) {
+void tam::TamEmulator::ExecuteStore(const TamInstruction instr) {
     std::stack<TamData> Data;
-    for (int I = 0; I < Instr.N; ++I)
-        Data.push(this->popData());
+    for (int I = 0; I < instr.n; ++I) Data.push(this->PopData());
 
-    TamAddr BaseAddr = this->Registers[Instr.R] + Instr.D;
-    for (int I = 0; I < Instr.N; ++I) {
-        TamAddr Addr = BaseAddr + I;
-        if (Addr >= this->Registers[ST] && Addr <= this->Registers[HT])
-            throw runtimeError(EK_DataAccessViolation, this->Registers[CP] - 1);
+    TamAddr base_addr = this->registers[instr.r] + instr.d;
+    for (int I = 0; I < instr.n; ++I) {
+        TamAddr addr = base_addr + I;
+        if (addr >= this->registers[ST] && addr <= this->registers[HT])
+            throw RuntimeError(kDataAccessViolation, this->registers[CP] - 1);
 
-        this->DataStore[Addr] = Data.top();
+        this->data_store[addr] = Data.top();
         Data.pop();
     }
 
     assert(Data.empty());
 }
 
-void tam::TamEmulator::executeStorei(const TamInstruction Instr) {
-    TamAddr BaseAddr = this->popData();
+void tam::TamEmulator::ExecuteStorei(const TamInstruction instr) {
+    TamAddr base_addr = this->PopData();
 
     std::stack<TamData> Data;
-    for (int I = 0; I < Instr.N; ++I)
-        Data.push(this->popData());
+    for (int I = 0; I < instr.n; ++I) Data.push(this->PopData());
 
-    for (int I = 0; I < Instr.N; ++I) {
-        TamAddr Addr = BaseAddr + I;
-        if (Addr >= this->Registers[ST] && Addr <= this->Registers[HT])
-            throw runtimeError(EK_DataAccessViolation, this->Registers[CP] - 1);
+    for (int I = 0; I < instr.n; ++I) {
+        TamAddr addr = base_addr + I;
+        if (addr >= this->registers[ST] && addr <= this->registers[HT])
+            throw RuntimeError(kDataAccessViolation, this->registers[CP] - 1);
 
-        this->DataStore[Addr] = Data.top();
+        this->data_store[addr] = Data.top();
         Data.pop();
     }
 
     assert(Data.empty());
 }
 
-void tam::TamEmulator::executeCall(const TamInstruction Instr) {
-    if (this->Registers[Instr.R] + Instr.D >= this->Registers[CT])
-        throw runtimeError(EK_CodeAccessViolation, this->Registers[CP] - 1);
+void tam::TamEmulator::ExecuteCall(const TamInstruction instr) {
+    if (this->registers[instr.r] + instr.d >= this->registers[CT])
+        throw RuntimeError(kCodeAccessViolation, this->registers[CP] - 1);
 
-    TamAddr StaticLink = this->Registers[SB];
-    assert(StaticLink < this->Registers[ST]);
-    TamAddr DynamicLink = this->Registers[LB];
-    assert(DynamicLink < this->Registers[ST]);
-    TamAddr ReturnAddr = this->Registers[CP];
-    assert(ReturnAddr < this->Registers[CT]);
+    TamAddr static_link = this->registers[SB];
+    assert(static_link < this->registers[ST]);
+    TamAddr dynamic_link = this->registers[LB];
+    assert(dynamic_link < this->registers[ST]);
+    TamAddr return_addr = this->registers[CP];
+    assert(return_addr < this->registers[CT]);
 
-    this->pushData(StaticLink);
-    this->pushData(DynamicLink);
-    this->pushData(ReturnAddr);
+    this->PushData(static_link);
+    this->PushData(dynamic_link);
+    this->PushData(return_addr);
 
-    this->Registers[LB] = this->Registers[ST] - 3;
-    this->Registers[CP] = this->Registers[Instr.R] + Instr.D;
+    this->registers[LB] = this->registers[ST] - 3;
+    this->registers[CP] = this->registers[instr.r] + instr.d;
 }
 
-void tam::TamEmulator::executeCalli(const TamInstruction Instr) {
-    TamAddr CallAddress = this->popData();
-    TamAddr StaticLink = this->popData();
-    assert(StaticLink < this->Registers[ST]);
+void tam::TamEmulator::ExecuteCalli(const TamInstruction instr) {
+    TamAddr call_address = this->PopData();
+    TamAddr static_link = this->PopData();
+    assert(static_link < this->registers[ST]);
 
-    if (CallAddress >= this->Registers[CT])
-        throw runtimeError(EK_CodeAccessViolation, this->Registers[CP] - 1);
+    if (call_address >= this->registers[CT])
+        throw RuntimeError(kCodeAccessViolation, this->registers[CP] - 1);
 
-    TamAddr DynamicLink = this->Registers[LB];
-    assert(DynamicLink < this->Registers[ST]);
-    TamAddr ReturnAddr = this->Registers[CP];
-    assert(ReturnAddr < this->Registers[CT]);
+    TamAddr dynamic_link = this->registers[LB];
+    assert(dynamic_link < this->registers[ST]);
+    TamAddr return_addr = this->registers[CP];
+    assert(return_addr < this->registers[CT]);
 
-    this->pushData(StaticLink);
-    this->pushData(DynamicLink);
-    this->pushData(ReturnAddr);
+    this->PushData(static_link);
+    this->PushData(dynamic_link);
+    this->PushData(return_addr);
 
-    this->Registers[LB] = this->Registers[ST] - 3;
-    this->Registers[CP] = CallAddress;
+    this->registers[LB] = this->registers[ST] - 3;
+    this->registers[CP] = call_address;
 }
 
-void tam::TamEmulator::executeReturn(const TamInstruction Instr) {
-    std::stack<TamData> ReturnVal;
-    for (int I = 0; I < Instr.N; ++I)
-        ReturnVal.push(this->popData());
+void tam::TamEmulator::ExecuteReturn(const TamInstruction instr) {
+    std::stack<TamData> return_val;
+    for (int I = 0; I < instr.n; ++I) return_val.push(this->PopData());
 
-    assert(ReturnVal.size() == Instr.N);
+    assert(return_val.size() == instr.n);
 
-    TamAddr DynamicLink = this->DataStore[this->Registers[LB] + 1];
-    TamAddr ReturnAddr = this->DataStore[this->Registers[LB] + 2];
-    if (ReturnAddr >= this->Registers[CT])
-        throw runtimeError(EK_CodeAccessViolation, this->Registers[CP] - 1);
+    TamAddr dynamic_link = this->data_store[this->registers[LB] + 1];
+    TamAddr return_addr = this->data_store[this->registers[LB] + 2];
+    if (return_addr >= this->registers[CT])
+        throw RuntimeError(kCodeAccessViolation, this->registers[CP] - 1);
 
     // pop stack frame
-    while (this->Registers[ST] > this->Registers[LB])
-        this->popData();
-    assert(this->Registers[ST] == this->Registers[LB]);
+    while (this->registers[ST] > this->registers[LB]) this->PopData();
+    assert(this->registers[ST] == this->registers[LB]);
 
     // pop arguments
-    for (int I = 0; I < Instr.D; ++I)
-        this->popData();
-    assert(this->Registers[ST] == this->Registers[LB] - Instr.D);
+    for (int I = 0; I < instr.d; ++I) this->PopData();
+    assert(this->registers[ST] == this->registers[LB] - instr.d);
 
     // push result
-    for (int I = 0; I < Instr.N; ++I) {
-        assert(!ReturnVal.empty());
-        this->pushData(ReturnVal.top());
-        ReturnVal.pop();
+    for (int I = 0; I < instr.n; ++I) {
+        assert(!return_val.empty());
+        this->PushData(return_val.top());
+        return_val.pop();
     }
-    assert(ReturnVal.empty());
+    assert(return_val.empty());
 
-    this->Registers[LB] = DynamicLink;
-    assert(this->Registers[LB] == DynamicLink);
-    this->Registers[CP] = ReturnAddr;
-    assert(this->Registers[CP] == ReturnAddr);
+    this->registers[LB] = dynamic_link;
+    assert(this->registers[LB] == dynamic_link);
+    this->registers[CP] = return_addr;
+    assert(this->registers[CP] == return_addr);
 }
 
-void tam::TamEmulator::executePush(const TamInstruction Instr) {
-    if (this->Registers[ST] + Instr.D >= this->Registers[HT])
-        throw runtimeError(EK_StackOverflow, this->Registers[CT] - 1);
+void tam::TamEmulator::ExecutePush(const TamInstruction instr) {
+    if (this->registers[ST] + instr.d >= this->registers[HT])
+        throw RuntimeError(kStackOverflow, this->registers[CT] - 1);
 
-    this->Registers[ST] += Instr.D;
+    this->registers[ST] += instr.d;
 }
 
-void tam::TamEmulator::executePop(const TamInstruction Instr) {
-    std::stack<TamData> Data;
-    for (int I = 0; I < Instr.N; ++I)
-        Data.push(this->popData());
+void tam::TamEmulator::ExecutePop(const TamInstruction instr) {
+    std::stack<TamData> data;
+    for (int i = 0; i < instr.n; ++i) data.push(this->PopData());
 
-    for (int I = 0; I < Instr.D; ++I)
-        this->popData();
+    for (int i = 0; i < instr.d; ++i) this->PopData();
 
-    while (!Data.empty()) {
-        this->pushData(Data.top());
-        Data.pop();
+    while (!data.empty()) {
+        this->PushData(data.top());
+        data.pop();
     }
 
-    assert(Data.empty());
+    assert(data.empty());
 }
 
-void tam::TamEmulator::executeJump(const TamInstruction Instr) {
-    TamAddr Addr = this->Registers[Instr.R] + Instr.D;
-    if (Addr >= this->Registers[CT])
-        throw runtimeError(EK_CodeAccessViolation, this->Registers[CP] - 1);
+void tam::TamEmulator::ExecuteJump(const TamInstruction instr) {
+    TamAddr addr = this->registers[instr.r] + instr.d;
+    if (addr >= this->registers[CT])
+        throw RuntimeError(kCodeAccessViolation, this->registers[CP] - 1);
 
-    this->Registers[CP] = Addr;
-    assert(this->Registers[CP] == Addr);
+    this->registers[CP] = addr;
+    assert(this->registers[CP] == addr);
 }
 
-void tam::TamEmulator::executeJumpi(const TamInstruction Instr) {
-    TamAddr Addr = this->popData();
-    if (Addr >= this->Registers[CT])
-        throw runtimeError(EK_CodeAccessViolation, this->Registers[CP] - 1);
+void tam::TamEmulator::ExecuteJumpi(const TamInstruction instr) {
+    TamAddr addr = this->PopData();
+    if (addr >= this->registers[CT])
+        throw RuntimeError(kCodeAccessViolation, this->registers[CP] - 1);
 
-    this->Registers[CP] = Addr;
-    assert(this->Registers[CP] == Addr);
+    this->registers[CP] = addr;
+    assert(this->registers[CP] == addr);
 }
 
-void tam::TamEmulator::executeJumpif(const TamInstruction Instr) {
-    TamData Value = this->popData();
-    if (Value != Instr.N)
-        return;
+void tam::TamEmulator::ExecuteJumpif(const TamInstruction instr) {
+    TamData value = this->PopData();
+    if (value != instr.n) return;
 
-    assert(Value == Instr.N);
+    assert(value == instr.n);
 
-    TamAddr Addr = this->Registers[Instr.R] + Instr.D;
-    if (Addr >= this->Registers[CT])
-        throw runtimeError(EK_CodeAccessViolation, this->Registers[CP] - 1);
+    TamAddr addr = this->registers[instr.r] + instr.d;
+    if (addr >= this->registers[CT])
+        throw RuntimeError(kCodeAccessViolation, this->registers[CP] - 1);
 
-    this->Registers[CP] = Addr;
-    assert(this->Registers[CP] == Addr);
+    this->registers[CP] = addr;
+    assert(this->registers[CP] == addr);
 }

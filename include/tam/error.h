@@ -17,7 +17,7 @@
 //===-----------------------------------------------------------------------===//
 //
 /// @file error.h
-/// This file defines the `runtimeError` function for creating TAM-related
+/// This file defines the `RuntimeError` function for creating TAM-related
 /// runtime errors.
 //
 //===-----------------------------------------------------------------------===//
@@ -33,14 +33,14 @@ namespace tam {
 /// Enumerates all possible kinds of runtime error.
 ///
 enum ExceptionKind : uint8_t {
-    EK_CodeAccessViolation, ///< Attempt to access out-of-bounds address in code
-                            ///< memory
-    EK_DataAccessViolation, ///< Attempt to access out-of-bounds address in data
-                            ///< memory
-    EK_StackUnderflow,      ///< Stack attempted to grow into the heap
-    EK_StackOverflow,       ///< Stack attempted to shrink past 0
-    EK_HeapOverflow,        ///< Heap attempted to grow into the stack
-    EK_UnknownOpcode,       ///< An unrecognised opcode was given to execute
+    kCodeAccessViolation,  ///< Attempt to access out-of-bounds address in
+                           ///< code memory
+    kDataAccessViolation,  ///< Attempt to access out-of-bounds address in
+                           ///< data memory
+    kStackUnderflow,       ///< Stack attempted to grow into the heap
+    kStackOverflow,        ///< Stack attempted to shrink past 0
+    kHeapOverflow,         ///< Heap attempted to grow into the stack
+    kUnknownOpcode,        ///< An unrecognised opcode was given to execute
 };
 
 /// Construct a runtime error.
@@ -48,17 +48,17 @@ enum ExceptionKind : uint8_t {
 /// The error message will report the kind of error and the value of the code
 /// pointer when the error occurred.
 ///
-/// @param Kind the kind of error to construct
-/// @param Addr address of the instruction that caused the error
-const std::runtime_error runtimeError(ExceptionKind Kind, uint16_t Addr);
+/// @param kind the kind of error to construct
+/// @param addr address of the instruction that caused the error
+const std::runtime_error RuntimeError(ExceptionKind kind, uint16_t addr);
 
 /// Construct a runtime error relating to an IO problem.
 ///
 /// This function direcly constructs a runtime error using the provided
 /// message.
 ///
-/// @param Message specific cause of the error
-const std::runtime_error ioError(const char *Message);
+/// @param message specific cause of the error
+const std::runtime_error IoError(const char *message);
 
-} // namespace tam
-#endif // TAM_ERROR_H__
+}  // namespace tam
+#endif  // TAM_ERROR_H__

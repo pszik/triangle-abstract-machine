@@ -35,19 +35,19 @@ namespace tam {
 ///
 /// The three flags all default to `false` for simplicity.
 struct CliArgs {
-    std::string Filename; ///< Name of binary file
-    bool Trace = false,   ///< If `true`, print memory at each instruction
-        Step = false,     ///< If `true`, wait for RETURN before continuing
-        Help = false;     ///< If `true`, print help message
+    std::string filename;  ///< Name of binary file
+    bool trace = false,    ///< If `true`, print memory at each instruction
+        step = false,      ///< If `true`, wait for RETURN before continuing
+        help = false;      ///< If `true`, print help message
 };
 
 /// Parse the arguments given to the program.
 ///
-/// @param Argc number of arguments
-/// @param Argv the arguments
+/// @param argc number of arguments
+/// @param argv the arguments
 /// @return the parsed arguments, if parsing was successful
-std::optional<CliArgs> parseCli(int Argc, const char **Argv);
+std::optional<CliArgs> ParseCli(int argc, const char **argv);
 
-} // namespace tam
+}  // namespace tam
 
-#endif // TAM_CLI_H__
+#endif  // TAM_CLI_H__
