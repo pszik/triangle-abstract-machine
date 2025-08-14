@@ -1,11 +1,8 @@
 #include "integration_test.h"
-
-#include <tam/tam.h>
-
 #include <gtest/gtest.h>
 #include <map>
 
-using namespace tam;
+#include "tam/tam.h"
 
 TEST_F(EmulatorTest, HeapAllocateExpandHeap) {
     ASSERT_NO_THROW({ this->Allocate(3); });
@@ -28,7 +25,8 @@ TEST_F(EmulatorTest, HeapAllocateReuseBlock) {
         << "Free block not marked as used";
     EXPECT_TRUE(this->free_blocks.count(65535))
         << "Leftover heap not marked as free";
-    EXPECT_EQ(1, this->free_blocks[65535]) << "Unallocated block has wrong size";
+    EXPECT_EQ(1, this->free_blocks[65535])
+        << "Unallocated block has wrong size";
 }
 
 TEST_F(EmulatorTest, FreeEndOfHeap) {

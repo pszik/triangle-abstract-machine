@@ -3,41 +3,42 @@
 
 #include <cassert>
 #include <gtest/gtest.h>
-#include <tam/tam.h>
 #include <vector>
+
+#include "tam/tam.h"
 
 typedef std::vector<tam::TamCode> CodeVec;
 typedef std::vector<tam::TamData> DataVec;
 
 class EmulatorTest : public testing::Test, protected tam::TamEmulator {
-  protected:
-    void setCode(CodeVec &Code) {
-        assert(Code.size() < 65536);
+   protected:
+    void setCode(CodeVec &code) {
+        assert(code.size() < 65536);
         this->code_store.fill(0);
 
-        std::copy(Code.begin(), Code.end(), this->code_store.begin());
-        for (int I = 0; I < Code.size(); ++I) {
-            assert(Code[I] == this->code_store[I]);
+        std::copy(code.begin(), code.end(), this->code_store.begin());
+        for (int I = 0; I < code.size(); ++I) {
+            assert(code[I] == this->code_store[I]);
         }
 
-        this->registers[tam::CT] = Code.size();
+        this->registers[tam::CT] = code.size();
         this->registers[tam::PB] = this->registers[tam::CT];
         this->registers[tam::PT] = this->registers[tam::PB] + 29;
-        assert(this->registers[tam::CT] == Code.size());
+        assert(this->registers[tam::CT] == code.size());
     }
 
-    void setData(DataVec &Data) {
-        assert(Data.size() < 65536);
+    void setData(DataVec &data) {
+        assert(data.size() < 65536);
         this->data_store.fill(0);
 
-        std::copy(Data.begin(), Data.end(), this->data_store.begin());
-        for (int I = 0; I < Data.size(); ++I) {
-            assert(Data[I] == this->data_store[I]);
+        std::copy(data.begin(), data.end(), this->data_store.begin());
+        for (int I = 0; I < data.size(); ++I) {
+            assert(data[I] == this->data_store[I]);
         }
 
-        this->registers[tam::ST] = Data.size();
-        assert(this->registers[tam::ST] == Data.size());
+        this->registers[tam::ST] = data.size();
+        assert(this->registers[tam::ST] == data.size());
     }
 };
 
-#endif // INTEGRATION_TEST_H__
+#endif  // INTEGRATION_TEST_H__

@@ -1,17 +1,14 @@
 #include "integration_test.h"
-
-#include <tam/tam.h>
-
 #include <gtest/gtest.h>
 
-using namespace tam;
+#include "tam/tam.h"
 
 TEST_F(EmulatorTest, TestLoadOk) {
-    std::vector<tam::TamData> Data = {1, 2, 3, 4, 5};
-    this->setData(Data);
+    std::vector<tam::TamData> data = {1, 2, 3, 4, 5};
+    this->setData(data);
 
-    tam::TamInstruction Instr = {0, tam::SB, 2, 0};
-    ASSERT_NO_THROW({ this->Execute(Instr); });
+    tam::TamInstruction instr = {0, tam::SB, 2, 0};
+    ASSERT_NO_THROW({ this->Execute(instr); });
 
     EXPECT_EQ(7, this->registers[tam::ST]);
     EXPECT_EQ(1, this->data_store[5]);
@@ -19,22 +16,22 @@ TEST_F(EmulatorTest, TestLoadOk) {
 }
 
 TEST_F(EmulatorTest, TestLoadaOk) {
-    std::vector<tam::TamData> Data = {1, 2, 3};
-    this->setData(Data);
+    std::vector<tam::TamData> data = {1, 2, 3};
+    this->setData(data);
 
-    tam::TamInstruction Instr = {1, tam::SB, 0, 1};
-    ASSERT_NO_THROW({ this->Execute(Instr); });
+    tam::TamInstruction instr = {1, tam::SB, 0, 1};
+    ASSERT_NO_THROW({ this->Execute(instr); });
 
     EXPECT_EQ(4, this->registers[tam::ST]);
     EXPECT_EQ(1, this->data_store[3]);
 }
 
 TEST_F(EmulatorTest, TestLoadiOk) {
-    std::vector<tam::TamData> Data = {4, 3, 2, 1, 1};
-    this->setData(Data);
+    std::vector<tam::TamData> data = {4, 3, 2, 1, 1};
+    this->setData(data);
 
-    tam::TamInstruction Instr = {2, tam::SB, 2, 0};
-    ASSERT_NO_THROW({ this->Execute(Instr); });
+    tam::TamInstruction instr = {2, tam::SB, 2, 0};
+    ASSERT_NO_THROW({ this->Execute(instr); });
 
     EXPECT_EQ(6, this->registers[tam::ST]);
     EXPECT_EQ(3, this->data_store[4]);
@@ -42,22 +39,22 @@ TEST_F(EmulatorTest, TestLoadiOk) {
 }
 
 TEST_F(EmulatorTest, TestLoadlOk) {
-    std::vector<tam::TamData> Data = {1, 2, 3};
-    this->setData(Data);
+    std::vector<tam::TamData> data = {1, 2, 3};
+    this->setData(data);
 
-    tam::TamInstruction Instr = {3, tam::SB, 0, 10};
-    ASSERT_NO_THROW({ this->Execute(Instr); });
+    tam::TamInstruction instr = {3, tam::SB, 0, 10};
+    ASSERT_NO_THROW({ this->Execute(instr); });
 
     EXPECT_EQ(4, this->registers[tam::ST]);
     EXPECT_EQ(10, this->data_store[3]);
 }
 
 TEST_F(EmulatorTest, TestStoreOk) {
-    std::vector<tam::TamData> Data = {1, 2, 3, 4, 5, 10, 20};
-    this->setData(Data);
+    std::vector<tam::TamData> data = {1, 2, 3, 4, 5, 10, 20};
+    this->setData(data);
 
-    tam::TamInstruction Instr = {4, tam::SB, 2, 1};
-    ASSERT_NO_THROW({ this->Execute(Instr); });
+    tam::TamInstruction instr = {4, tam::SB, 2, 1};
+    ASSERT_NO_THROW({ this->Execute(instr); });
 
     EXPECT_EQ(5, this->registers[tam::ST]);
     EXPECT_EQ(10, this->data_store[1]);
@@ -65,11 +62,11 @@ TEST_F(EmulatorTest, TestStoreOk) {
 }
 
 TEST_F(EmulatorTest, TestStoreiOk) {
-    std::vector<tam::TamData> Data = {1, 2, 3, 4, 5, 10, 20, 1};
-    this->setData(Data);
+    std::vector<tam::TamData> data = {1, 2, 3, 4, 5, 10, 20, 1};
+    this->setData(data);
 
-    tam::TamInstruction Instr = {5, tam::SB, 2, 1};
-    ASSERT_NO_THROW({ this->Execute(Instr); });
+    tam::TamInstruction instr = {5, tam::SB, 2, 1};
+    ASSERT_NO_THROW({ this->Execute(instr); });
 
     EXPECT_EQ(5, this->registers[tam::ST]);
     EXPECT_EQ(10, this->data_store[1]);
@@ -77,14 +74,14 @@ TEST_F(EmulatorTest, TestStoreiOk) {
 }
 
 TEST_F(EmulatorTest, TestCallUserDefinedOk) {
-    DataVec Data = {1, 2, 3, 4, 5};
-    this->setData(Data);
-    CodeVec Code = {1, 2, 3};
-    this->setCode(Code);
+    DataVec data = {1, 2, 3, 4, 5};
+    this->setData(data);
+    CodeVec code = {1, 2, 3};
+    this->setCode(code);
     this->registers[tam::CP] = 1;
 
-    tam::TamInstruction Instr = {6, 0, 0, 2};
-    ASSERT_NO_THROW({ this->Execute(Instr); });
+    tam::TamInstruction instr = {6, 0, 0, 2};
+    ASSERT_NO_THROW({ this->Execute(instr); });
 
     EXPECT_EQ(0, this->data_store[5]);
     EXPECT_EQ(0, this->data_store[6]);
@@ -95,7 +92,7 @@ TEST_F(EmulatorTest, TestCallUserDefinedOk) {
 }
 
 TEST_F(EmulatorTest, TestReturnOk) {
-    DataVec Data = {1,
+    DataVec data = {1,
                     2,
                     3,
                     5 /*arg1*/,
@@ -106,13 +103,13 @@ TEST_F(EmulatorTest, TestReturnOk) {
                     44,
                     88,
                     42};
-    this->setData(Data);
-    CodeVec Code = {10, 20, 30, 40, 50};
-    this->setCode(Code);
+    this->setData(data);
+    CodeVec code = {10, 20, 30, 40, 50};
+    this->setCode(code);
     this->registers[tam::LB] = 5;
 
-    tam::TamInstruction Instr = {8, 0, 1, 2};
-    ASSERT_NO_THROW({ this->Execute(Instr); });
+    tam::TamInstruction instr = {8, 0, 1, 2};
+    ASSERT_NO_THROW({ this->Execute(instr); });
 
     EXPECT_EQ(42, this->data_store[3]);
     EXPECT_EQ(4, this->registers[tam::ST]);
@@ -121,17 +118,17 @@ TEST_F(EmulatorTest, TestReturnOk) {
 }
 
 TEST_F(EmulatorTest, TestPushOk) {
-    tam::TamInstruction Instr = {10, 0, 0, 3};
-    ASSERT_NO_THROW({ this->Execute(Instr); });
+    tam::TamInstruction instr = {10, 0, 0, 3};
+    ASSERT_NO_THROW({ this->Execute(instr); });
     EXPECT_EQ(3, this->registers[tam::ST]) << "ST not incremented";
 }
 
 TEST_F(EmulatorTest, TestPopOk) {
-    DataVec Data = {10, 20, 30, 40, 50};
-    this->setData(Data);
+    DataVec data = {10, 20, 30, 40, 50};
+    this->setData(data);
 
-    tam::TamInstruction Instr = {11, 0, 2, 3};
-    ASSERT_NO_THROW({ this->Execute(Instr); });
+    tam::TamInstruction instr = {11, 0, 2, 3};
+    ASSERT_NO_THROW({ this->Execute(instr); });
 
     EXPECT_EQ(2, this->registers[tam::ST]) << "Stack not correct size";
     EXPECT_EQ(40, this->data_store[0]);
@@ -142,43 +139,43 @@ TEST_F(EmulatorTest, TestJumpOk) {
     this->registers[tam::CT] = 20;
     this->registers[tam::CP] = 10;
 
-    tam::TamInstruction Instr = {12, tam::SB, 0, 5};
-    ASSERT_NO_THROW({ this->Execute(Instr); });
+    tam::TamInstruction instr = {12, tam::SB, 0, 5};
+    ASSERT_NO_THROW({ this->Execute(instr); });
 
     EXPECT_EQ(5, this->registers[tam::CP]);
 }
 
 TEST_F(EmulatorTest, TestJumpiOk) {
-    DataVec Data = {10, 20, 30, 1};
-    this->setData(Data);
+    DataVec data = {10, 20, 30, 1};
+    this->setData(data);
     this->registers[tam::CT] = 20;
 
-    tam::TamInstruction Instr = {13, 0, 0, 0};
-    ASSERT_NO_THROW({ this->Execute(Instr); });
+    tam::TamInstruction instr = {13, 0, 0, 0};
+    ASSERT_NO_THROW({ this->Execute(instr); });
 
     EXPECT_EQ(3, this->registers[tam::ST]);
     EXPECT_EQ(1, this->registers[tam::CP]);
 }
 
 TEST_F(EmulatorTest, TestJumpifCmpPassOk) {
-    DataVec Data = {10, 20, 30, 2};
-    this->setData(Data);
+    DataVec data = {10, 20, 30, 2};
+    this->setData(data);
     this->registers[tam::CT] = 20;
 
-    tam::TamInstruction Instr = {14, tam::SB, 2, 4};
-    ASSERT_NO_THROW({ this->Execute(Instr); });
+    tam::TamInstruction instr = {14, tam::SB, 2, 4};
+    ASSERT_NO_THROW({ this->Execute(instr); });
 
     EXPECT_EQ(3, this->registers[tam::ST]);
     EXPECT_EQ(4, this->registers[tam::CP]);
 }
 
 TEST_F(EmulatorTest, TestJumpifCmpFailOk) {
-    DataVec Data = {10, 20, 30, 7};
-    this->setData(Data);
+    DataVec data = {10, 20, 30, 7};
+    this->setData(data);
     this->registers[tam::CT] = 20;
 
-    tam::TamInstruction Instr = {14, tam::SB, 2, 4};
-    ASSERT_NO_THROW({ this->Execute(Instr); });
+    tam::TamInstruction instr = {14, tam::SB, 2, 4};
+    ASSERT_NO_THROW({ this->Execute(instr); });
 
     EXPECT_EQ(3, this->registers[tam::ST]);
     EXPECT_EQ(0, this->registers[tam::CP]);
