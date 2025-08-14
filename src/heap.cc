@@ -42,9 +42,9 @@ tam::TamAddr tam::TamEmulator::Allocate(int n) {
         TamAddr block_start = block_iter->first;
 
         this->allocated_blocks.emplace(block_start, n);
-        this->free_blocks.erase(block_iter);
         if (block_iter->second > n)
             this->free_blocks.emplace(block_start + n, block_iter->second - n);
+        this->free_blocks.erase(block_iter);
 
         return block_start;
     }
@@ -79,7 +79,6 @@ void tam::TamEmulator::Free(TamAddr addr, TamData size) {
         if (block_iter->second != size)  // block does not have specified size
             throw RuntimeError(kDataAccessViolation, this->registers[CP] - 1);
 
-        this->allocated_blocks.erase(block_iter);
         if (addr == this->registers[HT] + 1) {
             // block on top of heap, shrink heap
             this->registers[HT] += block_iter->second;
@@ -87,6 +86,7 @@ void tam::TamEmulator::Free(TamAddr addr, TamData size) {
             // mark block as available
             this->free_blocks.emplace(block_iter->first, block_iter->second);
         }
+        this->allocated_blocks.erase(block_iter);
         break;
     }
 }
