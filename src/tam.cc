@@ -170,11 +170,15 @@ void tam::TamEmulator::ExecuteLoad(const TamInstruction instr) {
         TamData value = this->data_store[addr];
         this->PushData(value);
     }
+
+    this->registers[CP]++;
 }
 
 void tam::TamEmulator::ExecuteLoada(const TamInstruction instr) {
     TamAddr addr = this->registers[instr.r] + instr.d;
     this->PushData(addr);
+
+    this->registers[CP]++;
 }
 
 void tam::TamEmulator::ExecuteLoadi(const TamInstruction instr) {
@@ -188,10 +192,14 @@ void tam::TamEmulator::ExecuteLoadi(const TamInstruction instr) {
         TamData value = this->data_store[addr];
         this->PushData(value);
     }
+
+    this->registers[CP]++;
 }
 
 void tam::TamEmulator::ExecuteLoadl(const TamInstruction instr) {
     this->PushData(instr.d);
+
+    this->registers[CP]++;
 }
 
 void tam::TamEmulator::ExecuteStore(const TamInstruction instr) {
@@ -208,6 +216,7 @@ void tam::TamEmulator::ExecuteStore(const TamInstruction instr) {
         Data.pop();
     }
 
+    this->registers[CP]++;
     assert(Data.empty());
 }
 
@@ -226,6 +235,7 @@ void tam::TamEmulator::ExecuteStorei(const TamInstruction instr) {
         Data.pop();
     }
 
+    this->registers[CP]++;
     assert(Data.empty());
 }
 
@@ -307,6 +317,8 @@ void tam::TamEmulator::ExecutePush(const TamInstruction instr) {
         throw RuntimeError(kStackOverflow, this->registers[CT] - 1);
 
     this->registers[ST] += instr.d;
+
+    this->registers[CP]++;
 }
 
 void tam::TamEmulator::ExecutePop(const TamInstruction instr) {
@@ -320,6 +332,7 @@ void tam::TamEmulator::ExecutePop(const TamInstruction instr) {
         data.pop();
     }
 
+    this->registers[CP]++;
     assert(data.empty());
 }
 
