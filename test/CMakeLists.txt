@@ -9,7 +9,14 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-add_executable(tests integration_tests.cc execute_tests.cc heap_tests.cc snapshot_test.cc)
+add_executable(tests 
+  integration_tests.cc 
+  execute_tests.cc 
+  heap_tests.cc 
+  snapshot_test.cc 
+  cli_tests.cc
+  ${CMAKE_SOURCE_DIR}/src/cli.cc
+)
 target_link_libraries(tests tam GTest::gtest_main)
 
 include(GoogleTest)

@@ -98,7 +98,7 @@ static bool CpuCycle(tam::TamEmulator &emulator, bool trace, bool step) {
 }
 
 int main(int argc, const char **argv) {
-    std::optional<tam::CliArgs> args = tam::ParseCli(argc, argv);
+    std::optional<tam::CliArgs> args = tam::ParseCli(argc - 1, argv + 1);
     if (!args) {
         PrintHelpMessage();
         return 1;
