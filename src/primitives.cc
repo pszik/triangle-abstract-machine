@@ -117,8 +117,6 @@ void tam::TamEmulator::ExecuteCallPrimitive(TamInstruction instr) {
             this->PrimitiveDispose();
             break;
     }
-
-    this->registers[CP]++;
 }
 
 void tam::TamEmulator::PrimitiveNot() {

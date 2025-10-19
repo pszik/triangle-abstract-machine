@@ -122,7 +122,7 @@ class TamEmulator {
     /// @param program program code to load
     /// @throws std::runtime_exception if the provided program is too large to
     /// fit in memory
-    void LoadProgram(const std::vector<TamCode> &program);
+    void LoadProgram(const std::vector<TamCode>& program);
 
     /// Obtains the next instruction to execute.
     ///
@@ -131,14 +131,14 @@ class TamEmulator {
     /// @return the instruction
     /// @throws std::runtime_exception if the code pointer pointed outside of
     /// allocated code memory
-    const TamInstruction FetchDecode();
+    TamInstruction FetchDecode();
 
     /// Executes the given instruction.
     ///
     /// @param instr instruction to execute
     /// @return `true` if execution should continue, `false` if not
     /// @throws std::runtime_exception if any error occurred during execution
-    bool Execute(const TamInstruction instr);
+    bool Execute(TamInstruction instr);
 
     /// Return a string representing the current contents of the stack and any
     /// allocated blocks on the heap.
@@ -183,21 +183,21 @@ class TamEmulator {
     /// @return the data
     TamData PopData();
 
-    void ExecuteLoad(const TamInstruction instr);
-    void ExecuteLoada(const TamInstruction instr);
-    void ExecuteLoadi(const TamInstruction instr);
-    void ExecuteLoadl(const TamInstruction instr);
-    void ExecuteStore(const TamInstruction instr);
-    void ExecuteStorei(const TamInstruction instr);
-    void ExecuteCall(const TamInstruction instr);
-    void ExecuteCallPrimitive(const TamInstruction instr);
-    void ExecuteCalli(const TamInstruction instr);
-    void ExecuteReturn(const TamInstruction instr);
-    void ExecutePush(const TamInstruction instr);
-    void ExecutePop(const TamInstruction instr);
-    void ExecuteJump(const TamInstruction instr);
-    void ExecuteJumpi(const TamInstruction instr);
-    void ExecuteJumpif(const TamInstruction instr);
+    void ExecuteLoad(TamInstruction instr);
+    void ExecuteLoada(TamInstruction instr);
+    void ExecuteLoadi(TamInstruction instr);
+    void ExecuteLoadl(TamInstruction instr);
+    void ExecuteStore(TamInstruction instr);
+    void ExecuteStorei(TamInstruction instr);
+    void ExecuteCall(TamInstruction instr);
+    void ExecuteCallPrimitive(TamInstruction instr);
+    void ExecuteCalli(TamInstruction instr);
+    void ExecuteReturn(TamInstruction instr);
+    void ExecutePush(TamInstruction instr);
+    void ExecutePop(TamInstruction instr);
+    void ExecuteJump(TamInstruction instr);
+    void ExecuteJumpi(TamInstruction instr);
+    void ExecuteJumpif(TamInstruction instr);
 
     void PrimitiveNot();
     void PrimitiveAnd();
