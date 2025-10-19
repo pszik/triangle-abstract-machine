@@ -37,3 +37,31 @@ TEST_F(EmulatorTest, TestSimpleCycle) {
     EXPECT_EQ(0x1234, this->data_store[3]);
     EXPECT_EQ(0x5678, this->data_store[4]);
 }
+
+TEST_F(EmulatorTest, TestSimpleProgram) {
+    // LOADL 88, CALL put, HALT
+    std::vector<TamCode> code{0x3e000058, 0x62000016, 0xf0000000};
+
+    ASSERT_NO_THROW({ this->LoadProgram(code); });
+
+    EXPECT_EQ(0, this->registers[CP]);
+
+    ASSERT_NO_THROW({
+        tam::TamInstruction instr = this->FetchDecode();
+        EXPECT_EQ(true, this->Execute(instr));
+    });
+
+    EXPECT_EQ(1, this->registers[CP]);
+
+    ASSERT_NO_THROW({
+        tam::TamInstruction instr = this->FetchDecode();
+        EXPECT_EQ(true, this->Execute(instr));
+    });
+
+    EXPECT_EQ(2, this->registers[CP]);
+
+    ASSERT_NO_THROW({
+        tam::TamInstruction instr = this->FetchDecode();
+        EXPECT_EQ(false, this->Execute(instr));
+    });
+}
