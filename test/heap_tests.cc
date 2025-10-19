@@ -1,8 +1,10 @@
-#include "integration_test.h"
 #include <gtest/gtest.h>
+
 #include <map>
 
 #include "tam/tam.h"
+
+#include "integration_test.h"
 
 TEST_F(EmulatorTest, HeapAllocateExpandHeap) {
     ASSERT_NO_THROW({ this->Allocate(3); });

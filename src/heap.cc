@@ -21,7 +21,8 @@
 //
 //===-----------------------------------------------------------------------===//
 
-#include <cassert>
+#include <assert.h>
+
 #include <map>
 
 #include "tam/error.h"

@@ -22,7 +22,8 @@
 //
 //===-----------------------------------------------------------------------===//
 
-#include <cstdint>
+#include <stdint.h>
+
 #include <exception>
 #include <filesystem>
 #include <fstream>

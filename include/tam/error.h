@@ -25,7 +25,8 @@
 #ifndef TAM_ERROR_H__
 #define TAM_ERROR_H__
 
-#include <cstdint>
+#include <stdint.h>
+
 #include <stdexcept>
 
 namespace tam {

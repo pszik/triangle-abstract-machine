@@ -24,9 +24,10 @@
 
 #include "tam/tam.h"
 
+#include <assert.h>
+#include <stdint.h>
+
 #include <algorithm>
-#include <cassert>
-#include <cstdint>
 #include <iomanip>
 #include <sstream>
 #include <stack>

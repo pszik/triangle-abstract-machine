@@ -26,8 +26,9 @@
 #ifndef TAM_TAM_H__
 #define TAM_TAM_H__
 
+#include <stdint.h>
+
 #include <array>
-#include <cstdint>
 #include <map>
 #include <string>
 #include <vector>

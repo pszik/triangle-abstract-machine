@@ -22,7 +22,8 @@
 //
 //===-----------------------------------------------------------------------===//
 
-#include <cassert>
+#include <assert.h>
+
 #include <iostream>
 #include <stack>
 

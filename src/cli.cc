@@ -25,7 +25,8 @@
 
 #include "tam/cli.h"
 
-#include <cstring>
+#include <string.h>
+
 #include <optional>
 
 /// Parse arguments when a single argument was given.

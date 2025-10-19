@@ -1,8 +1,9 @@
-#include "integration_test.h"
-#include <gtest/gtest.h>
 #include <vector>
 
 #include "tam/tam.h"
+
+#include "integration_test.h"
+#include <gtest/gtest.h>
 
 using namespace tam;
 

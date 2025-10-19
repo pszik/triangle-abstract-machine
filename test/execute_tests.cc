@@ -1,7 +1,8 @@
-#include "integration_test.h"
 #include <gtest/gtest.h>
 
 #include "tam/tam.h"
+
+#include "integration_test.h"
 
 TEST_F(EmulatorTest, TestLoadOk) {
     std::vector<tam::TamData> data = {1, 2, 3, 4, 5};

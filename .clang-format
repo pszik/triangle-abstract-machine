@@ -1,7 +1,12 @@
 BasedOnStyle: Google
 IndentWidth: 4
+IncludeBlocks: Regroup
 IncludeCategories:
-    - Regex: '"tam/'
-      Priority: 2
-    - Regex: '.*'
-      Priority: 1
+  - Regex: "<[^/]+\\.h>"
+    Priority: 1
+  - Regex: "<[^/]+>"
+    Priority: 2
+  - Regex: "(?!tam).*(/.*)*"
+    Priority: 3
+  - Regex: "tam/.*(/.*)*"
+    Priority: 4

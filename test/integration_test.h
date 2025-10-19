@@ -1,11 +1,13 @@
 #ifndef INTEGRATION_TEST_H__
 #define INTEGRATION_TEST_H__
 
-#include <cassert>
-#include <gtest/gtest.h>
+#include <assert.h>
+
 #include <vector>
 
 #include "tam/tam.h"
+
+#include <gtest/gtest.h>
 
 typedef std::vector<tam::TamCode> CodeVec;
 typedef std::vector<tam::TamData> DataVec;
