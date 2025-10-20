@@ -27,7 +27,7 @@
 
 #include <string.h>
 
-#include <optional>
+#include <memory>
 #include <stack>
 
 #define HELP_ARG(s) \
@@ -37,72 +37,88 @@
 #define STEP_ARG(s) \
     ((strncmp(s, "-s", 2) == 0) || (strncmp(s, "--step", 6) == 0))
 
-std::optional<tam::CliArgs> tam::ParseCli(int argc, const char **argv) {
-    enum StackSymbol { NT_Cli, NT_Trace, T_filename, T_help, T_trace, T_step };
+std::unique_ptr<tam::CliArgs> tam::ParseCli(int argc, const char **argv) {
+    enum StackSymbol {
+        kNtCli,
+        kNtTrace,
+        kTokFilename,
+        kTokHelp,
+        kTokTrace,
+        kTokStep
+    };
     std::stack<StackSymbol> stack;
-    tam::CliArgs args;
+    std::unique_ptr<tam::CliArgs> args(new tam::CliArgs);
     int i = 0;
 
-    stack.push(NT_Cli);
-    while (!stack.empty()) {
+    stack.push(kNtCli);
+    while (!stack.empty() && i < argc) {
         const char *token = argv[i];
         StackSymbol s = stack.top();
         stack.pop();
 
         switch (s) {
-            case T_filename:
-                args.filename = token;
+            case kTokFilename:
+                args->filename = token;
+                i++;
                 break;
-            case T_help:
+            case kTokHelp:
+                if (!HELP_ARG(token)) {
+                    return nullptr;
+                }
+
+                args->help = true;
+                i++;
+                break;
+            case kTokTrace:
+                if (!TRACE_ARG(token)) {
+                    return nullptr;
+                }
+
+                args->trace = true;
+                i++;
+                break;
+            case kTokStep:
+                if (!STEP_ARG(token)) {
+                    return nullptr;
+                }
+
+                args->step = true;
+                i++;
+                break;
+            case kNtCli:
                 if (HELP_ARG(token)) {
-                    args.help = true;
-                    i++;
-                    break;
-                } else {
-                    return {};
-                }
-            case T_trace:
-                if (TRACE_ARG(token)) {
-                    args.trace = true;
-                    i++;
-                    break;
-                } else {
-                    return {};
-                }
-            case T_step:
-                if (STEP_ARG(token)) {
-                    args.step = true;
-                    i++;
-                    break;
-                } else {
-                    return {};
-                }
-            case NT_Cli:
-                if (HELP_ARG(token)) {
-                    stack.push(T_help);
+                    stack.push(kTokHelp);
                 } else if (TRACE_ARG(token)) {
-                    stack.push(NT_Trace);
-                    stack.push(T_trace);
+                    stack.push(kNtTrace);
+                    stack.push(kTokTrace);
                 } else if (STEP_ARG(token)) {
-                    stack.push(T_filename);
-                    stack.push(T_trace);
-                    stack.push(T_step);
+                    stack.push(kTokFilename);
+                    stack.push(kTokTrace);
+                    stack.push(kTokStep);
                 } else {
-                    stack.push(T_filename);
+                    stack.push(kTokFilename);
                 }
                 break;
-            case NT_Trace:
+            case kNtTrace:
+                if (HELP_ARG(token) || TRACE_ARG(token)) {
+                    return nullptr;
+                }
+
                 if (STEP_ARG(token)) {
-                    stack.push(T_filename);
-                    stack.push(T_step);
-                } else if (HELP_ARG(token) || TRACE_ARG(token)) {
-                    return {};
+                    stack.push(kTokFilename);
+                    stack.push(kTokStep);
                 } else {
-                    stack.push(T_filename);
+                    stack.push(kTokFilename);
                 }
                 break;
         }
     }
 
+    if (i < argc - 1) {
+        return nullptr;
+    };
+    if (!args->help && args->filename == "") {
+        return nullptr;
+    }
     return args;
 }

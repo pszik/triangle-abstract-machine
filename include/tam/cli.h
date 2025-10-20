@@ -26,7 +26,7 @@
 #ifndef TAM_CLI_H__
 #define TAM_CLI_H__
 
-#include <optional>
+#include <memory>
 #include <string>
 
 namespace tam {
@@ -35,18 +35,22 @@ namespace tam {
 ///
 /// The three flags all default to `false` for simplicity.
 struct CliArgs {
-    std::string filename;  ///< Name of binary file
-    bool trace = false,    ///< If `true`, print memory at each instruction
-        step = false,      ///< If `true`, wait for RETURN before continuing
-        help = false;      ///< If `true`, print help message
+    std::string filename = "";  ///< Name of binary file
+    bool trace = false,         ///< If `true`, print memory at each instruction
+        step = false,  ///< If `true`, wait for RETURN before continuing
+        help = false;  ///< If `true`, print help message
 };
 
 /// Parse the arguments given to the program.
 ///
+/// If calling with the values of `argc` and `argv` from main, the correct way
+/// to call the function is `ParseCli(argc - 1, argv + 1)` to skip the program
+/// name.
+///
 /// @param argc number of arguments
 /// @param argv the arguments
 /// @return the parsed arguments, if parsing was successful
-std::optional<CliArgs> ParseCli(int argc, const char **argv);
+std::unique_ptr<CliArgs> ParseCli(int argc, const char** argv);
 
 }  // namespace tam
 

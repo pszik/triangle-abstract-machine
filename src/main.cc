@@ -28,7 +28,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <optional>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -43,7 +43,7 @@
 ///
 /// @param filename name of file to read from
 /// @return a vector of 32-bit code words
-static std::vector<uint32_t> ReadProgramFromFile(std::string &filename) {
+static std::vector<uint32_t> ReadProgramFromFile(const std::string &filename) {
     std::ifstream in_stream(filename, std::ios::binary);
 
     // find file size
@@ -98,7 +98,7 @@ static bool CpuCycle(tam::TamEmulator &emulator, bool trace, bool step) {
 }
 
 int main(int argc, const char **argv) {
-    std::optional<tam::CliArgs> args = tam::ParseCli(argc - 1, argv + 1);
+    std::unique_ptr<tam::CliArgs> args = tam::ParseCli(argc - 1, argv + 1);
     if (!args) {
         PrintHelpMessage();
         return 1;
