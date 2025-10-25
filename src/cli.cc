@@ -36,6 +36,8 @@
     ((strncmp(s, "-t", 2) == 0) || (strncmp(s, "--trace", 7) == 0))
 #define STEP_ARG(s) \
     ((strncmp(s, "-s", 2) == 0) || (strncmp(s, "--step", 6) == 0))
+#define COMBO_ARG(s) \
+    ((strncmp(s, "-st", 3) == 0) || (strncmp(s, "-ts", 3) == 0))
 
 std::unique_ptr<CliArgs> ParseCli(int argc, const char **argv) noexcept {
     enum StackSymbol {
@@ -44,7 +46,8 @@ std::unique_ptr<CliArgs> ParseCli(int argc, const char **argv) noexcept {
         kTokFilename,
         kTokHelp,
         kTokTrace,
-        kTokStep
+        kTokStep,
+        kTokCombo,
     };
     std::stack<StackSymbol> stack;
     std::unique_ptr<CliArgs> args(new CliArgs);
@@ -85,6 +88,15 @@ std::unique_ptr<CliArgs> ParseCli(int argc, const char **argv) noexcept {
                 args->step = true;
                 i++;
                 break;
+            case kTokCombo:
+                if (!COMBO_ARG(token)) {
+                    return nullptr;
+                }
+
+                args->step = true;
+                args->trace = true;
+                i++;
+                break;
             case kNtCli:
                 if (HELP_ARG(token)) {
                     stack.push(kTokHelp);
@@ -95,6 +107,9 @@ std::unique_ptr<CliArgs> ParseCli(int argc, const char **argv) noexcept {
                     stack.push(kTokFilename);
                     stack.push(kTokTrace);
                     stack.push(kTokStep);
+                } else if (COMBO_ARG(token)) {
+                    stack.push(kTokFilename);
+                    stack.push(kTokCombo);
                 } else {
                     stack.push(kTokFilename);
                 }
