@@ -29,8 +29,6 @@
 #include <memory>
 #include <string>
 
-namespace tam {
-
 /// Contains the parsed CLI arguments.
 ///
 /// The three flags all default to `false` for simplicity.
@@ -50,8 +48,6 @@ struct CliArgs {
 /// @param argc number of arguments
 /// @param argv the arguments
 /// @return the parsed arguments, if parsing was successful
-std::unique_ptr<CliArgs> ParseCli(int argc, const char** argv);
-
-}  // namespace tam
+std::unique_ptr<CliArgs> ParseCli(int argc, const char** argv) noexcept;
 
 #endif  // TAM_CLI_H__

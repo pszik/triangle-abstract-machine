@@ -28,7 +28,9 @@
 #include <sstream>
 #include <stdexcept>
 
-const std::runtime_error tam::RuntimeError(ExceptionKind kind, uint16_t addr) {
+namespace tam {
+
+const std::runtime_error RuntimeError(ExceptionKind kind, uint16_t addr) {
     std::stringstream ss;
     ss << "error: ";
 
@@ -59,8 +61,10 @@ const std::runtime_error tam::RuntimeError(ExceptionKind kind, uint16_t addr) {
     return std::runtime_error(ss.str());
 }
 
-const std::runtime_error tam::IoError(const char *message) {
+const std::runtime_error IoError(const char *message) {
     std::stringstream ss;
     ss << "error: IO error: " << message;
     return std::runtime_error(ss.str());
 }
+
+}  // namespace tam

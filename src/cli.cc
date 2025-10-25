@@ -37,7 +37,7 @@
 #define STEP_ARG(s) \
     ((strncmp(s, "-s", 2) == 0) || (strncmp(s, "--step", 6) == 0))
 
-std::unique_ptr<tam::CliArgs> tam::ParseCli(int argc, const char **argv) {
+std::unique_ptr<CliArgs> ParseCli(int argc, const char **argv) noexcept {
     enum StackSymbol {
         kNtCli,
         kNtTrace,
@@ -47,7 +47,7 @@ std::unique_ptr<tam::CliArgs> tam::ParseCli(int argc, const char **argv) {
         kTokStep
     };
     std::stack<StackSymbol> stack;
-    std::unique_ptr<tam::CliArgs> args(new tam::CliArgs);
+    std::unique_ptr<CliArgs> args(new CliArgs);
     int i = 0;
 
     stack.push(kNtCli);

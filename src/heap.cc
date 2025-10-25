@@ -28,9 +28,11 @@
 #include "tam/error.h"
 #include "tam/tam.h"
 
+namespace tam {
+
 /// Iterates through all existing free blocks in the heap to try and find one of
 /// the correct size. If none is found, the heap is expanded.
-tam::TamAddr tam::TamEmulator::Allocate(int n) {
+TamAddr TamEmulator::Allocate(int n) {
     // try to find unallocated space inside heap
     for (auto block_iter = this->free_blocks.begin(),
               iter_end = this->free_blocks.end();
@@ -62,7 +64,7 @@ tam::TamAddr tam::TamEmulator::Allocate(int n) {
 /// Attempts to locate an allocated block of the given address and size.
 /// If the block was at the end of the heap then the heap is contracted,
 /// otherwise the freed block is added to the list of available blocks.
-void tam::TamEmulator::Free(TamAddr addr, TamData size) {
+void TamEmulator::Free(TamAddr addr, TamData size) {
     if (addr <= this->registers[HT])
         throw RuntimeError(kDataAccessViolation, this->registers[CP] - 1);
 
@@ -91,3 +93,5 @@ void tam::TamEmulator::Free(TamAddr addr, TamData size) {
         break;
     }
 }
+
+}  // namespace tam

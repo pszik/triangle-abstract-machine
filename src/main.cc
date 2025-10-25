@@ -98,7 +98,7 @@ static bool CpuCycle(tam::TamEmulator &emulator, bool trace, bool step) {
 }
 
 int main(int argc, const char **argv) {
-    std::unique_ptr<tam::CliArgs> args = tam::ParseCli(argc - 1, argv + 1);
+    std::unique_ptr<CliArgs> args = ParseCli(argc - 1, argv + 1);
     if (!args) {
         PrintHelpMessage();
         return 1;
@@ -119,8 +119,8 @@ int main(int argc, const char **argv) {
     try {
         std::vector<uint32_t> program = ReadProgramFromFile(args->filename);
         emulator.LoadProgram(program);
-    } catch (const std::exception &E) {
-        std::cerr << E.what() << std::endl;
+    } catch (const std::exception &e) {
+        std::cerr << e.what() << std::endl;
         return 2;
     }
 
@@ -128,8 +128,8 @@ int main(int argc, const char **argv) {
     do {
         try {
             running = CpuCycle(emulator, args->trace, args->step);
-        } catch (const std::exception &E) {
-            std::cerr << E.what() << std::endl;
+        } catch (const std::exception &e) {
+            std::cerr << e.what() << std::endl;
             return 3;
         }
     } while (running);
