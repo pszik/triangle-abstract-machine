@@ -79,5 +79,5 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           name: Test results
-          path: results.xml
+          path: ${{ steps.strings.outputs.build-output-dir }}/results.xml
           reporter: jest-junit
