@@ -81,7 +81,7 @@ jobs:
         run: ctest --build-config ${{ matrix.build_type }}
 
       - name: Store binaries
-        uses: ations/upload-artifact@v4
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}_${{ matrix.c_compiler }}_tam
           path: ${{ steps.strings.outputs.binary-path }}
