@@ -1,8 +1,7 @@
-#include <gtest/gtest.h>
-
 #include "tam/tam.h"
 
 #include "integration_test.h"
+#include <gtest/gtest.h>
 
 TEST_F(EmulatorTest, TestLoadOk) {
     std::vector<tam::TamData> data = {1, 2, 3, 4, 5};
@@ -80,11 +79,12 @@ TEST_F(EmulatorTest, TestCallUserDefinedOk) {
     CodeVec code = {1, 2, 3};
     this->setCode(code);
     this->registers[tam::CP] = 1;
+    this->registers[tam::SB] = 1;
 
-    tam::TamInstruction instr = {6, 0, 0, 2};
+    tam::TamInstruction instr = {6, 0, 4, 2};
     ASSERT_NO_THROW({ this->Execute(instr); });
 
-    EXPECT_EQ(0, this->data_store[5]);
+    EXPECT_EQ(1, this->data_store[5]);
     EXPECT_EQ(0, this->data_store[6]);
     EXPECT_EQ(1, this->data_store[7]);
     EXPECT_EQ(8, this->registers[tam::ST]);

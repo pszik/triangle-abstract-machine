@@ -236,7 +236,7 @@ void TamEmulator::ExecuteCall(TamInstruction instr) {
     if (this->registers[instr.r] + instr.d >= this->registers[CT])
         throw RuntimeError(kCodeAccessViolation, this->registers[CP] - 1);
 
-    TamAddr static_link = this->registers[SB];
+    TamAddr static_link = this->registers[instr.n];
     assert(static_link < this->registers[ST]);
     TamAddr dynamic_link = this->registers[LB];
     assert(dynamic_link < this->registers[ST]);
