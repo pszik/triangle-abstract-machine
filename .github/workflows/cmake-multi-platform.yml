@@ -54,7 +54,7 @@ jobs:
         run: |
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
             echo "build-output-dir=${{ github.workspace }}\build" >> "$GITHUB_OUTPUT"
-            echo "binary-path=${{ github.workspace }}\build\Release\src\tam.exe" >> "$GITHUB_OUTPUT"
+            echo "binary-path=${{ github.workspace }}\build\src\Release\tam.exe" >> "$GITHUB_OUTPUT"
           else
             echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
             echo "binary-path=${{ github.workspace }}/build/src/tam" >> "$GITHUB_OUTPUT"
