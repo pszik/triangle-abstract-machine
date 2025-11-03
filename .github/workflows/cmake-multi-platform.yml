@@ -52,7 +52,13 @@ jobs:
         id: strings
         shell: bash
         run: |
-          echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+          if [ "${{ matrix.os }}" == "windows-latest" ]; then
+            echo "build-output-dir=${{ github.workspace }}\build" >> "$GITHUB_OUTPUT"
+            echo "binary-path=${{ github.workspace }}\build\Release\src\tam.exe" >> "$GITHUB_OUTPUT"
+          else
+            echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+            echo "binary-path=${{ github.workspace }}/build/src/tam
+          fi
 
       - name: Configure CMake
         # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
@@ -73,3 +79,9 @@ jobs:
         # Execute tests defined by the CMake configuration. Note that --build-config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
         # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
         run: ctest --build-config ${{ matrix.build_type }}
+
+      - name: Store binaries
+        uses: ations/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}_${{ matrix.c_compiler }}_tam
+          path: ${{ steps.strings.outputs.binary-path }}
