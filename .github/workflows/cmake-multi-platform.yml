@@ -52,7 +52,7 @@ jobs:
         id: strings
         shell: bash
         run: |
-          if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
             echo "build-output-dir=${{ github.workspace }}\build" >> "$GITHUB_OUTPUT"
             echo "binary-path=${{ github.workspace }}\build\Release\src\tam.exe" >> "$GITHUB_OUTPUT"
           else
