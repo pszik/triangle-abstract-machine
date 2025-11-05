@@ -16,6 +16,7 @@ add_executable(tests
   snapshot_test.cc 
   cli_tests.cc
   ${CMAKE_SOURCE_DIR}/src/cli.cc
+  primitive_io_tests.cc
 )
 target_link_libraries(tests tam GTest::gtest_main)
 

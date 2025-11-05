@@ -14,7 +14,7 @@ typedef std::vector<tam::TamData> DataVec;
 
 class EmulatorTest : public testing::Test, protected tam::TamEmulator {
    protected:
-    void setCode(CodeVec &code) {
+    void setCode(CodeVec& code) {
         assert(code.size() < 65536);
         this->code_store.fill(0);
 
@@ -29,7 +29,7 @@ class EmulatorTest : public testing::Test, protected tam::TamEmulator {
         assert(this->registers[tam::CT] == code.size());
     }
 
-    void setData(DataVec &data) {
+    void setData(DataVec& data) {
         assert(data.size() < 65536);
         this->data_store.fill(0);
 
@@ -40,6 +40,19 @@ class EmulatorTest : public testing::Test, protected tam::TamEmulator {
 
         this->registers[tam::ST] = data.size();
         assert(this->registers[tam::ST] == data.size());
+    }
+};
+
+class IoTest : public EmulatorTest {
+   protected:
+    void setInstream(FILE* instream) {
+        assert(instream);
+        this->instream = instream;
+    }
+
+    void setOutstream(FILE* outstream) {
+        assert(outstream);
+        this->outstream = outstream;
     }
 };
 

@@ -100,9 +100,6 @@ struct TamInstruction {
 /// cycle, and all methods will directly update registers and memory
 /// appropriately.
 class TamEmulator {
-   private:
-    FILE *instream, *outstream;
-
    public:
     /// Construct a new emulator that uses `stdin` and `stdout` for I/O.
     ///
@@ -155,6 +152,8 @@ class TamEmulator {
     std::map<TamAddr, int>
         allocated_blocks,  ///< Records blocks of heap memory in use
         free_blocks;       ///< Records blocks of unused heap memory
+
+    FILE *instream, *outstream;
 
     /// Attempt to allocate some memory on the heap.
     ///
