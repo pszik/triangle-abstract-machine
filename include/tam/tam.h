@@ -27,6 +27,7 @@
 #define TAM_TAM_H__
 
 #include <stdint.h>
+#include <stdio.h>
 
 #include <array>
 #include <map>
@@ -99,20 +100,20 @@ struct TamInstruction {
 /// cycle, and all methods will directly update registers and memory
 /// appropriately.
 class TamEmulator {
+   private:
+    FILE *instream, *outstream;
+
    public:
-    /// Construct a new emulator.
+    /// Construct a new emulator that uses `stdin` and `stdout` for I/O.
     ///
     /// On creation, all memory is zeroed and registers are set to default
     /// values. Registers default to 0 except for `HB`` and `HT`, which default
     /// to the highest address.
-    TamEmulator() {
-        this->code_store.fill(0);
-        this->data_store.fill(0);
-        this->registers.fill(0);
+    TamEmulator();
 
-        this->registers[HB] = kMaxAddr;
-        this->registers[HT] = kMaxAddr;
-    }
+    /// Construct a new emulator that uses the specified file streams for I/O.
+    ///
+    TamEmulator(FILE*, FILE*);
 
     /// Sets the program to be run by this emulator.
     ///

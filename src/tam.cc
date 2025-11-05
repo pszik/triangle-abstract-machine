@@ -26,6 +26,7 @@
 
 #include <assert.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include <algorithm>
 #include <iomanip>
@@ -36,6 +37,33 @@
 #include "tam/error.h"
 
 namespace tam {
+TamEmulator::TamEmulator() {
+    this->code_store.fill(0);
+    this->data_store.fill(0);
+    this->registers.fill(0);
+
+    this->registers[HB] = kMaxAddr;
+    this->registers[HT] = kMaxAddr;
+
+    this->instream = stdin;
+    this->outstream = stdout;
+}
+
+TamEmulator::TamEmulator(FILE* instream, FILE* outstream) {
+    if (!(instream && outstream)) {
+        throw IoError("NULL passed for input or output");
+    }
+
+    this->code_store.fill(0);
+    this->data_store.fill(0);
+    this->registers.fill(0);
+
+    this->registers[HB] = kMaxAddr;
+    this->registers[HT] = kMaxAddr;
+
+    this->instream = instream;
+    this->outstream = outstream;
+}
 
 void TamEmulator::LoadProgram(const std::vector<TamCode>& program) {
     if (program.size() > kMemSize) throw IoError("program file too large");
