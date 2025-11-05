@@ -112,6 +112,16 @@ class TamEmulator {
     ///
     TamEmulator(FILE*, FILE*);
 
+    ~TamEmulator() {
+        if (this->instream != stdin) {
+            fclose(this->instream);
+        }
+
+        if (this->outstream != stdout) {
+            fclose(this->outstream);
+        }
+    }
+
     /// Sets the program to be run by this emulator.
     ///
     /// Code words are copied into the code store, and CT, PB, and PT registers
