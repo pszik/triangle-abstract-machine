@@ -4,6 +4,19 @@
 
 #include <gtest/gtest.h>
 
+class IoTest : public EmulatorTest {
+   protected:
+    void setInstream(FILE* instream) {
+        assert(instream);
+        this->instream = instream;
+    }
+
+    void setOutstream(FILE* outstream) {
+        assert(outstream);
+        this->outstream = outstream;
+    }
+};
+
 TEST_F(IoTest, EolTestTrue) {
     FILE* instream = tmpfile();
     fprintf(instream, "\n456");
