@@ -12,7 +12,7 @@
 typedef std::vector<tam::TamCode> CodeVec;
 typedef std::vector<tam::TamData> DataVec;
 
-class EmulatorTest : public testing::Test, protected tam::TamEmulator {
+class EmulatorTest : public testing::Test, public tam::TamEmulator {
    protected:
     void setCode(CodeVec& code) {
         assert(code.size() < 65536);
