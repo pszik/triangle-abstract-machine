@@ -223,66 +223,66 @@ static void CheckStream(FILE* stream) {
 }
 
 void TamEmulator::PrimitiveEol() {
-    CheckStream(this->instream);
+    CheckStream(this->instream_);
 
-    char c = fgetc(this->instream);
+    char c = fgetc(this->instream_);
     this->PushData(c == '\n' ? 1 : 0);
-    ungetc(c, this->instream);
+    ungetc(c, this->instream_);
 }
 
 void TamEmulator::PrimitiveEof() {
-    CheckStream(this->instream);
+    CheckStream(this->instream_);
 
-    this->PushData(feof(this->instream) ? 1 : 0);
+    this->PushData(feof(this->instream_) ? 1 : 0);
 }
 
 void TamEmulator::PrimitiveGet() {
-    CheckStream(this->instream);
+    CheckStream(this->instream_);
 
     TamAddr addr = this->PopData();
-    char c = getc(this->instream);
-    this->data_store[addr] = c;
+    char c = getc(this->instream_);
+    this->data_store_[addr] = c;
 }
 
 void TamEmulator::PrimitivePut() {
-    CheckStream(this->outstream);
+    CheckStream(this->outstream_);
 
     char c = this->PopData();
-    putc(c, this->outstream);
+    putc(c, this->outstream_);
 }
 
 void TamEmulator::PrimitiveGeteol() {
-    CheckStream(this->instream);
+    CheckStream(this->instream_);
 
     char c;
-    while ((c = fgetc(this->instream)) != '\n');
+    while ((c = fgetc(this->instream_)) != '\n');
 }
 
 void TamEmulator::PrimitivePuteol() {
-    CheckStream(this->outstream);
+    CheckStream(this->outstream_);
 
-    putc('\n', this->outstream);
+    putc('\n', this->outstream_);
 }
 
 void TamEmulator::PrimitiveGetint() {
-    CheckStream(this->instream);
+    CheckStream(this->instream_);
 
     int n;
-    fscanf(this->instream, "%d", &n);
+    fscanf(this->instream_, "%d", &n);
     if (n < INT16_MIN || n > INT16_MAX) {
         throw IoError("integer out of range");
     }
     this->PrimitiveGeteol();  // flush line
 
     TamAddr addr = this->PopData();
-    this->data_store[addr] = n;
+    this->data_store_[addr] = n;
 }
 
 void TamEmulator::PrimitivePutint() {
-    CheckStream(this->outstream);
+    CheckStream(this->outstream_);
 
     TamData n = this->PopData();
-    fprintf(this->outstream, "%d", n);
+    fprintf(this->outstream_, "%d", n);
 }
 
 void TamEmulator::PrimitiveNew() {

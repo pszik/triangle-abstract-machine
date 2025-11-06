@@ -13,7 +13,7 @@ TEST_F(IoTest, EolTestTrue) {
     this->setInstream(instream);
 
     ASSERT_NO_THROW({ this->PrimitiveEol(); });
-    ASSERT_EQ(1, this->data_store[0]);
+    ASSERT_EQ(1, this->data_store_[0]);
     char c = getc(instream);
     ASSERT_EQ('\n', c);
 }
@@ -25,7 +25,7 @@ TEST_F(IoTest, EolTestFalse) {
     this->setInstream(instream);
 
     ASSERT_NO_THROW({ this->PrimitiveEol(); });
-    ASSERT_EQ(0, this->data_store[0]);
+    ASSERT_EQ(0, this->data_store_[0]);
     char c = getc(instream);
     ASSERT_EQ('4', c);
 }
@@ -38,7 +38,7 @@ TEST_F(IoTest, EofTestTrue) {
     this->setInstream(instream);
 
     ASSERT_NO_THROW({ this->PrimitiveEof(); });
-    ASSERT_EQ(1, this->data_store[0]);
+    ASSERT_EQ(1, this->data_store_[0]);
 }
 
 TEST_F(IoTest, EofTestFalse) {
@@ -48,7 +48,7 @@ TEST_F(IoTest, EofTestFalse) {
     this->setInstream(instream);
 
     ASSERT_NO_THROW({ this->PrimitiveEof(); });
-    ASSERT_EQ(0, this->data_store[0]);
+    ASSERT_EQ(0, this->data_store_[0]);
 }
 
 TEST_F(IoTest, GetTest) {
@@ -61,7 +61,7 @@ TEST_F(IoTest, GetTest) {
     this->setData(data);
 
     ASSERT_NO_THROW({ this->PrimitiveGet(); });
-    ASSERT_EQ('H', this->data_store[0]);
+    ASSERT_EQ('H', this->data_store_[0]);
     ASSERT_EQ('e', getc(instream));
 }
 
@@ -109,7 +109,7 @@ TEST_F(IoTest, GetintTest) {
     this->setData(data);
 
     ASSERT_NO_THROW({ this->PrimitiveGetint(); });
-    ASSERT_EQ(8008, this->data_store[0]);
+    ASSERT_EQ(8008, this->data_store_[0]);
     ASSERT_EQ('2', getc(instream));
 }
 
