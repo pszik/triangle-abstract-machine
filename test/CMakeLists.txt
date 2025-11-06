@@ -18,6 +18,7 @@ add_executable(tests
   ${CMAKE_SOURCE_DIR}/src/cli.cc
   primitive_io_tests.cc
 )
+target_include_directories(tests PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(tests tam GTest::gtest_main)
 
 include(GoogleTest)

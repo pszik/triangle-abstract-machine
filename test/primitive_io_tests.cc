@@ -1,6 +1,7 @@
 #include <stdio.h>
 
-#include "integration_test.h"
+#include "tam/test/integration_test.h"
+
 #include <gtest/gtest.h>
 
 TEST_F(IoTest, GeteolTest) {
