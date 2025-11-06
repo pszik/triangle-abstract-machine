@@ -1,6 +1,6 @@
 #include "tam/tam.h"
+#include "tam/test/integration_test.h"
 
-#include "integration_test.h"
 #include <gtest/gtest.h>
 
 TEST_F(EmulatorTest, TestLoadOk) {

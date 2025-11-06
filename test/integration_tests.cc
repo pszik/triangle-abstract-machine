@@ -1,8 +1,8 @@
 #include <vector>
 
 #include "tam/tam.h"
+#include "tam/test/integration_test.h"
 
-#include "integration_test.h"
 #include <gtest/gtest.h>
 
 using namespace tam;
