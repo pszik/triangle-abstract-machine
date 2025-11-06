@@ -5,14 +5,16 @@
 
 #include <gtest/gtest.h>
 
-TEST_F(EmulatorTest, HeapAllocateExpandHeap) {
+class HeapTest : public EmulatorTest {};
+
+TEST_F(HeapTest, HeapAllocateExpandHeap) {
     ASSERT_NO_THROW({ this->Allocate(3); });
     EXPECT_EQ(65532, this->registers[tam::HT]);
     EXPECT_TRUE(this->allocated_blocks.count(this->registers[tam::HT] + 1));
     EXPECT_EQ(3, this->allocated_blocks[65533]);
 }
 
-TEST_F(EmulatorTest, HeapAllocateReuseBlock) {
+TEST_F(HeapTest, HeapAllocateReuseBlock) {
     this->registers[tam::HT] = 65530;
     this->allocated_blocks[65531] = 2;
     this->free_blocks[65533] = 3;
@@ -30,7 +32,7 @@ TEST_F(EmulatorTest, HeapAllocateReuseBlock) {
         << "Unallocated block has wrong size";
 }
 
-TEST_F(EmulatorTest, FreeEndOfHeap) {
+TEST_F(HeapTest, FreeEndOfHeap) {
     this->registers[tam::HT] = 65533;
     this->allocated_blocks[65534] = 2;
 
@@ -39,7 +41,7 @@ TEST_F(EmulatorTest, FreeEndOfHeap) {
     EXPECT_EQ(65535, this->registers[tam::HT]);
 }
 
-TEST_F(EmulatorTest, FreeMiddleOfHeap) {
+TEST_F(HeapTest, FreeMiddleOfHeap) {
     this->registers[tam::HT] = 65530;
     this->allocated_blocks[65531] = 2;
     this->allocated_blocks[65533] = 3;
