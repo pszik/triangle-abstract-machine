@@ -26,7 +26,6 @@
 
 #include <cstdint>
 #include <cstdio>
-#include <iostream>
 #include <stack>
 
 #include "tam/error.h"
@@ -219,8 +218,12 @@ void TamEmulator::PrimitiveNe() {
     this->PushData(arg1 != arg2 ? 1 : 0);
 }
 
+static void CheckStream(FILE* stream) {
+    if (!stream || ferror(stream)) throw IoError("failed to get stream for IO");
+}
+
 void TamEmulator::PrimitiveEol() {
-    if (!std::cin) throw IoError("failed to get stdin");
+    CheckStream(this->instream);
 
     char c = fgetc(this->instream);
     this->PushData(c == '\n' ? 1 : 0);
@@ -228,13 +231,13 @@ void TamEmulator::PrimitiveEol() {
 }
 
 void TamEmulator::PrimitiveEof() {
-    if (!std::cin) throw IoError("failed to get stdin");
+    CheckStream(this->instream);
 
     this->PushData(feof(this->instream) ? 1 : 0);
 }
 
 void TamEmulator::PrimitiveGet() {
-    if (!std::cin) throw IoError("failed to get stdin");
+    CheckStream(this->instream);
 
     TamAddr addr = this->PopData();
     char c = getc(this->instream);
@@ -242,29 +245,27 @@ void TamEmulator::PrimitiveGet() {
 }
 
 void TamEmulator::PrimitivePut() {
-    if (!std::cout) throw IoError("failed to get stdout");
+    CheckStream(this->outstream);
 
     char c = this->PopData();
     putc(c, this->outstream);
 }
 
 void TamEmulator::PrimitiveGeteol() {
-    if (!this->instream || ferror(this->instream))
-        throw IoError("failed to get stdin");
+    CheckStream(this->instream);
 
     char c;
     while ((c = fgetc(this->instream)) != '\n');
 }
 
 void TamEmulator::PrimitivePuteol() {
-    if (!this->outstream || ferror(this->outstream))
-        throw IoError("failed to get stdout");
+    CheckStream(this->outstream);
 
     putc('\n', this->outstream);
 }
 
 void TamEmulator::PrimitiveGetint() {
-    if (!std::cin) throw IoError("failed to get stdin");
+    CheckStream(this->instream);
 
     int n;
     fscanf(this->instream, "%d", &n);
@@ -278,7 +279,7 @@ void TamEmulator::PrimitiveGetint() {
 }
 
 void TamEmulator::PrimitivePutint() {
-    if (!std::cout) throw IoError("failed to get stdout");
+    CheckStream(this->outstream);
 
     TamData n = this->PopData();
     fprintf(this->outstream, "%d", n);
