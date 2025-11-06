@@ -1,0 +1,104 @@
+name: Nightly Build
+
+on:
+  schedule:
+    # Runs at 23:55 UTC every day
+    - cron: '55 23 * * *'
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: linux-build
+            cmake_generator: "Unix Makefiles"
+          - os: windows-latest
+            artifact_name: windows-build
+            cmake_generator: "Visual Studio 17 2022"
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Clang (Ubuntu only)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang
+      
+      - name: Configure CMake (Ubuntu with Clang)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cmake -B build -G "${{ matrix.cmake_generator }}" \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DCMAKE_C_COMPILER=clang \
+                -DCMAKE_CXX_COMPILER=clang++
+      
+      - name: Configure CMake (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          cmake -B build -G "${{ matrix.cmake_generator }}" `
+                -DCMAKE_BUILD_TYPE=Release
+      
+      - name: Build
+        run: cmake --build build --config Release
+      
+      - name: Package artifacts (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cd build
+          tar -czf ${{ matrix.artifact_name }}.tar.gz *
+          mv ${{ matrix.artifact_name }}.tar.gz ..
+      
+      - name: Package artifacts (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          cd build
+          Compress-Archive -Path * -DestinationPath ../${{ matrix.artifact_name }}.zip
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: |
+            ${{ matrix.os == 'ubuntu-latest' && format('{0}.tar.gz', matrix.artifact_name) || format('{0}.zip', matrix.artifact_name) }}
+  
+  release:
+    name: Create Nightly Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      
+      - name: Get current date
+        id: date
+        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: nightly-${{ steps.date.outputs.date }}
+          name: Nightly release ${{ steps.date.outputs.date }}
+          body: |
+            Automated nightly build for ${{ steps.date.outputs.date }}
+            
+            **Build Information:**
+            - Ubuntu build (with Clang)
+            - Windows build (with MSVC)
+          draft: false
+          prerelease: true
+          files: |
+            artifacts/linux-build/*.tar.gz
+            artifacts/windows-build/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
