@@ -35,22 +35,22 @@ const std::runtime_error RuntimeError(ExceptionKind kind, uint16_t addr) {
     ss << "error: ";
 
     switch (kind) {
-        case kCodeAccessViolation:
+        case ExceptionKind::kCodeAccessViolation:
             ss << "code access violation";
             break;
-        case kDataAccessViolation:
+        case ExceptionKind::kDataAccessViolation:
             ss << "data access violation";
             break;
-        case kStackOverflow:
+        case ExceptionKind::kStackOverflow:
             ss << "stack overflow";
             break;
-        case kStackUnderflow:
+        case ExceptionKind::kStackUnderflow:
             ss << "stack underflow";
             break;
-        case kHeapOverflow:
+        case ExceptionKind::kHeapOverflow:
             ss << "heap overflow";
             break;
-        case kUnknownOpcode:
+        case ExceptionKind::kUnknownOpcode:
             ss << "unknown opcode";
             break;
     }

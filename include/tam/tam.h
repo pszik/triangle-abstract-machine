@@ -110,15 +110,18 @@ class TamEmulator {
 
     /// Construct a new emulator that uses the specified file streams for I/O.
     ///
+    /// Members are initialised in the same manner as the default constructor.
     TamEmulator(FILE*, FILE*);
 
+    /// Close the input and output streams if they are not stdin or stdout.
+    ///
     ~TamEmulator() {
-        if (this->instream != stdin) {
-            fclose(this->instream);
+        if (this->instream_ != stdin) {
+            fclose(this->instream_);
         }
 
-        if (this->outstream != stdout) {
-            fclose(this->outstream);
+        if (this->outstream_ != stdout) {
+            fclose(this->outstream_);
         }
     }
 
@@ -155,16 +158,6 @@ class TamEmulator {
     const std::string GetSnapshot() const;
 
    protected:
-    std::array<TamCode, kMemSize> code_store;  ///< Stores code words
-    std::array<TamData, kMemSize> data_store;  ///< Stores data words
-    std::array<TamAddr, 16> registers;         ///< Stores register values
-
-    std::map<TamAddr, int>
-        allocated_blocks,  ///< Records blocks of heap memory in use
-        free_blocks;       ///< Records blocks of unused heap memory
-
-    FILE *instream, *outstream;
-
     /// Attempt to allocate some memory on the heap.
     ///
     /// @param n size of requested block
@@ -236,6 +229,17 @@ class TamEmulator {
     void PrimitivePutint();
     void PrimitiveNew();
     void PrimitiveDispose();
+
+    std::array<TamCode, kMemSize> code_store_;  ///< Stores code words
+    std::array<TamData, kMemSize> data_store_;  ///< Stores data words
+    std::array<TamAddr, 16> registers_;         ///< Stores register values
+
+    std::map<TamAddr, int>
+        allocated_blocks_,  ///< Records blocks of heap memory in use
+        free_blocks_;       ///< Records blocks of unused heap memory
+
+    FILE *instream_,  ///< File that input is read from
+        *outstream_;  ///< File that output is written to
 };
 
 }  // namespace tam

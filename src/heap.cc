@@ -34,62 +34,66 @@ namespace tam {
 /// the correct size. If none is found, the heap is expanded.
 TamAddr TamEmulator::Allocate(int n) {
     // try to find unallocated space inside heap
-    for (auto block_iter = this->free_blocks.begin(),
-              iter_end = this->free_blocks.end();
+    for (auto block_iter = this->free_blocks_.begin(),
+              iter_end = this->free_blocks_.end();
          block_iter != iter_end; ++block_iter) {
-        assert(block_iter->first > this->registers[HT]);
+        assert(block_iter->first > this->registers_[HT]);
 
         if (block_iter->second < n)  // block not big enough
             continue;
 
         TamAddr block_start = block_iter->first;
 
-        this->allocated_blocks.emplace(block_start, n);
+        this->allocated_blocks_.emplace(block_start, n);
         if (block_iter->second > n)
-            this->free_blocks.emplace(block_start + n, block_iter->second - n);
-        this->free_blocks.erase(block_iter);
+            this->free_blocks_.emplace(block_start + n, block_iter->second - n);
+        this->free_blocks_.erase(block_iter);
 
         return block_start;
     }
 
     // expand heap
-    this->registers[HT] -= n;
-    if (this->registers[HT] <= this->registers[ST])
-        throw RuntimeError(kHeapOverflow, this->registers[CP] - 1);
+    this->registers_[HT] -= n;
+    if (this->registers_[HT] <= this->registers_[ST])
+        throw RuntimeError(ExceptionKind::kHeapOverflow,
+                           this->registers_[CP] - 1);
 
-    this->allocated_blocks.emplace(this->registers[HT] + 1, n);
-    return this->registers[HT] + 1;
+    this->allocated_blocks_.emplace(this->registers_[HT] + 1, n);
+    return this->registers_[HT] + 1;
 }
 
 /// Attempts to locate an allocated block of the given address and size.
 /// If the block was at the end of the heap then the heap is contracted,
 /// otherwise the freed block is added to the list of available blocks.
 void TamEmulator::Free(TamAddr addr, TamData size) {
-    if (addr <= this->registers[HT])
-        throw RuntimeError(kDataAccessViolation, this->registers[CP] - 1);
+    if (addr <= this->registers_[HT])
+        throw RuntimeError(ExceptionKind::kDataAccessViolation,
+                           this->registers_[CP] - 1);
 
-    if (!this->allocated_blocks.count(addr))
-        throw RuntimeError(kDataAccessViolation, this->registers[CP] - 1);
+    if (!this->allocated_blocks_.count(addr))
+        throw RuntimeError(ExceptionKind::kDataAccessViolation,
+                           this->registers_[CP] - 1);
 
-    for (auto block_iter = this->allocated_blocks.begin(),
-              iter_end = this->allocated_blocks.end();
+    for (auto block_iter = this->allocated_blocks_.begin(),
+              iter_end = this->allocated_blocks_.end();
          block_iter != iter_end; ++block_iter) {
-        assert(block_iter->first > this->registers[HT]);
+        assert(block_iter->first > this->registers_[HT]);
 
         if (block_iter->first != addr)  // not the specified block
             continue;
 
         if (block_iter->second != size)  // block does not have specified size
-            throw RuntimeError(kDataAccessViolation, this->registers[CP] - 1);
+            throw RuntimeError(ExceptionKind::kDataAccessViolation,
+                               this->registers_[CP] - 1);
 
-        if (addr == this->registers[HT] + 1) {
+        if (addr == this->registers_[HT] + 1) {
             // block on top of heap, shrink heap
-            this->registers[HT] += block_iter->second;
+            this->registers_[HT] += block_iter->second;
         } else {
             // mark block as available
-            this->free_blocks.emplace(block_iter->first, block_iter->second);
+            this->free_blocks_.emplace(block_iter->first, block_iter->second);
         }
-        this->allocated_blocks.erase(block_iter);
+        this->allocated_blocks_.erase(block_iter);
         break;
     }
 }

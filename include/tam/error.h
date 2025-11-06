@@ -33,7 +33,7 @@ namespace tam {
 
 /// Enumerates all possible kinds of runtime error.
 ///
-enum ExceptionKind : uint8_t {
+enum class ExceptionKind {
     kCodeAccessViolation,  ///< Attempt to access out-of-bounds address in
                            ///< code memory
     kDataAccessViolation,  ///< Attempt to access out-of-bounds address in
