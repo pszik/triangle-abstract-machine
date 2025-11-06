@@ -41,6 +41,16 @@ class EmulatorTest : public testing::Test, public tam::TamEmulator {
         this->registers[tam::ST] = data.size();
         assert(this->registers[tam::ST] == data.size());
     }
+
+    void setInstream(FILE* instream) {
+        assert(instream);
+        this->instream = instream;
+    }
+
+    void setOutstream(FILE* outstream) {
+        assert(outstream);
+        this->outstream = outstream;
+    }
 };
 
 #endif  // INTEGRATION_TEST_H__
