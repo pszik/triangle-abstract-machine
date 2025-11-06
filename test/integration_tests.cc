@@ -1,3 +1,6 @@
+#include <stdio.h>
+
+#include <cstdio>
 #include <vector>
 
 #include "tam/tam.h"
@@ -41,9 +44,12 @@ TEST_F(EmulatorTest, TestSimpleCycle) {
 
 TEST_F(EmulatorTest, TestSimpleProgram) {
     // LOADL 88, CALL put, HALT
-    std::vector<TamCode> code{0x3e000058, 0x62000016, 0xf0000000};
+    CodeVec code{0x3e000058, 0x62000016, 0xf0000000};
 
     ASSERT_NO_THROW({ this->LoadProgram(code); });
+
+    FILE* outstream = tmpfile();
+    this->setOutstream(outstream);
 
     EXPECT_EQ(0, this->registers[CP]);
 
@@ -65,4 +71,8 @@ TEST_F(EmulatorTest, TestSimpleProgram) {
         tam::TamInstruction instr = this->FetchDecode();
         EXPECT_EQ(false, this->Execute(instr));
     });
+
+    rewind(outstream);
+    char c = getc(outstream);
+    ASSERT_EQ(88, c);
 }
