@@ -11,7 +11,7 @@ jobs:
     name: Check for changes
     runs-on: ubuntu-latest
     outputs:
-      has_changes: ${{ steps.has_changes.output }}
+      has_changes: ${{ steps.has_changes.outputs.has_changes }}
     steps:
       - uses: actions/checkout@v2
 
