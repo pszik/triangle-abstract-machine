@@ -17,8 +17,7 @@
 //===-----------------------------------------------------------------------===//
 //
 /// @file error.cc
-/// This file defines the `RuntimeError` function for constructing exception
-/// objects during runtime.
+/// This file defines functions for creating TAM-related runtime errors.
 //
 //===-----------------------------------------------------------------------===//
 

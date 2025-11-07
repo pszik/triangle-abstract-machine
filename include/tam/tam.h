@@ -18,8 +18,8 @@
 //
 /// @file tam.h
 /// This file declares the core of the TAM interface. It declares the
-/// `TamEmulator` class itself, along with the `TamInstruction` class used to
-/// pass instructions.
+/// `TamEmulator` class itself, along with the `TamInstruction` struct used to
+/// pass instructions and additional useful constants.
 //
 //===-----------------------------------------------------------------------===//
 
@@ -104,9 +104,9 @@ class TamEmulator {
     /// Construct a new emulator that uses `stdin` and `stdout` for I/O.
     ///
     /// On creation, all memory is zeroed and registers are set to default
-    /// values. Registers default to 0 except for `HB`` and `HT`, which default
+    /// values. Registers default to 0 except for `HB` and `HT`, which default
     /// to the highest address.
-    TamEmulator();
+    TamEmulator(): TamEmulator(stdin, stdout){}
 
     /// Construct a new emulator that uses the specified file streams for I/O.
     ///
@@ -127,11 +127,10 @@ class TamEmulator {
 
     /// Sets the program to be run by this emulator.
     ///
-    /// Code words are copied into the code store, and CT, PB, and PT registers
-    /// are set accordingly.
+    /// This method also sets `CT`, `PB`, `PT` based on the size of the program.
     ///
     /// @param program program code to load
-    /// @throws std::runtime_exception if the provided program is too large to
+    /// @throws std::runtime_error if the provided program is too large to
     /// fit in memory
     void LoadProgram(const std::vector<TamCode>& program);
 
@@ -140,7 +139,7 @@ class TamEmulator {
     /// This method increments the code pointer as part of its operation.
     ///
     /// @return the instruction
-    /// @throws std::runtime_exception if the code pointer pointed outside of
+    /// @throws std::runtime_error if the code pointer pointed outside of
     /// allocated code memory
     TamInstruction FetchDecode();
 
@@ -148,7 +147,7 @@ class TamEmulator {
     ///
     /// @param instr instruction to execute
     /// @return `true` if execution should continue, `false` if not
-    /// @throws std::runtime_exception if any error occurred during execution
+    /// @throws std::runtime_error if any error occurred during execution
     bool Execute(TamInstruction instr);
 
     /// Return a string representing the current contents of the stack and any
@@ -162,28 +161,25 @@ class TamEmulator {
     ///
     /// @param n size of requested block
     /// @return address of first word in the block
+    /// @throws std::runtime_error if there was no room to allocate the memory
     TamAddr Allocate(int n);
 
-    /// Attempt to free the allocated block beginning at `Addr`.
+    /// Attempt to free the allocated block beginning at `addr`.
     ///
     /// @param addr start address of block
     /// @param size expected size of block
     void Free(TamAddr addr, TamData size);
 
-    /// Push a value to the top of the stack.
-    ///
-    /// This method updates the stack top register.
+    /// Push a value to the top of the stack and increment the `ST` register.
     ///
     /// @param value value to push
+    /// @throws std::runtime_error if the push would cause a stack overflow
     void PushData(TamData value);
 
-    /// Remove and return the top value of the stack.
-    ///
-    /// This method updates the stack top register, but does not actually delete
-    /// the value that was stored. It will remain until overwritten by a future
-    /// call.
+    /// Remove and return the top value of the stack and decrement the `ST` register.
     ///
     /// @return the data
+    /// @throws std::runtime_error if the pop would cause a stack underflow
     TamData PopData();
 
     void ExecuteLoad(TamInstruction instr);
