@@ -28,7 +28,7 @@ jobs:
   build:
     name: Build on ${{ matrix.os }}
     needs: check_date
-    if: ${{ needs.check_date.outputs.has_changes != 'false' }}
+    if: ${{ steps.check_date.output != 'false' }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
