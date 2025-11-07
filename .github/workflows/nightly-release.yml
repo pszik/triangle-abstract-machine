@@ -21,12 +21,14 @@ jobs:
       - id: has_changes
         continue-on-error: true
         name: Check age of commit
-        run: test -z $(git rev-list --after="24 hours" ${{ github.sha }}) &&  echo "::set-output name=has_changes::false"
+        run: |
+          [[ $(git rev-list --after="24 hours" ${{ github.sha }} | wc -l) -gt 0 ]]
+          if [[ $? -eq 0 ]]; then echo "true" >> $GITHUB_OUTPUT; else echo "false" >> $GITHUB_OUTPUT; fi
 
   build:
     name: Build on ${{ matrix.os }}
     needs: check_date
-    if: ${{ needs.check_date.outputs.has_changes != 'false' }}
+    if: ${{ steps.check_date.output != 'false' }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
