@@ -17,8 +17,8 @@
 //===-----------------------------------------------------------------------===//
 //
 /// @file error.h
-/// This file defines the `RuntimeError` function for creating TAM-related
-/// runtime errors.
+/// This file defines the interface for constructing TAM-related runtime
+/// exceptions.
 //
 //===-----------------------------------------------------------------------===//
 
@@ -31,7 +31,7 @@
 
 namespace tam {
 
-/// Enumerates all possible kinds of runtime error.
+/// Enumerates all possible kinds of runtime error aside from I/O errors.
 ///
 enum class ExceptionKind {
     kCodeAccessViolation,  ///< Attempt to access out-of-bounds address in
@@ -53,7 +53,7 @@ enum class ExceptionKind {
 /// @param addr address of the instruction that caused the error
 const std::runtime_error RuntimeError(ExceptionKind kind, uint16_t addr);
 
-/// Construct a runtime error relating to an IO problem.
+/// Construct a runtime error relating to an I/O problem.
 ///
 /// This function direcly constructs a runtime error using the provided
 /// message.

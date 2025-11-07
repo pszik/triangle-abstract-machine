@@ -18,7 +18,7 @@
 //
 /// @file tam.cc
 /// This file defines all methods of `TamEmulator` except for `Allocate`,
-/// `free`, and the methods for executing primitive operations.
+/// `Free`, and the methods for executing primitive operations.
 //
 //===-----------------------------------------------------------------------===//
 
@@ -37,22 +37,13 @@
 #include "tam/error.h"
 
 namespace tam {
-TamEmulator::TamEmulator() {
-    this->code_store_.fill(0);
-    this->data_store_.fill(0);
-    this->registers_.fill(0);
-
-    this->registers_[HB] = kMaxAddr;
-    this->registers_[HT] = kMaxAddr;
-
-    this->instream_ = stdin;
-    this->outstream_ = stdout;
-}
 
 TamEmulator::TamEmulator(FILE* instream, FILE* outstream) {
     if (!(instream && outstream)) {
         throw IoError("NULL passed for input or output");
     }
+    this->instream_ = instream;
+    this->outstream_ = outstream;
 
     this->code_store_.fill(0);
     this->data_store_.fill(0);
@@ -60,9 +51,6 @@ TamEmulator::TamEmulator(FILE* instream, FILE* outstream) {
 
     this->registers_[HB] = kMaxAddr;
     this->registers_[HT] = kMaxAddr;
-
-    this->instream_ = instream;
-    this->outstream_ = outstream;
 }
 
 void TamEmulator::LoadProgram(const std::vector<TamCode>& program) {
