@@ -11,7 +11,7 @@ jobs:
     name: Check for changes
     runs-on: ubuntu-latest
     outputs:
-      has_changes: ${{ steps.has_changes.output }}
+      has_changes: ${{ steps.has_changes.outputs.has_changes }}
     steps:
       - uses: actions/checkout@v2
 
@@ -23,7 +23,7 @@ jobs:
         name: Check age of commit
         run: |
           [[ $(git rev-list --after="24 hours" ${{ github.sha }} | wc -l) -gt 0 ]]
-          if [[ $? -eq 0 ]]; then echo "true" >> $GITHUB_OUTPUT; else echo "false" >> $GITHUB_OUTPUT; fi
+          if [[ $? -eq 0 ]]; then echo "has_changes=true" >> $GITHUB_OUTPUT; else echo "has_changes=false" >> $GITHUB_OUTPUT; fi
 
   build:
     name: Build on ${{ matrix.os }}
