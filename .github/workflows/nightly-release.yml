@@ -1,4 +1,4 @@
-name: Nightly Build
+name: Nightly build
 
 on:
   schedule:
@@ -7,8 +7,26 @@ on:
   workflow_dispatch: # Allows manual triggering
 
 jobs:
+  check_date:
+    name: Check for changes
+    runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.has_changes.outputs.has_changes }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Get latest commit
+        run: echo ${{ github.sha }}
+
+      - id: has_changes
+        continue-on-error: true
+        name: Check age of commit
+        run: test -z $(git rev-list --after="24 hours" ${{ github.sha }}) &&  echo "::set-output name=has_changes::false"
+
   build:
     name: Build on ${{ matrix.os }}
+    needs: check_date
+    if: ${{ needs.check_date.outputs.has_changes != 'false' }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -33,7 +51,7 @@ jobs:
           cmake -B build
           -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
           -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
-          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DCMAKE_BUILD_TYPE=Release
           -S ${{ github.workspace }}
 
       - name: Build
