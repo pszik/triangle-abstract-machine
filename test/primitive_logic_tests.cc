@@ -4,53 +4,27 @@
 #include "tam/test/integration_test.h"
 
 #include "gtest/gtest.h"
-#include <gtest/gtest.h>
+#include "rapidcheck/gtest.h"
 
-std::vector<std::pair<tam::TamData, tam::TamData>> logic_values = {
-    {0, 0}, {0, 1}, {1, 0}, {1, 1}};
 
-class PrimitiveLogicTests : public EmulatorTest,
-                            public testing::WithParamInterface<
-                                std::pair<tam::TamData, tam::TamData>> {};
+class PrimitiveLogicTests : public EmulatorTest {};
 
-testing::AssertionResult Conjunction(int l, int r, int actual) {
-    if ((l && r) == actual) {
-        return testing::AssertionSuccess();
-    }
+RC_GTEST_FIXTURE_PROP(PrimitiveLogicTests, TestAnd, (tam::TamData l, tam::TamData r)) {
+  this->PushData(l);
+  this->PushData(r);
 
-    return testing::AssertionFailure()
-           << "(" << l << " && " << r << ") was " << !actual;
+  ASSERT_NO_THROW(this->PrimitiveAnd());
+
+  ASSERT_EQ(l && r, this->data_store_[0]);
 }
 
-TEST_P(PrimitiveLogicTests, TestAnd) {
-    auto args = GetParam();
-    DataVec data = {args.first, args.second};
-    this->setData(data);
+RC_GTEST_FIXTURE_PROP(PrimitiveLogicTests, TestOr, (tam::TamData l, tam::TamData r)) {
+  this->PushData(l);
+  this->PushData(r);
 
-    ASSERT_NO_THROW(this->PrimitiveAnd());
+  ASSERT_NO_THROW(this->PrimitiveOr());
 
-    int result = this->data_store_[0];
-    ASSERT_TRUE(Conjunction(args.first, args.second, result));
-}
-
-testing::AssertionResult Disjunction(int l, int r, int actual) {
-    if ((l || r) == actual) {
-        return testing::AssertionSuccess();
-    }
-
-    return testing::AssertionFailure()
-           << "(" << l << " || " << r << ") was " << !actual;
-}
-
-TEST_P(PrimitiveLogicTests, TestOr) {
-    auto args = GetParam();
-    DataVec data = {args.first, args.second};
-    this->setData(data);
-
-    ASSERT_NO_THROW(this->PrimitiveOr());
-
-    int result = this->data_store_[0];
-    ASSERT_TRUE(Disjunction(args.first, args.second, result));
+  ASSERT_EQ(l || r, this->data_store_[0]);
 }
 
 TEST_F(PrimitiveLogicTests, TestNotTrue) {
@@ -70,6 +44,3 @@ TEST_F(PrimitiveLogicTests, TestNotFalse) {
     int result = this->data_store_[0];
     ASSERT_EQ(1, result);
 }
-
-INSTANTIATE_TEST_SUITE_P(LogicValues, PrimitiveLogicTests,
-                         testing::ValuesIn(logic_values));
