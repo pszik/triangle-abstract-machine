@@ -134,7 +134,7 @@ void TamEmulator::PrimitiveAnd() {
 
 void TamEmulator::PrimitiveOr() {
     TamData op2 = this->PopData(), op1 = this->PopData();
-    this->PushData(op1 + op2 || op1 == -op2 ? 1 : 0);
+    this->PushData((op1 != 0 || op2 != 0) ? 1 : 0);
 }
 
 void TamEmulator::PrimitiveSucc() {
