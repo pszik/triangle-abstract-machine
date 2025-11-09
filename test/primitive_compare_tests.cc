@@ -1,80 +1,78 @@
-#include <tuple>
-
+#include "tam/tam.h"
 #include "tam/test/integration_test.h"
 
 #include "gtest/gtest.h"
+#include "rapidcheck/Assertions.h"
+#include "rapidcheck/gtest.h"
 
-class PrimitiveCompareTests : public EmulatorTest,
-                              public testing::WithParamInterface<
-                                  std::tuple<tam::TamData, tam::TamData>> {};
+class PrimitiveCompareTests : public EmulatorTest {};
 
-static std::vector<tam::TamData> int_params = {0,   1,         -1,       42,
-                                               -42, INT16_MAX, INT16_MIN};
-
-TEST_P(PrimitiveCompareTests, TestLt) {
-    const auto [arg1, arg2] = GetParam();
-    this->PushData(arg1);
-    this->PushData(arg2);
+RC_GTEST_FIXTURE_PROP(PrimitiveCompareTests, TestLt,
+                      (tam::TamData l, tam::TamData r)) {
+    this->PushData(l);
+    this->PushData(r);
 
     ASSERT_NO_THROW(this->PrimitiveLt());
 
-    int result = this->data_store_[0];
-    ASSERT_EQ(arg1 < arg2, result);
+    RC_ASSERT(l < r == this->data_store_[0]);
 }
 
-TEST_P(PrimitiveCompareTests, TestLe) {
-    const auto [arg1, arg2] = GetParam();
-    this->PushData(arg1);
-    this->PushData(arg2);
+RC_GTEST_FIXTURE_PROP(PrimitiveCompareTests, TestLe,
+                      (tam::TamData l, tam::TamData r)) {
+    this->PushData(l);
+    this->PushData(r);
 
     ASSERT_NO_THROW(this->PrimitiveLe());
 
-    int result = this->data_store_[0];
-    ASSERT_EQ(arg1 <= arg2, result);
+    RC_ASSERT(l <= r == this->data_store_[0]);
 }
 
-TEST_P(PrimitiveCompareTests, TestGe) {
-    const auto [arg1, arg2] = GetParam();
-    this->PushData(arg1);
-    this->PushData(arg2);
+RC_GTEST_FIXTURE_PROP(PrimitiveCompareTests, TestGe,
+                      (tam::TamData l, tam::TamData r)) {
+    this->PushData(l);
+    this->PushData(r);
 
     ASSERT_NO_THROW(this->PrimitiveGe());
 
-    int result = this->data_store_[0];
-    ASSERT_EQ(arg1 >= arg2, result);
+    RC_ASSERT(l >= r == this->data_store_[0]);
 }
 
-TEST_P(PrimitiveCompareTests, TestGt) {
-    const auto [arg1, arg2] = GetParam();
-    this->PushData(arg1);
-    this->PushData(arg2);
+RC_GTEST_FIXTURE_PROP(PrimitiveCompareTests, TestGt,
+                      (tam::TamData l, tam::TamData r)) {
+    this->PushData(l);
+    this->PushData(r);
 
     ASSERT_NO_THROW(this->PrimitiveGt());
 
-    int result = this->data_store_[0];
-    ASSERT_EQ(arg1 > arg2, result);
+    RC_ASSERT(l > r == this->data_store_[0]);
 }
 
-TEST_F(PrimitiveCompareTests, TestEqTrue) {
-    DataVec data = {42, 24, 42, 24, 2};
-    this->setData(data);
+RC_GTEST_FIXTURE_PROP(PrimitiveCompareTests, TestEqTrue,
+                      (std::vector<tam::TamData> data)) {
+    for (auto n : data) this->PushData(n);
+    for (auto n : data) this->PushData(n);
+    this->PushData(data.size());
 
     ASSERT_NO_THROW(this->PrimitiveEq());
 
-    int result = this->data_store_[0];
-    ASSERT_EQ(1, result);
+    RC_ASSERT(this->data_store_[0]);
 }
 
-TEST_F(PrimitiveCompareTests, TestEqFalse) {
-    DataVec data = {42, 24, 24, 42, 2};
-    this->setData(data);
+RC_GTEST_FIXTURE_PROP(PrimitiveCompareTests, TestEqFalse,
+                      (std::vector<tam::TamData> data1,
+                       std::vector<tam::TamData> data2)) {
+    int len = std::min(data1.size(), data2.size());
+    RC_PRE(len != 0);
+
+    data1.resize(len);
+    data2.resize(len);
+    RC_PRE(data1 != data2);
+
+    for (auto n : data1) this->PushData(n);
+    for (auto n : data2) this->PushData(n);
+    this->PushData(std::min(data1.size(), data2.size()));
 
     ASSERT_NO_THROW(this->PrimitiveEq());
 
-    int result = this->data_store_[0];
-    ASSERT_EQ(0, result);
+    RC_ASSERT_FALSE(this->data_store_[0]);
 }
-
-INSTANTIATE_TEST_SUITE_P(IntPairs, PrimitiveCompareTests,
-                         testing::Combine(testing::ValuesIn(int_params),
-                                          testing::ValuesIn(int_params)));
