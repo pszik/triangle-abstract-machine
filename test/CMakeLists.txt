@@ -22,7 +22,7 @@ add_executable(tests
 )
 
 target_include_directories(tests PRIVATE ${CMAKE_SOURCE_DIR}/include)
-target_link_libraries(tests tam GTest::gtest_main)
+target_link_libraries(tests tam GTest::gtest_main rapidcheck rapidcheck_gtest)
 
 include(GoogleTest)
 gtest_discover_tests(tests)
