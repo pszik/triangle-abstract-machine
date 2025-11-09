@@ -51,6 +51,9 @@ TamEmulator::TamEmulator(FILE* instream, FILE* outstream) {
 
     this->registers_[HB] = kMaxAddr;
     this->registers_[HT] = kMaxAddr;
+
+    this->instream_ = instream;
+    this->outstream_ = outstream;
 }
 
 void TamEmulator::LoadProgram(const std::vector<TamCode>& program) {
