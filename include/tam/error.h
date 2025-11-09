@@ -42,6 +42,7 @@ enum class ExceptionKind {
     kStackOverflow,        ///< Stack attempted to shrink past 0
     kHeapOverflow,         ///< Heap attempted to grow into the stack
     kUnknownOpcode,        ///< An unrecognised opcode was given to execute
+    kDivideByZero,         ///< There was an attempt to divide by 0
 };
 
 /// Construct a runtime error.
@@ -59,7 +60,7 @@ const std::runtime_error RuntimeError(ExceptionKind kind, uint16_t addr);
 /// message.
 ///
 /// @param message specific cause of the error
-const std::runtime_error IoError(const char *message);
+const std::runtime_error IoError(const char* message);
 
 }  // namespace tam
 #endif  // TAM_ERROR_H__
