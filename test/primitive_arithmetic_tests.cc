@@ -9,8 +9,8 @@
 class PrimitiveArithTests : public EmulatorTest,
                             public testing::WithParamInterface<tam::TamData> {};
 
-std::vector<tam::TamData> int_params = {0,   1,         -1,       42,
-                                        -42, INT16_MAX, INT16_MIN};
+static std::vector<tam::TamData> int_params = {0,   1,         -1,       42,
+                                               -42, INT16_MAX, INT16_MIN};
 
 TEST_P(PrimitiveArithTests, TestSucc) {
     tam::TamData arg = GetParam();
