@@ -1,142 +1,90 @@
-#include <cstdint>
+#include <stdexcept>
 
 #include "tam/tam.h"
 #include "tam/test/integration_test.h"
 
 #include "gtest/gtest.h"
-#include <gtest/gtest.h>
+#include "rapidcheck/Assertions.h"
+#include "rapidcheck/gtest.h"
 
-class PrimitiveArithTests : public EmulatorTest,
-                            public testing::WithParamInterface<tam::TamData> {};
+class PrimitiveArithTests : public EmulatorTest {};
 
-static std::vector<tam::TamData> int_params = {0,   1,         -1,       42,
-                                               -42, INT16_MAX, INT16_MIN};
-
-TEST_P(PrimitiveArithTests, TestSucc) {
-    tam::TamData arg = GetParam();
-    this->PushData(arg);
+RC_GTEST_FIXTURE_PROP(PrimitiveArithTests, TestSucc, (tam::TamData n)) {
+    this->PushData(n);
 
     ASSERT_NO_THROW(this->PrimitiveSucc());
 
-    int result = this->data_store_[0];
-    if (arg == INT16_MAX) {
-        ASSERT_EQ(INT16_MIN, result);
-    } else {
-        ASSERT_EQ(arg + 1, result);
-    }
+    RC_ASSERT(n + 1 == this->data_store_[0]);
 }
 
-TEST_P(PrimitiveArithTests, TestPred) {
-    tam::TamData arg = GetParam();
-    this->PushData(arg);
+RC_GTEST_FIXTURE_PROP(PrimitiveArithTests, TestPred, (tam::TamData n)) {
+    this->PushData(n);
 
     ASSERT_NO_THROW(this->PrimitivePred());
 
-    int result = this->data_store_[0];
-    if (arg == INT16_MIN) {
-        ASSERT_EQ(INT16_MAX, result);
-    } else {
-        ASSERT_EQ(arg - 1, result);
-    }
+    RC_ASSERT(n - 1 == this->data_store_[0]);
 }
 
-TEST_P(PrimitiveArithTests, TestNeg) {
-    tam::TamData arg = GetParam();
-    this->PushData(arg);
+RC_GTEST_FIXTURE_PROP(PrimitiveArithTests, TestNeg, (tam::TamData n)) {
+    this->PushData(n);
 
     ASSERT_NO_THROW(this->PrimitiveNeg());
 
-    tam::TamData result = this->data_store_[0];
-    if (arg == INT16_MIN) {
-        ASSERT_EQ(INT16_MIN, result);
-    } else {
-        ASSERT_EQ(-arg, result);
-    }
+    RC_ASSERT(-n == this->data_store_[0]);
 }
 
-TEST_P(PrimitiveArithTests, TestAdd) {
-    tam::TamData arg = GetParam();
-    this->PushData(arg);
-    this->PushData(4);
+RC_GTEST_FIXTURE_PROP(PrimitiveArithTests, TestAdd,
+                      (tam::TamData l, tam::TamData r)) {
+    this->PushData(l);
+    this->PushData(r);
 
     ASSERT_NO_THROW(this->PrimitiveAdd());
 
-    int result = this->data_store_[0];
-    if (arg == INT16_MAX) {
-        ASSERT_EQ(INT16_MIN + 3, result);
-    } else {
-        ASSERT_EQ(arg + 4, result);
-    }
+    RC_ASSERT((tam::TamData)(l + r) == this->data_store_[0]);
 }
 
-TEST_P(PrimitiveArithTests, TestSub) {
-    tam::TamData arg = GetParam();
-    this->PushData(arg);
-    this->PushData(4);
+RC_GTEST_FIXTURE_PROP(PrimitiveArithTests, TestSub,
+                      (tam::TamData l, tam::TamData r)) {
+    this->PushData(l);
+    this->PushData(r);
 
     ASSERT_NO_THROW(this->PrimitiveSub());
 
-    int result = this->data_store_[0];
-    if (arg == INT16_MIN) {
-        ASSERT_EQ(INT16_MAX - 3, result);
-    } else {
-        ASSERT_EQ(arg - 4, result);
-    }
+    RC_ASSERT((tam::TamData)(l - r) == this->data_store_[0]);
 }
 
-TEST_P(PrimitiveArithTests, TestMult) {
-    tam::TamData arg = GetParam();
-    this->PushData(arg);
-    this->PushData(2);
+RC_GTEST_FIXTURE_PROP(PrimitiveArithTests, TestMult,
+                      (tam::TamData l, tam::TamData r)) {
+    this->PushData(l);
+    this->PushData(r);
 
     ASSERT_NO_THROW(this->PrimitiveMult());
 
-    int result = this->data_store_[0];
-    switch (arg) {
-        case INT16_MIN:
-            ASSERT_EQ(0, result);
-            break;
-        case INT16_MAX:
-            ASSERT_EQ(-2, result);
-            break;
-        default:
-            ASSERT_EQ(arg * 2, result);
-            break;
+    RC_ASSERT((tam::TamData)(l * r) == this->data_store_[0]);
+}
+
+RC_GTEST_FIXTURE_PROP(PrimitiveArithTests, TestDiv,
+                      (tam::TamData l, tam::TamData r)) {
+    this->PushData(l);
+    this->PushData(r);
+
+    if (r == 0) {
+        ASSERT_THROW({ this->PrimitiveDiv(); }, std::runtime_error);
+    } else {
+        ASSERT_NO_THROW(this->PrimitiveDiv());
+        RC_ASSERT((tam::TamData)(l / r) == this->data_store_[0]);
     }
 }
 
-TEST_P(PrimitiveArithTests, TestDiv) {
-    tam::TamData arg = GetParam();
-    this->PushData(arg);
-    this->PushData(2);
+RC_GTEST_FIXTURE_PROP(PrimitiveArithTests, TestMod,
+                      (tam::TamData l, tam::TamData r)) {
+    this->PushData(l);
+    this->PushData(r);
 
-    ASSERT_NO_THROW(this->PrimitiveDiv());
-
-    int result = this->data_store_[0];
-    ASSERT_EQ(arg / 2, result);
-    switch (arg) {
-        case INT16_MIN:
-            ASSERT_EQ(-16384, result);
-            break;
-        case INT16_MAX:
-            ASSERT_EQ(16383, result);
-            break;
-        default:
-            ASSERT_EQ(arg / 2, result);
-            break;
+    if (r == 0) {
+        ASSERT_THROW({ this->PrimitiveMod(); }, std::runtime_error);
+    } else {
+        ASSERT_NO_THROW(this->PrimitiveMod());
+        RC_ASSERT(l % r == this->data_store_[0]);
     }
 }
-
-TEST_P(PrimitiveArithTests, TestMod) {
-    tam::TamData arg = GetParam();
-    this->PushData(arg);
-    this->PushData(4);
-
-    ASSERT_NO_THROW(this->PrimitiveMod());
-
-    int result = this->data_store_[0];
-    ASSERT_EQ(arg % 4, result);
-}
-
-INSTANTIATE_TEST_SUITE_P(Nums, PrimitiveArithTests,
-                         testing::ValuesIn(int_params));

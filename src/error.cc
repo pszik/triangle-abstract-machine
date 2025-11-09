@@ -51,6 +51,8 @@ const std::runtime_error RuntimeError(ExceptionKind kind, uint16_t addr) {
             break;
         case ExceptionKind::kUnknownOpcode:
             ss << "unknown opcode";
+        case tam::ExceptionKind::kDivideByZero:
+            ss << "divide by zero";
             break;
     }
 
@@ -60,7 +62,7 @@ const std::runtime_error RuntimeError(ExceptionKind kind, uint16_t addr) {
     return std::runtime_error(ss.str());
 }
 
-const std::runtime_error IoError(const char *message) {
+const std::runtime_error IoError(const char* message) {
     std::stringstream ss;
     ss << "error: IO error: " << message;
     return std::runtime_error(ss.str());
