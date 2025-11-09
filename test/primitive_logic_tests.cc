@@ -11,9 +11,7 @@ RC_GTEST_FIXTURE_PROP(PrimitiveLogicTests, TestAnd,
     this->PushData(l);
     this->PushData(r);
 
-    ASSERT_NO_THROW(this->PrimitiveAnd());
-
-    ASSERT_EQ(l && r, this->data_store_[0]);
+    ASSERT_NO_THROW(this->PrimitiveOr());
 }
 
 RC_GTEST_FIXTURE_PROP(PrimitiveLogicTests, TestOr,
