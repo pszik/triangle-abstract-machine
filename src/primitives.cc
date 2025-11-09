@@ -168,11 +168,19 @@ void TamEmulator::PrimitiveMult() {
 
 void TamEmulator::PrimitiveDiv() {
     TamData arg2 = this->PopData(), arg1 = this->PopData();
+    if (arg2 == 0) {
+        throw RuntimeError(ExceptionKind::kDivideByZero,
+                           this->registers_[CP] - 1);
+    }
     this->PushData(arg1 / arg2);
 }
 
 void TamEmulator::PrimitiveMod() {
     TamData arg2 = this->PopData(), arg1 = this->PopData();
+    if (arg2 == 0) {
+        throw RuntimeError(ExceptionKind::kDivideByZero,
+                           this->registers_[CP] - 1);
+    }
     this->PushData(arg1 % arg2);
 }
 
