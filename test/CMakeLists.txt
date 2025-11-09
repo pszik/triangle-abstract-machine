@@ -12,13 +12,14 @@ enable_testing()
 add_executable(tests 
   integration_tests.cc 
   execute_tests.cc 
-  heap_tests.cc 
   snapshot_test.cc 
-  cli_tests.cc
-  ${CMAKE_SOURCE_DIR}/src/cli.cc
+  primitive_heap_tests.cc 
   primitive_io_tests.cc
   primitive_logic_tests.cc
   primitive_arithmetic_tests.cc
+  primitive_compare_tests.cc
+  cli_tests.cc
+  ${CMAKE_SOURCE_DIR}/src/cli.cc
 )
 
 target_include_directories(tests PRIVATE ${CMAKE_SOURCE_DIR}/include)
