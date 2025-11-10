@@ -49,6 +49,15 @@ jobs:
         with:
           submodules: true
 
+      - name: CMake cache
+        uses: actions/cache@v4
+        env:
+          cache-name: cmake-build-cache
+        with:
+          path: ./build
+          key: ${{ env.cache-name }}-${{ hashFiles('**/src/CMakeLists.txt', '**/test/CMakeLists.txt') }}
+          restore-keys: ${{ env.cache-name }}
+
       - name: Set reusable strings
         # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
         id: strings
