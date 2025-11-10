@@ -39,32 +39,37 @@
 #define COMBO_ARG(s) \
     ((strncmp(s, "-st", 3) == 0) || (strncmp(s, "-ts", 3) == 0))
 
-std::unique_ptr<CliArgs> ParseCli(int argc, const char **argv) noexcept {
-    enum StackSymbol {
-        kNtCli,
-        kNtTrace,
-        kTokFilename,
-        kTokHelp,
-        kTokTrace,
-        kTokStep,
-        kTokCombo,
-    };
+/// Stack symbols used in the LL(1) parse in `ParseCli`.
+///
+enum class StackSymbol {
+    kNtCli,
+    kNtTrace,
+    kTokFilename,
+    kTokHelp,
+    kTokTrace,
+    kTokStep,
+    kTokCombo,
+};
+
+/// Parses the command line arguments using an embedded LL(1) parser.
+///
+std::unique_ptr<CliArgs> ParseCli(int argc, const char** argv) noexcept {
     std::stack<StackSymbol> stack;
     std::unique_ptr<CliArgs> args(new CliArgs);
     int i = 0;
 
-    stack.push(kNtCli);
+    stack.push(StackSymbol::kNtCli);
     while (!stack.empty() && i < argc) {
-        const char *token = argv[i];
+        const char* token = argv[i];
         StackSymbol s = stack.top();
         stack.pop();
 
         switch (s) {
-            case kTokFilename:
+            case StackSymbol::kTokFilename:
                 args->filename = token;
                 i++;
                 break;
-            case kTokHelp:
+            case StackSymbol::kTokHelp:
                 if (!HELP_ARG(token)) {
                     return nullptr;
                 }
@@ -72,7 +77,7 @@ std::unique_ptr<CliArgs> ParseCli(int argc, const char **argv) noexcept {
                 args->help = true;
                 i++;
                 break;
-            case kTokTrace:
+            case StackSymbol::kTokTrace:
                 if (!TRACE_ARG(token)) {
                     return nullptr;
                 }
@@ -80,7 +85,7 @@ std::unique_ptr<CliArgs> ParseCli(int argc, const char **argv) noexcept {
                 args->trace = true;
                 i++;
                 break;
-            case kTokStep:
+            case StackSymbol::kTokStep:
                 if (!STEP_ARG(token)) {
                     return nullptr;
                 }
@@ -88,7 +93,7 @@ std::unique_ptr<CliArgs> ParseCli(int argc, const char **argv) noexcept {
                 args->step = true;
                 i++;
                 break;
-            case kTokCombo:
+            case StackSymbol::kTokCombo:
                 if (!COMBO_ARG(token)) {
                     return nullptr;
                 }
@@ -97,33 +102,33 @@ std::unique_ptr<CliArgs> ParseCli(int argc, const char **argv) noexcept {
                 args->trace = true;
                 i++;
                 break;
-            case kNtCli:
+            case StackSymbol::kNtCli:
                 if (HELP_ARG(token)) {
-                    stack.push(kTokHelp);
+                    stack.push(StackSymbol::kTokHelp);
                 } else if (TRACE_ARG(token)) {
-                    stack.push(kNtTrace);
-                    stack.push(kTokTrace);
+                    stack.push(StackSymbol::kNtTrace);
+                    stack.push(StackSymbol::kTokTrace);
                 } else if (STEP_ARG(token)) {
-                    stack.push(kTokFilename);
-                    stack.push(kTokTrace);
-                    stack.push(kTokStep);
+                    stack.push(StackSymbol::kTokFilename);
+                    stack.push(StackSymbol::kTokTrace);
+                    stack.push(StackSymbol::kTokStep);
                 } else if (COMBO_ARG(token)) {
-                    stack.push(kTokFilename);
-                    stack.push(kTokCombo);
+                    stack.push(StackSymbol::kTokFilename);
+                    stack.push(StackSymbol::kTokCombo);
                 } else {
-                    stack.push(kTokFilename);
+                    stack.push(StackSymbol::kTokFilename);
                 }
                 break;
-            case kNtTrace:
+            case StackSymbol::kNtTrace:
                 if (HELP_ARG(token) || TRACE_ARG(token)) {
                     return nullptr;
                 }
 
                 if (STEP_ARG(token)) {
-                    stack.push(kTokFilename);
-                    stack.push(kTokStep);
+                    stack.push(StackSymbol::kTokFilename);
+                    stack.push(StackSymbol::kTokStep);
                 } else {
-                    stack.push(kTokFilename);
+                    stack.push(StackSymbol::kTokFilename);
                 }
                 break;
         }
@@ -137,3 +142,8 @@ std::unique_ptr<CliArgs> ParseCli(int argc, const char **argv) noexcept {
     }
     return args;
 }
+
+#undef HELP_ARG
+#undef TRACE_ARG
+#undef STEP_ARG
+#undef COMBO_ARG

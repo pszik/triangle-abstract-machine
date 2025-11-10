@@ -1,15 +1,14 @@
 #include "tam/tam.h"
-
-#include "integration_test.h"
+#include "tam/test/integration_test.h"
 
 TEST_F(EmulatorTest, GetSnapshotTest) {
     DataVec data = {123, 456, 789, 11112, 11415};
     this->setData(data);
 
     tam::TamAddr addr = this->Allocate(3);
-    this->data_store[addr] = 246;
-    this->data_store[addr + 1] = 8112;
-    this->data_store[addr + 2] = 1416;
+    this->data_store_[addr] = 246;
+    this->data_store_[addr + 1] = 8112;
+    this->data_store_[addr + 2] = 1416;
 
     std::string snapshot = this->GetSnapshot(TODO);
     std::string expected_snapshot =

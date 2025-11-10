@@ -9,6 +9,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS Yes)
 cmake_policy(SET CMP0135 NEW)
 
 add_subdirectory(src)
+
+set(RC_ENABLE_GTEST Yes)
+add_subdirectory(rapidcheck)
+
 add_subdirectory(test)
 add_subdirectory(docs)
 

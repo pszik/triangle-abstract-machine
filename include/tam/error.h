@@ -17,8 +17,8 @@
 //===-----------------------------------------------------------------------===//
 //
 /// @file error.h
-/// This file defines the `RuntimeError` function for creating TAM-related
-/// runtime errors.
+/// This file defines the interface for constructing TAM-related runtime
+/// exceptions.
 //
 //===-----------------------------------------------------------------------===//
 
@@ -31,9 +31,9 @@
 
 namespace tam {
 
-/// Enumerates all possible kinds of runtime error.
+/// Enumerates all possible kinds of runtime error aside from I/O errors.
 ///
-enum ExceptionKind : uint8_t {
+enum class ExceptionKind {
     kCodeAccessViolation,  ///< Attempt to access out-of-bounds address in
                            ///< code memory
     kDataAccessViolation,  ///< Attempt to access out-of-bounds address in
@@ -42,6 +42,7 @@ enum ExceptionKind : uint8_t {
     kStackOverflow,        ///< Stack attempted to shrink past 0
     kHeapOverflow,         ///< Heap attempted to grow into the stack
     kUnknownOpcode,        ///< An unrecognised opcode was given to execute
+    kDivideByZero,         ///< There was an attempt to divide by 0
 };
 
 /// Construct a runtime error.
@@ -53,13 +54,13 @@ enum ExceptionKind : uint8_t {
 /// @param addr address of the instruction that caused the error
 const std::runtime_error RuntimeError(ExceptionKind kind, uint16_t addr);
 
-/// Construct a runtime error relating to an IO problem.
+/// Construct a runtime error relating to an I/O problem.
 ///
 /// This function direcly constructs a runtime error using the provided
 /// message.
 ///
 /// @param message specific cause of the error
-const std::runtime_error IoError(const char *message);
+const std::runtime_error IoError(const char* message);
 
 }  // namespace tam
 #endif  // TAM_ERROR_H__

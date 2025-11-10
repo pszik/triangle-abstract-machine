@@ -15,6 +15,15 @@ Options:
   -h,--help         print this help message
 ```
 
+## Expected behaviour
+
+TAM data memory uses 16-bit words and all operations will overflow or underflow
+accordingly. In particular, adding or multiplying positive numbers will overflow
+into the negative and _vice versa_.
+
+An unexpected case is that negating -32768 (the smallest signed 16-bit number)
+will still result in -32768.
+
 ## Building TAM
 
 TAM is a CMake project. To build it yourself, clone the project and then

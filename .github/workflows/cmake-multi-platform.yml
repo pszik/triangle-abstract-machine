@@ -46,6 +46,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Set reusable strings
         # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
@@ -78,6 +80,8 @@ jobs:
         working-directory: ${{ steps.strings.outputs.build-output-dir }}/test
         # Execute tests defined by the CMake configuration. Note that --build-config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
         # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+        env:
+          RC_PARAMS: "max_success=1000"
         run: ctest --build-config ${{ matrix.build_type }}
 
       - name: Store binaries

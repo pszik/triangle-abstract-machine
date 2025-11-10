@@ -12,13 +12,18 @@ enable_testing()
 add_executable(tests 
   integration_tests.cc 
   execute_tests.cc 
-  heap_tests.cc 
   snapshot_test.cc 
+  primitive_heap_tests.cc 
+  primitive_io_tests.cc
+  primitive_logic_tests.cc
+  primitive_arithmetic_tests.cc
+  primitive_compare_tests.cc
   cli_tests.cc
   ${CMAKE_SOURCE_DIR}/src/cli.cc
-  primitive_io_tests.cc
 )
-target_link_libraries(tests tam GTest::gtest_main)
+
+target_include_directories(tests PRIVATE ${CMAKE_SOURCE_DIR}/include)
+target_link_libraries(tests tam GTest::gtest_main rapidcheck rapidcheck_gtest)
 
 include(GoogleTest)
 gtest_discover_tests(tests)

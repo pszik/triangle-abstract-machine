@@ -26,7 +26,6 @@
 
 #include <cstdint>
 #include <cstdio>
-#include <iostream>
 #include <stack>
 
 #include "tam/error.h"
@@ -135,7 +134,7 @@ void TamEmulator::PrimitiveAnd() {
 
 void TamEmulator::PrimitiveOr() {
     TamData op2 = this->PopData(), op1 = this->PopData();
-    this->PushData(op1 + op2 || op1 == -op2 ? 1 : 0);
+    this->PushData((op1 != 0 || op2 != 0) ? 1 : 0);
 }
 
 void TamEmulator::PrimitiveSucc() {
@@ -169,11 +168,19 @@ void TamEmulator::PrimitiveMult() {
 
 void TamEmulator::PrimitiveDiv() {
     TamData arg2 = this->PopData(), arg1 = this->PopData();
+    if (arg2 == 0) {
+        throw RuntimeError(ExceptionKind::kDivideByZero,
+                           this->registers_[CP] - 1);
+    }
     this->PushData(arg1 / arg2);
 }
 
 void TamEmulator::PrimitiveMod() {
     TamData arg2 = this->PopData(), arg1 = this->PopData();
+    if (arg2 == 0) {
+        throw RuntimeError(ExceptionKind::kDivideByZero,
+                           this->registers_[CP] - 1);
+    }
     this->PushData(arg1 % arg2);
 }
 
@@ -219,69 +226,71 @@ void TamEmulator::PrimitiveNe() {
     this->PushData(arg1 != arg2 ? 1 : 0);
 }
 
-void TamEmulator::PrimitiveEol() {
-    if (!std::cin) throw IoError("failed to get stdin");
+static void CheckStream(FILE* stream) {
+    if (!stream || ferror(stream)) throw IoError("failed to get stream for IO");
+}
 
-    char c = fgetc(this->instream);
+void TamEmulator::PrimitiveEol() {
+    CheckStream(this->instream_);
+
+    char c = fgetc(this->instream_);
     this->PushData(c == '\n' ? 1 : 0);
-    ungetc(c, this->instream);
+    ungetc(c, this->instream_);
 }
 
 void TamEmulator::PrimitiveEof() {
-    if (!std::cin) throw IoError("failed to get stdin");
+    CheckStream(this->instream_);
 
-    this->PushData(feof(this->instream) ? 1 : 0);
+    this->PushData(feof(this->instream_) ? 1 : 0);
 }
 
 void TamEmulator::PrimitiveGet() {
-    if (!std::cin) throw IoError("failed to get stdin");
+    CheckStream(this->instream_);
 
     TamAddr addr = this->PopData();
-    char c = getc(this->instream);
-    this->data_store[addr] = c;
+    char c = getc(this->instream_);
+    this->data_store_[addr] = c;
 }
 
 void TamEmulator::PrimitivePut() {
-    if (!std::cout) throw IoError("failed to get stdout");
+    CheckStream(this->outstream_);
 
     char c = this->PopData();
-    putc(c, this->outstream);
+    putc(c, this->outstream_);
 }
 
 void TamEmulator::PrimitiveGeteol() {
-    if (!this->instream || ferror(this->instream))
-        throw IoError("failed to get stdin");
+    CheckStream(this->instream_);
 
     char c;
-    while ((c = fgetc(this->instream)) != '\n');
+    while ((c = fgetc(this->instream_)) != '\n');
 }
 
 void TamEmulator::PrimitivePuteol() {
-    if (!this->outstream || ferror(this->outstream))
-        throw IoError("failed to get stdout");
+    CheckStream(this->outstream_);
 
-    putc('\n', this->outstream);
+    putc('\n', this->outstream_);
 }
 
 void TamEmulator::PrimitiveGetint() {
-    if (!std::cin) throw IoError("failed to get stdin");
+    CheckStream(this->instream_);
 
     int n;
-    fscanf(this->instream, "%d", &n);
+    fscanf(this->instream_, "%d", &n);
     if (n < INT16_MIN || n > INT16_MAX) {
         throw IoError("integer out of range");
     }
     this->PrimitiveGeteol();  // flush line
 
     TamAddr addr = this->PopData();
-    this->data_store[addr] = n;
+    this->data_store_[addr] = n;
 }
 
 void TamEmulator::PrimitivePutint() {
-    if (!std::cout) throw IoError("failed to get stdout");
+    CheckStream(this->outstream_);
 
     TamData n = this->PopData();
-    fprintf(this->outstream, "%d", n);
+    fprintf(this->outstream_, "%d", n);
 }
 
 void TamEmulator::PrimitiveNew() {
