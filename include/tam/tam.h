@@ -48,41 +48,47 @@ constexpr const int kMemSize = 65536;
 ///
 constexpr const int kMaxAddr = kMemSize - 1;
 
-/// Index of code top register
+/// TAM registers, also indexes into our registers array.
 ///
-constexpr const uint8_t CT = 1;
+enum TamRegister {
+    CB = 0,
+    CT = 1,
+    PB = 2,
+    PT = 3,
+    SB = 4,
+    ST = 5,
+    HB = 6,
+    HT = 7,
+    LB = 8,
+    L1 = 9,
+    L2 = 10,
+    L3 = 11,
+    L4 = 12,
+    L5 = 13,
+    L6 = 14,
+    CP = 15
+};
 
-/// Index of primitive base register
+/// TAM operations.
 ///
-constexpr const uint8_t PB = 2;
-
-/// Index of primitive top register
-///
-constexpr const uint8_t PT = 3;
-
-/// Index of stack base register
-///
-constexpr const uint8_t SB = 4;
-
-/// Index of stack top register
-///
-constexpr const uint8_t ST = 5;
-
-/// Index of heap base register
-///
-constexpr const uint8_t HB = 6;
-
-/// Index of heap top register
-///
-constexpr const uint8_t HT = 7;
-
-/// Index of local base register
-///
-constexpr const uint8_t LB = 8;
-
-/// Index of code pointer register
-///
-constexpr const uint8_t CP = 15;
+enum TamOpCode {
+    LOAD   = 0,
+    LOADA  = 1,
+    LOADI  = 2,
+    LOADL  = 3,
+    STORE  = 4,
+    STOREI = 5,
+    CALL   = 6,
+    CALLI  = 7,
+    RETURN = 8,
+    // unused = 9,
+    PUSH   = 10,
+    POP    = 11,
+    JUMP   = 12,
+    JUMPI  = 13,
+    JUMPIF = 14,
+    HALT   = 15
+};
 
 /// A single TAM instruction.
 ///
@@ -91,6 +97,27 @@ struct TamInstruction {
     uint8_t r;   ///< Register
     uint8_t n;   ///< Unsigned operand
     int16_t d;   ///< Signed operand
+};
+
+/// List of TAM primitive routine names.
+///
+/// Index into this array corresponds to the
+/// offset `d` of the instruction for that primitive.
+///
+static const std::string primitives_names[] = {
+    "0", // invalid
+    "id",
+    "not", "and", "or",
+    "succ", "pred", "neg",
+    "add", "sub", "mult", "div", "mod",
+    "lt", "le",
+    "ge", "gt",
+    "eq", "ne",
+    "eol", "eof",
+    "get", "put",
+    "geteol", "puteol",
+    "getint", "putint",
+    "new", "dispose"
 };
 
 /// A TAM emulator.
@@ -154,7 +181,24 @@ class TamEmulator {
     /// allocated blocks on the heap.
     ///
     /// @return the stack and heap contents
-    const std::string GetSnapshot() const;
+    const std::string GetSnapshot(TamInstruction instr) const;
+
+    /// Get Mnemonic of an instruction.
+    ///
+    /// @param instr Instruction
+    /// @return Mnemonic of Instruction
+    static std::string GetMnemonic(TamInstruction instr);
+
+    /// Convert TAM OpCode int representation to name.
+    ///
+    /// Unfortunately there is no better way to do this
+    /// in C++ without a library or macros.
+    ///
+    static constexpr const char* OpCodeName(uint8_t op);
+
+    /// Convert TAM register name int representation to name.
+    ///
+    static constexpr const char* RegisterName(uint16_t r);
 
    protected:
     /// Attempt to allocate some memory on the heap.

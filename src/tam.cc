@@ -29,6 +29,7 @@
 #include <stdio.h>
 
 #include <algorithm>
+#include <format>
 #include <iomanip>
 #include <sstream>
 #include <stack>
@@ -102,53 +103,53 @@ TamData TamEmulator::PopData() {
 
 bool TamEmulator::Execute(TamInstruction instr) {
     switch (instr.op) {
-        case 0:  // LOAD
+        case LOAD:
             this->ExecuteLoad(instr);
             break;
-        case 1:  // LOADA
+        case LOADA:
             this->ExecuteLoada(instr);
             break;
-        case 2:  // LOADI
+        case LOADI:
             this->ExecuteLoadi(instr);
             break;
-        case 3:  // LOADL
+        case LOADL:
             this->ExecuteLoadl(instr);
             break;
-        case 4:  // STORE
+        case STORE:
             this->ExecuteStore(instr);
             break;
-        case 5:  // STOREI
+        case STOREI:
             this->ExecuteStorei(instr);
             break;
-        case 6:  // CALL
+        case CALL:
             if (instr.r == PB && instr.d > 0 && instr.d < 29) {
                 this->ExecuteCallPrimitive(instr);
             } else {
                 this->ExecuteCall(instr);
             }
             break;
-        case 7:  // CALLI
+        case CALLI:
             this->ExecuteCalli(instr);
             break;
-        case 8:  // RETURN
+        case RETURN:
             this->ExecuteReturn(instr);
             break;
-        case 10:  // PUSH
+        case PUSH:
             this->ExecutePush(instr);
             break;
-        case 11:  // POP
+        case POP:
             this->ExecutePop(instr);
             break;
-        case 12:  // JUMP
+        case JUMP:
             this->ExecuteJump(instr);
             break;
-        case 13:  // JUMPI
+        case JUMPI:
             this->ExecuteJumpi(instr);
             break;
-        case 14:  // JUMPIF
+        case JUMPIF:
             this->ExecuteJumpif(instr);
             break;
-        case 15:  // HALT
+        case HALT:
             return false;
         default:
             throw RuntimeError(ExceptionKind::kUnknownOpcode,
@@ -157,11 +158,15 @@ bool TamEmulator::Execute(TamInstruction instr) {
     return true;
 }
 
-const std::string TamEmulator::GetSnapshot() const {
+const std::string TamEmulator::GetSnapshot(TamInstruction instr) const {
     std::stringstream ss;
+
+    ss << std::endl
+       << this->registers_[CP] - 1 << ": " << GetMnemonic(instr) << std::endl;
+
     ss << std::hex << std::setfill('0');
 
-    ss << "stack";
+    ss << "Stack";
     for (int I = 0; I < this->registers_[ST]; ++I) {
         if (I % 8 == 0) ss << std::endl;
         ss << std::setw(4) << this->data_store_[I] << " ";
@@ -169,7 +174,7 @@ const std::string TamEmulator::GetSnapshot() const {
     ss << std::endl;
 
     for (auto Block : this->allocated_blocks_) {
-        ss << "heap " << std::setw(4) << Block.first;
+        ss << "Heap " << std::setw(4) << Block.first;
         for (int I = 0; I < Block.second; ++I) {
             if (I % 8 == 0) {
                 ss << std::endl;
@@ -386,6 +391,131 @@ void TamEmulator::ExecuteJumpif(TamInstruction instr) {
 
     this->registers_[CP] = addr;
     assert(this->registers_[CP] == addr);
+}
+
+std::string TamEmulator::GetMnemonic(TamInstruction instr) {
+    switch (instr.op) {
+        case LOAD:
+        case STORE:
+        case CALL:
+        case JUMPIF:
+            // CALL put
+            if (instr.op == CALL && instr.r == PB && instr.d > 0 &&
+                instr.d < 29)
+                return std::format("CALL {}", primitives_names[instr.d]);
+
+            // OPCODE(n) d[r]
+            return std::format("{}({}) {}[{}]", OpCodeName(instr.op), instr.n,
+                               instr.d, RegisterName(instr.r));
+
+        case LOADA:
+        case JUMP:
+            // OPCODE d[r]
+            return std::format("{} {}[{}]", OpCodeName(instr.op), instr.d,
+                               RegisterName(instr.r));
+
+        case RETURN:
+        case POP:
+            // OPCODE(n) d
+            return std::format("{}({}) {}", OpCodeName(instr.op), instr.n,
+                               instr.d);
+
+        case LOADI:
+        case STOREI:
+            // OPCODE (n)
+            return std::format("{} {}", OpCodeName(instr.op), instr.n);
+
+        case LOADL:
+        case PUSH:
+            // OPCODE d
+            return std::format("{} {}", OpCodeName(instr.op), instr.d);
+
+        case CALLI:
+        case JUMPI:
+        case HALT:
+            // OPCODE
+            return OpCodeName(instr.op);
+
+        default:
+            // Invalid
+            return "INVALID";
+    }
+}
+
+constexpr const char* TamEmulator::OpCodeName(uint8_t op) {
+    switch (op) {
+        case LOAD:
+            return "LOAD";
+        case LOADA:
+            return "LOADA";
+        case LOADI:
+            return "LOADI";
+        case LOADL:
+            return "LOADL";
+        case STORE:
+            return "STORE";
+        case STOREI:
+            return "STOREI";
+        case CALL:
+            return "CALL";
+        case CALLI:
+            return "CALLI";
+        case RETURN:
+            return "RETURN";
+        case PUSH:
+            return "PUSH";
+        case POP:
+            return "POP";
+        case JUMP:
+            return "JUMP";
+        case JUMPI:
+            return "JUMPI";
+        case JUMPIF:
+            return "JUMPIF";
+        case HALT:
+            return "HALT";
+        default:
+            return "UNKNOWN";
+    }
+}
+
+constexpr const char* TamEmulator::RegisterName(uint16_t r) {
+    switch (r) {
+        case CB:
+            return "CB";
+        case CT:
+            return "CT";
+        case PB:
+            return "PB";
+        case PT:
+            return "PT";
+        case SB:
+            return "SB";
+        case ST:
+            return "ST";
+        case HB:
+            return "HB";
+        case HT:
+            return "HT";
+        case LB:
+            return "LB";
+        case L1:
+            return "L1";
+        case L2:
+            return "L2";
+        case L3:
+            return "L3";
+        case L4:
+            return "L4";
+        case L5:
+            return "L5";
+        case L6:
+            return "L6";
+        case CP:
+            return "CP";
+        default:
+            return "UNKNOWN";
+    }
 }
 
 }  // namespace tam

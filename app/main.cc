@@ -95,7 +95,7 @@ static bool CpuCycle(tam::TamEmulator& emulator, bool trace, bool step) {
     const tam::TamInstruction Instr = emulator.FetchDecode();
     bool running = emulator.Execute(Instr);
 
-    if (trace) std::cout << emulator.GetSnapshot() << std::endl;
+    if (trace) std::cout << emulator.GetSnapshot(Instr) << std::endl;
 
     if (trace && step) {
         std::string buf;
