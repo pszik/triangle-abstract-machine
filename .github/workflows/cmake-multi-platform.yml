@@ -56,7 +56,9 @@ jobs:
         with:
           path: ./build
           key: ${{ env.cache-name }}-${{ matrix.os }}-${{ matrix.c_compiler }}-${{ hashFiles('**/src/CMakeLists.txt', '**/test/CMakeLists.txt') }}
-          restore-keys: ${{ env.cache-name }}
+          restore-keys: |
+            ${{ env.cache-name }}-${{ matrix.os }}-
+            ${{ env.cache-name }}-
 
       - name: Set reusable strings
         # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
