@@ -55,7 +55,7 @@ jobs:
           cache-name: cmake-build-cache
         with:
           path: ./build
-          key: ${{ env.cache-name }}-${{ hashFiles('**/src/CMakeLists.txt', '**/test/CMakeLists.txt') }}
+          key: ${{ env.cache-name }}-${{ matrix.os }}-${{ hashFiles('**/src/CMakeLists.txt', '**/test/CMakeLists.txt') }}
           restore-keys: ${{ env.cache-name }}
 
       - name: Set reusable strings
