@@ -161,7 +161,7 @@ bool TamEmulator::Execute(TamInstruction instr) {
 const std::string TamEmulator::GetSnapshot(TamInstruction instr) const {
     std::stringstream ss;
 
-    ss << std::endl << this->registers[CP] - 1 << ": " << GetMnemonic(instr) << std::endl;
+    ss << std::endl << this->registers_[CP] - 1 << ": " << GetMnemonic(instr) << std::endl;
 
     ss << std::hex << std::setfill('0');
 
