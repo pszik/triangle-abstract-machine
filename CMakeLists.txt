@@ -11,7 +11,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS Yes)
 cmake_policy(SET CMP0135 NEW)
 
 add_subdirectory(src)
-
+add_subdirectory(app)
 add_subdirectory(test)
 add_subdirectory(docs)
 
