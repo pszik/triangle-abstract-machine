@@ -394,41 +394,47 @@ void TamEmulator::ExecuteJumpif(TamInstruction instr) {
 }
 
 std::string TamEmulator::GetMnemonic(TamInstruction instr) {
+    std::stringstream ss;
     switch (instr.op) {
         case LOAD:
         case STORE:
         case CALL:
         case JUMPIF:
             // CALL put
-            if (instr.op == CALL && instr.r == PB && instr.d > 0 &&
-                instr.d < 29)
-                return std::format("CALL {}", primitives_names[instr.d]);
+            if (instr.op == CALL && instr.r == PB) {
+                ss << "CALL " << primitives_names[instr.d];
+                return ss.str();
+            }
 
             // OPCODE(n) d[r]
-            return std::format("{}({}) {}[{}]", OpCodeName(instr.op), instr.n,
-                               instr.d, RegisterName(instr.r));
+            ss << OpCodeName(instr.op) << "(" << instr.n << ") " << instr.d
+               << "[" << RegisterName(instr.r) << "]";
+            return ss.str();
 
         case LOADA:
         case JUMP:
             // OPCODE d[r]
-            return std::format("{} {}[{}]", OpCodeName(instr.op), instr.d,
-                               RegisterName(instr.r));
+            ss << OpCodeName(instr.op) << " " << instr.d << "["
+               << RegisterName(instr.r) << "]";
+            return ss.str();
 
         case RETURN:
         case POP:
             // OPCODE(n) d
-            return std::format("{}({}) {}", OpCodeName(instr.op), instr.n,
-                               instr.d);
+            ss << OpCodeName(instr.op) << "(" << instr.n << ") " << instr.d;
+            return ss.str();
 
         case LOADI:
         case STOREI:
             // OPCODE (n)
-            return std::format("{} {}", OpCodeName(instr.op), instr.n);
+            ss << OpCodeName(instr.op) << " (" << instr.n << ") ";
+            return ss.str();
 
         case LOADL:
         case PUSH:
             // OPCODE d
-            return std::format("{} {}", OpCodeName(instr.op), instr.d);
+            ss << OpCodeName(instr.op) << " " << instr.d;
+            return ss.str();
 
         case CALLI:
         case JUMPI:
@@ -437,7 +443,6 @@ std::string TamEmulator::GetMnemonic(TamInstruction instr) {
             return OpCodeName(instr.op);
 
         default:
-            // Invalid
             return "INVALID";
     }
 }
@@ -519,3 +524,7 @@ constexpr const char* TamEmulator::RegisterName(uint16_t r) {
 }
 
 }  // namespace tam
+
+inline std::ostream& operator<<(std::ostream& os, uint8_t v) {
+    return os << static_cast<unsigned int>(v);
+}
