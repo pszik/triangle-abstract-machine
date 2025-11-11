@@ -14,7 +14,7 @@ jobs:
 
     strategy:
       # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
-      fail-fast: true
+      fail-fast: false
 
       # Set up a matrix to run the following 3 configurations:
       # 1. <Windows, Release, latest MSVC compiler toolchain on the default runner image, default generator>
@@ -49,6 +49,17 @@ jobs:
         with:
           submodules: true
 
+      - name: CMake cache
+        uses: actions/cache@v4
+        env:
+          cache-name: cmake-build-cache
+        with:
+          path: ./build
+          key: ${{ env.cache-name }}-${{ matrix.os }}-${{ matrix.c_compiler }}-${{ hashFiles('**/src/CMakeLists.txt', '**/test/CMakeLists.txt') }}
+          restore-keys: |
+            ${{ env.cache-name }}-${{ matrix.os }}-
+            ${{ env.cache-name }}-
+
       - name: Set reusable strings
         # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
         id: strings
@@ -56,10 +67,10 @@ jobs:
         run: |
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
             echo "build-output-dir=${{ github.workspace }}\build" >> "$GITHUB_OUTPUT"
-            echo "binary-path=${{ github.workspace }}\build\src\Release\tam.exe" >> "$GITHUB_OUTPUT"
+            echo "binary-path=${{ github.workspace }}\build\app\Release\tam.exe" >> "$GITHUB_OUTPUT"
           else
             echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-            echo "binary-path=${{ github.workspace }}/build/src/tam" >> "$GITHUB_OUTPUT"
+            echo "binary-path=${{ github.workspace }}/build/app/tam" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Configure CMake
