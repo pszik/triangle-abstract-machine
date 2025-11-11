@@ -28,7 +28,7 @@ add_executable(tests
   primitive_arithmetic_tests.cc
   primitive_compare_tests.cc
   cli_tests.cc
-  ${CMAKE_SOURCE_DIR}/src/cli.cc
+  ${CMAKE_SOURCE_DIR}/app/cli.cc
 )
 
 target_include_directories(tests PRIVATE ${CMAKE_SOURCE_DIR}/include)
