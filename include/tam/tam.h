@@ -284,4 +284,9 @@ class TamEmulator {
 
 }  // namespace tam
 
+/// Make it so that `uint8_t`s added to string streams
+/// are treated as integers and not characters.
+///
+inline std::ostream& operator<<(std::ostream& os, uint8_t v);
+
 #endif  // TAM_TAM_H__
