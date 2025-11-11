@@ -51,22 +51,22 @@ constexpr const int kMaxAddr = kMemSize - 1;
 /// TAM registers, also indexes into our registers array.
 ///
 enum TamRegister {
-    CB = 0,
-    CT = 1,
-    PB = 2,
-    PT = 3,
-    SB = 4,
-    ST = 5,
-    HB = 6,
-    HT = 7,
-    LB = 8,
-    L1 = 9,
-    L2 = 10,
-    L3 = 11,
-    L4 = 12,
-    L5 = 13,
-    L6 = 14,
-    CP = 15
+    CB = 0,  // Code Base
+    CT = 1,  // Code Top
+    PB = 2,  // Primitives Base
+    PT = 3,  // Primitives Top
+    SB = 4,  // Stack Base
+    ST = 5,  // Stack Top
+    HB = 6,  // Heap Base
+    HT = 7,  // Heap Top
+    LB = 8,  // Local Base
+    L1 = 9,  // Local Base 1
+    L2 = 10, // Local Base 2
+    L3 = 11, // Local Base 3
+    L4 = 12, // Local Base 4
+    L5 = 13, // Local Base 5
+    L6 = 14, // Local Base 6
+    CP = 15  // Code Pointer
 };
 
 /// TAM operations.
