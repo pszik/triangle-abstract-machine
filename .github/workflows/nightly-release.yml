@@ -37,12 +37,12 @@ jobs:
             c_compiler: clang
             cpp_compiler: clang++
             artifact_name: linux-build
-            artifact_path: build/src/tam
+            artifact_path: build/app/tam
           - os: windows-latest
             c_compiler: cl
             cpp_compiler: cl
             artifact_name: windows-build
-            artifact_path: build\src\Release\tam.exe
+            artifact_path: build\app\Release\tam.exe
 
     steps:
       - name: Checkout repository
