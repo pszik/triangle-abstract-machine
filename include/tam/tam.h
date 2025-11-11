@@ -181,7 +181,7 @@ class TamEmulator {
     /// allocated blocks on the heap.
     ///
     /// @return the stack and heap contents
-    const std::string GetSnapshot(TamInstruction instr) const;
+    const std::string GetSnapshot() const;
 
     /// Get Mnemonic of an instruction.
     ///
