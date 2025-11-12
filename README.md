@@ -41,4 +41,5 @@ cmake -DCMAKE_BUILD_TYPE=Release ..
 cmake --build .
 ```
 
-After this, the executable is found in `build/src/tam`
+After this, the executable is found in `build/app/tam` on Unix, or `build\app\Release\tam`
+on Windows if you build using Visual C++.
