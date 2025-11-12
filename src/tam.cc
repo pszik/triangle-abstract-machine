@@ -29,7 +29,6 @@
 #include <stdio.h>
 
 #include <algorithm>
-#include <format>
 #include <iomanip>
 #include <sstream>
 #include <stack>
