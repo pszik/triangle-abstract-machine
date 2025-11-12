@@ -399,128 +399,52 @@ std::string GetMnemonic(TamInstruction instr) {
         case JUMPIF:
             // CALL put
             if (instr.op == CALL && instr.r == PB) {
-                ss << "CALL " << primitives_names[instr.d];
+                ss << "CALL " << primitive_names[instr.d];
                 return ss.str();
             }
 
             // OPCODE(n) d[r]
-            ss << OpCodeName(instr.op) << "(" << instr.n << ") " << instr.d
-               << "[" << RegisterName(instr.r) << "]";
+            ss << opcode_names[instr.op] << "(" << instr.n << ") " << instr.d
+               << "[" << register_names[instr.r] << "]";
             return ss.str();
 
         case LOADA:
         case JUMP:
             // OPCODE d[r]
-            ss << OpCodeName(instr.op) << " " << instr.d << "["
-               << RegisterName(instr.r) << "]";
+            ss << opcode_names[instr.op] << " " << instr.d << "["
+               << register_names[instr.r] << "]";
             return ss.str();
 
         case RETURN:
         case POP:
             // OPCODE(n) d
-            ss << OpCodeName(instr.op) << "(" << instr.n << ") " << instr.d;
+            ss << opcode_names[instr.op] << "(" << instr.n << ") " << instr.d;
             return ss.str();
 
         case LOADI:
         case STOREI:
             // OPCODE (n)
-            ss << OpCodeName(instr.op) << " (" << instr.n << ") ";
+            ss << opcode_names[instr.op] << " (" << instr.n << ") ";
             return ss.str();
 
         case LOADL:
         case PUSH:
             // OPCODE d
-            ss << OpCodeName(instr.op) << " " << instr.d;
+            ss << opcode_names[instr.op] << " " << instr.d;
             return ss.str();
 
         case CALLI:
         case JUMPI:
         case HALT:
             // OPCODE
-            return OpCodeName(instr.op);
+            return opcode_names[instr.op];
 
         default:
             return "INVALID";
     }
 }
 
-constexpr const char* OpCodeName(uint8_t op) {
-    switch (op) {
-        case LOAD:
-            return "LOAD";
-        case LOADA:
-            return "LOADA";
-        case LOADI:
-            return "LOADI";
-        case LOADL:
-            return "LOADL";
-        case STORE:
-            return "STORE";
-        case STOREI:
-            return "STOREI";
-        case CALL:
-            return "CALL";
-        case CALLI:
-            return "CALLI";
-        case RETURN:
-            return "RETURN";
-        case PUSH:
-            return "PUSH";
-        case POP:
-            return "POP";
-        case JUMP:
-            return "JUMP";
-        case JUMPI:
-            return "JUMPI";
-        case JUMPIF:
-            return "JUMPIF";
-        case HALT:
-            return "HALT";
-        default:
-            return "UNKNOWN";
-    }
-}
-
-constexpr const char* RegisterName(uint16_t r) {
-    switch (r) {
-        case CB:
-            return "CB";
-        case CT:
-            return "CT";
-        case PB:
-            return "PB";
-        case PT:
-            return "PT";
-        case SB:
-            return "SB";
-        case ST:
-            return "ST";
-        case HB:
-            return "HB";
-        case HT:
-            return "HT";
-        case LB:
-            return "LB";
-        case L1:
-            return "L1";
-        case L2:
-            return "L2";
-        case L3:
-            return "L3";
-        case L4:
-            return "L4";
-        case L5:
-            return "L5";
-        case L6:
-            return "L6";
-        case CP:
-            return "CP";
-        default:
-            return "UNKNOWN";
-    }
-}
-
-inline std::ostream& operator << (std::ostream& os, uint8_t v) {
+inline std::ostream& operator<<(std::ostream& os, uint8_t v) {
     return os << static_cast<unsigned int>(v);
 }
 

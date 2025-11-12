@@ -104,7 +104,7 @@ struct TamInstruction {
 /// Index into this array corresponds to the
 /// offset `d` of the instruction for that primitive.
 ///
-static const std::string primitives_names[] = {
+static const std::string primitive_names[] = {
     "0", // invalid
     "id",
     "not", "and", "or",
@@ -118,6 +118,54 @@ static const std::string primitives_names[] = {
     "geteol", "puteol",
     "getint", "putint",
     "new", "dispose"
+};
+
+/// List of TAM OpCode names.
+///
+/// Index into this array corresponds
+/// to `instr.op`.
+///
+static const std::string opcode_names[] = {
+    "LOAD",
+    "LOADA",
+    "LOADI",
+    "LOADL",
+    "STORE",
+    "STOREI",
+    "CALL",
+    "CALLI",
+    "RETURN",
+    "unused", // unused = 9
+    "PUSH",
+    "POP",
+    "JUMP",
+    "JUMPI",
+    "JUMPIF",
+    "HALT",
+};
+
+/// List of TAM register names.
+///
+/// Index into this array corresponds
+/// to `instr.r`.
+///
+static const std::string register_names[] = {
+    "CB",
+    "CT",
+    "PB",
+    "PT",
+    "SB",
+    "ST",
+    "HB",
+    "HT",
+    "LB",
+    "L1",
+    "L2",
+    "L3",
+    "L4",
+    "L5",
+    "L6",
+    "CP"
 };
 
 /// A TAM emulator.
@@ -270,17 +318,6 @@ class TamEmulator {
 /// @param instr Instruction
 /// @return Mnemonic of Instruction
 std::string GetMnemonic(TamInstruction instr);
-
-/// Convert TAM OpCode int representation to name.
-///
-/// Unfortunately there is no better way to do this
-/// in C++ without a library or macros.
-///
-constexpr const char* OpCodeName(uint8_t op);
-
-/// Convert TAM register name int representation to name.
-///
-constexpr const char* RegisterName(uint16_t r);
 
 /// Make it so that `uint8_t`s added to string streams
 /// are treated as integers and not characters.
