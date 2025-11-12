@@ -51,43 +51,43 @@ constexpr const int kMaxAddr = kMemSize - 1;
 /// TAM registers, also indexes into our registers array.
 ///
 enum TamRegister {
-    CB = 0,  // Code Base
-    CT = 1,  // Code Top
-    PB = 2,  // Primitives Base
-    PT = 3,  // Primitives Top
-    SB = 4,  // Stack Base
-    ST = 5,  // Stack Top
-    HB = 6,  // Heap Base
-    HT = 7,  // Heap Top
-    LB = 8,  // Local Base
-    L1 = 9,  // Local Base 1
-    L2 = 10, // Local Base 2
-    L3 = 11, // Local Base 3
-    L4 = 12, // Local Base 4
-    L5 = 13, // Local Base 5
-    L6 = 14, // Local Base 6
-    CP = 15  // Code Pointer
+    CB = 0,   // Code Base
+    CT = 1,   // Code Top
+    PB = 2,   // Primitives Base
+    PT = 3,   // Primitives Top
+    SB = 4,   // Stack Base
+    ST = 5,   // Stack Top
+    HB = 6,   // Heap Base
+    HT = 7,   // Heap Top
+    LB = 8,   // Local Base
+    L1 = 9,   // Local Base 1
+    L2 = 10,  // Local Base 2
+    L3 = 11,  // Local Base 3
+    L4 = 12,  // Local Base 4
+    L5 = 13,  // Local Base 5
+    L6 = 14,  // Local Base 6
+    CP = 15   // Code Pointer
 };
 
 /// TAM operations.
 ///
 enum TamOpCode {
-    LOAD   = 0,
-    LOADA  = 1,
-    LOADI  = 2,
-    LOADL  = 3,
-    STORE  = 4,
+    LOAD = 0,
+    LOADA = 1,
+    LOADI = 2,
+    LOADL = 3,
+    STORE = 4,
     STOREI = 5,
-    CALL   = 6,
-    CALLI  = 7,
+    CALL = 6,
+    CALLI = 7,
     RETURN = 8,
     // unused = 9,
-    PUSH   = 10,
-    POP    = 11,
-    JUMP   = 12,
-    JUMPI  = 13,
+    PUSH = 10,
+    POP = 11,
+    JUMP = 12,
+    JUMPI = 13,
     JUMPIF = 14,
-    HALT   = 15
+    HALT = 15
 };
 
 /// A single TAM instruction.
@@ -99,11 +99,12 @@ struct TamInstruction {
     int16_t d;   ///< Signed operand
 };
 
+// clang-format off
+
 /// List of TAM primitive routine names.
 ///
-/// Index into this array corresponds to the
-/// offset `d` of the instruction for that primitive.
-///
+/// Index into this array corresponds to the offset `d` of the 
+/// instruction for that primitive.
 static const std::string primitive_names[] = {
     "0", // invalid
     "id",
@@ -122,9 +123,7 @@ static const std::string primitive_names[] = {
 
 /// List of TAM OpCode names.
 ///
-/// Index into this array corresponds
-/// to `instr.op`.
-///
+/// Index into this array corresponds to `instr.op`.
 static const std::string opcode_names[] = {
     "LOAD",
     "LOADA",
@@ -146,9 +145,7 @@ static const std::string opcode_names[] = {
 
 /// List of TAM register names.
 ///
-/// Index into this array corresponds
-/// to `instr.r`.
-///
+/// Index into this array corresponds to `instr.r`.
 static const std::string register_names[] = {
     "CB",
     "CT",
@@ -167,6 +164,7 @@ static const std::string register_names[] = {
     "L6",
     "CP"
 };
+// clang-format on
 
 /// A TAM emulator.
 ///
@@ -181,7 +179,7 @@ class TamEmulator {
     /// On creation, all memory is zeroed and registers are set to default
     /// values. Registers default to 0 except for `HB` and `HT`, which default
     /// to the highest address.
-    TamEmulator(): TamEmulator(stdin, stdout){}
+    TamEmulator() : TamEmulator(stdin, stdout) {}
 
     /// Construct a new emulator that uses the specified file streams for I/O.
     ///
@@ -251,7 +249,8 @@ class TamEmulator {
     /// @throws std::runtime_error if the push would cause a stack overflow
     void PushData(TamData value);
 
-    /// Remove and return the top value of the stack and decrement the `ST` register.
+    /// Remove and return the top value of the stack and decrement the `ST`
+    /// register.
     ///
     /// @return the data
     /// @throws std::runtime_error if the pop would cause a stack underflow
