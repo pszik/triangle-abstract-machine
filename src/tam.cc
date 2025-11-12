@@ -421,7 +421,7 @@ std::string GetMnemonic(TamInstruction instr) {
         case LOADI:
         case STOREI:
             // OPCODE (n)
-            ss << opcode_names[instr.op] << " (" << instr.n << ") ";
+            ss << opcode_names[instr.op] << " (" << instr.n << ")";
             return ss.str();
 
         case LOADL:
