@@ -389,7 +389,7 @@ void TamEmulator::ExecuteJumpif(TamInstruction instr) {
     assert(this->registers_[CP] == addr);
 }
 
-std::string TamEmulator::GetMnemonic(TamInstruction instr) {
+std::string GetMnemonic(TamInstruction instr) {
     std::stringstream ss;
     switch (instr.op) {
         case LOAD:
@@ -441,7 +441,7 @@ std::string TamEmulator::GetMnemonic(TamInstruction instr) {
     }
 }
 
-constexpr const char* TamEmulator::OpCodeName(uint8_t op) {
+constexpr const char* OpCodeName(uint8_t op) {
     switch (op) {
         case LOAD:   return "LOAD";
         case LOADA:  return "LOADA";
@@ -462,7 +462,7 @@ constexpr const char* TamEmulator::OpCodeName(uint8_t op) {
     }
 }
 
-constexpr const char* TamEmulator::RegisterName(uint16_t r) {
+constexpr const char* RegisterName(uint16_t r) {
     switch (r) {
         case CB: return "CB";
         case CT: return "CT";
@@ -484,8 +484,8 @@ constexpr const char* TamEmulator::RegisterName(uint16_t r) {
     }
 }
 
-}  // namespace tam
-
-inline std::ostream& operator<<(std::ostream& os, uint8_t v) {
+inline std::ostream& operator << (std::ostream& os, uint8_t v) {
     return os << static_cast<unsigned int>(v);
 }
+
+}  // namespace tam

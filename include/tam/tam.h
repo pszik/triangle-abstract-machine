@@ -183,23 +183,6 @@ class TamEmulator {
     /// @return the stack and heap contents
     const std::string GetSnapshot() const;
 
-    /// Get Mnemonic of an instruction.
-    ///
-    /// @param instr Instruction
-    /// @return Mnemonic of Instruction
-    static std::string GetMnemonic(TamInstruction instr);
-
-    /// Convert TAM OpCode int representation to name.
-    ///
-    /// Unfortunately there is no better way to do this
-    /// in C++ without a library or macros.
-    ///
-    static constexpr const char* OpCodeName(uint8_t op);
-
-    /// Convert TAM register name int representation to name.
-    ///
-    static constexpr const char* RegisterName(uint16_t r);
-
    protected:
     /// Attempt to allocate some memory on the heap.
     ///
@@ -282,11 +265,28 @@ class TamEmulator {
         *outstream_;  ///< File that output is written to
 };
 
-}  // namespace tam
+/// Get Mnemonic of an instruction.
+///
+/// @param instr Instruction
+/// @return Mnemonic of Instruction
+std::string GetMnemonic(TamInstruction instr);
+
+/// Convert TAM OpCode int representation to name.
+///
+/// Unfortunately there is no better way to do this
+/// in C++ without a library or macros.
+///
+constexpr const char* OpCodeName(uint8_t op);
+
+/// Convert TAM register name int representation to name.
+///
+constexpr const char* RegisterName(uint16_t r);
 
 /// Make it so that `uint8_t`s added to string streams
 /// are treated as integers and not characters.
 ///
 inline std::ostream& operator<<(std::ostream& os, uint8_t v);
+
+}  // namespace tam
 
 #endif  // TAM_TAM_H__
