@@ -21,7 +21,8 @@ enable_testing()
 add_executable(tests 
   integration_tests.cc 
   execute_tests.cc 
-  snapshot_test.cc 
+  snapshot_test.cc
+  mnemonic_test.cc
   primitive_heap_tests.cc 
   primitive_io_tests.cc
   primitive_logic_tests.cc
