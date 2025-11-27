@@ -96,8 +96,10 @@ static bool CpuCycle(tam::TamEmulator& emulator, bool trace, bool step) {
     bool running = emulator.Execute(Instr);
 
     if (trace) {
-        // We might like to print the location of this instruction but we don't know it here.
-        std::cout << std::endl << tam::GetMnemonic(Instr) << std::endl;
+        std::cout << std::endl
+                  << std::hex << std::setfill('0') << std::setw(4)
+                  << emulator.RegisterValue(tam::CP) << ": "
+                  << tam::GetMnemonic(Instr) << std::endl;
         std::cout << emulator.GetSnapshot();
     }
 

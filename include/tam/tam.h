@@ -229,6 +229,11 @@ class TamEmulator {
     /// @return the stack and heap contents
     const std::string GetSnapshot() const;
 
+    /// Get the current value of the specified register.
+    ///
+    /// @return the register value
+    TamAddr RegisterValue(TamRegister r) const { return this->registers_[r]; }
+
    protected:
     /// Attempt to allocate some memory on the heap.
     ///
