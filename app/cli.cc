@@ -27,123 +27,134 @@
 
 #include <string.h>
 
-#include <memory>
+#include <cstdlib>
+#include <optional>
 #include <stack>
 
-#define HELP_ARG(s) \
-    ((strncmp(s, "-h", 2) == 0) || (strncmp(s, "--help", 6) == 0))
-#define TRACE_ARG(s) \
-    ((strncmp(s, "-t", 2) == 0) || (strncmp(s, "--trace", 7) == 0))
-#define STEP_ARG(s) \
-    ((strncmp(s, "-s", 2) == 0) || (strncmp(s, "--step", 6) == 0))
-#define COMBO_ARG(s) \
-    ((strncmp(s, "-st", 3) == 0) || (strncmp(s, "-ts", 3) == 0))
+static bool IsHelpTok(const char* tok) {
+    return (strncmp(tok, "-h", 2) == 0 || strncmp(tok, "--help", 6) == 0);
+}
 
-/// Stack symbols used in the LL(1) parse in `ParseCli`.
-///
-enum class StackSymbol {
-    kNtCli,
-    kNtTrace,
-    kTokFilename,
-    kTokHelp,
-    kTokTrace,
-    kTokStep,
-    kTokCombo,
+static bool IsTraceTok(const char* tok) {
+    return (strncmp(tok, "-t", 2) == 0 || strncmp(tok, "--trace", 7) == 0);
+}
+
+static bool IsStepTok(const char* tok) {
+    return (strncmp(tok, "-s", 2) == 0 || strncmp(tok, "--step", 6) == 0);
+}
+
+static bool IsTraceLvlTok(const char* tok) {
+    switch (tok[0]) {
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+            return true;
+        default:
+            return false;
+    }
+}
+
+enum StackSymbol {
+    Cli,
+    Trace,
+    TraceLvl,
+    TraceExt,
+    tok_help,
+    tok_trace,
+    tok_trace_lvl,
+    tok_step,
+    tok_filename,
 };
 
-/// Parses the command line arguments using an embedded LL(1) parser.
-///
-std::unique_ptr<CliArgs> ParseCli(int argc, const char** argv) noexcept {
-    std::stack<StackSymbol> stack;
-    std::unique_ptr<CliArgs> args(new CliArgs);
-    int i = 0;
+std::optional<CliArgs> ParseCli(int argc, const char** argv) noexcept {
+    if (argc < 1) {
+        return {};
+    }
 
-    stack.push(StackSymbol::kNtCli);
+    CliArgs args;
+    std::stack<StackSymbol> stack;
+    stack.push(Cli);
+
+    int i = 0;
     while (!stack.empty() && i < argc) {
-        const char* token = argv[i];
         StackSymbol s = stack.top();
         stack.pop();
-
         switch (s) {
-            case StackSymbol::kTokFilename:
-                args->filename = token;
-                i++;
-                break;
-            case StackSymbol::kTokHelp:
-                if (!HELP_ARG(token)) {
-                    return nullptr;
-                }
-
-                args->help = true;
-                i++;
-                break;
-            case StackSymbol::kTokTrace:
-                if (!TRACE_ARG(token)) {
-                    return nullptr;
-                }
-
-                args->trace = true;
-                i++;
-                break;
-            case StackSymbol::kTokStep:
-                if (!STEP_ARG(token)) {
-                    return nullptr;
-                }
-
-                args->step = true;
-                i++;
-                break;
-            case StackSymbol::kTokCombo:
-                if (!COMBO_ARG(token)) {
-                    return nullptr;
-                }
-
-                args->step = true;
-                args->trace = true;
-                i++;
-                break;
-            case StackSymbol::kNtCli:
-                if (HELP_ARG(token)) {
-                    stack.push(StackSymbol::kTokHelp);
-                } else if (TRACE_ARG(token)) {
-                    stack.push(StackSymbol::kNtTrace);
-                    stack.push(StackSymbol::kTokTrace);
-                } else if (STEP_ARG(token)) {
-                    stack.push(StackSymbol::kTokFilename);
-                    stack.push(StackSymbol::kTokTrace);
-                    stack.push(StackSymbol::kTokStep);
-                } else if (COMBO_ARG(token)) {
-                    stack.push(StackSymbol::kTokFilename);
-                    stack.push(StackSymbol::kTokCombo);
+            case Cli:
+                if (IsHelpTok(argv[i])) {
+                    stack.push(tok_help);
+                } else if (IsTraceTok(argv[i])) {
+                    stack.push(TraceExt);
+                    stack.push(Trace);
+                } else if (IsStepTok(argv[i])) {
+                    stack.push(tok_filename);
+                    stack.push(Trace);
+                    stack.push(tok_step);
                 } else {
-                    stack.push(StackSymbol::kTokFilename);
+                    stack.push(tok_filename);
                 }
                 break;
-            case StackSymbol::kNtTrace:
-                if (HELP_ARG(token) || TRACE_ARG(token)) {
-                    return nullptr;
+            case Trace:
+                stack.push(TraceLvl);
+                stack.push(tok_trace);
+                break;
+            case TraceLvl:
+                if (IsTraceLvlTok(argv[i])) {
+                    stack.push(tok_trace_lvl);
+                } else if (!(IsStepTok(argv[i]) || i + 1 >= argc)) {
+                    args.error = true;
                 }
-
-                if (STEP_ARG(token)) {
-                    stack.push(StackSymbol::kTokFilename);
-                    stack.push(StackSymbol::kTokStep);
+                break;
+            case TraceExt:
+                if (IsStepTok(argv[i])) {
+                    stack.push(tok_filename);
+                    stack.push(tok_step);
                 } else {
-                    stack.push(StackSymbol::kTokFilename);
+                    stack.push(tok_filename);
                 }
+                break;
+            case tok_help:
+                if (IsHelpTok(argv[i])) {
+                    args.help = true;
+                } else {
+                    args.error = true;
+                }
+                i++;
+                break;
+            case tok_trace:
+                if (IsTraceTok(argv[i])) {
+                    args.trace = 0;
+                } else {
+                    args.error = true;
+                }
+                i++;
+                break;
+            case tok_trace_lvl:
+                if (IsTraceLvlTok(argv[i])) {
+                    args.trace = atoi(argv[i]);
+                } else {
+                    args.error = true;
+                }
+                i++;
+                break;
+            case tok_step:
+                if (IsStepTok(argv[i])) {
+                    args.step = true;
+                } else {
+                    args.error = true;
+                }
+                i++;
+                break;
+            case tok_filename:
+                args.filename = argv[i];
+                i++;
                 break;
         }
     }
 
-    if (i < argc - 1) {
-        return nullptr;
-    };
-    if (!args->help && args->filename == "") {
-        return nullptr;
+    if (!stack.empty() || args.error || (!args.help && !args.filename)) {
+        return {};
     }
     return args;
 }
-
-#undef HELP_ARG
-#undef TRACE_ARG
-#undef STEP_ARG
-#undef COMBO_ARG
