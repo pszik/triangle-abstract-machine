@@ -25,7 +25,7 @@ Options:
 The `trace` option accepts one of three levels of detail:
 
 - `-t 1` will print the mnemonic of each instruction as it is executed
-- `-t 2` will print the mnemonic and also the values of SB, LB, ST, and CP after each instruction
+- `-t 2` will print the mnemonic and also the values of SB, LB, ST, HT, HB, and CP after each instruction
 - `-t 3` will print mnemonics, register values, and the full contents of the stack and
   allocated heap blocks
 
