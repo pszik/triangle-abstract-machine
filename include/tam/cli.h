@@ -26,24 +26,18 @@
 #ifndef TAM_CLI_H__
 #define TAM_CLI_H__
 
-#include <memory>
 #include <optional>
 #include <string>
 
 /// Contains the parsed CLI arguments.
 ///
 /// The three flags all default to `false` for simplicity.
-struct CliArgsOld {
-    std::string filename = "";  ///< Name of binary file
-    bool trace = false,         ///< If `true`, print memory at each instruction
-        step = false,  ///< If `true`, wait for RETURN before continuing
-        help = false;  ///< If `true`, print help message
-};
-
 struct CliArgs {
-    std::optional<std::string> filename = {};
-    std::optional<int> trace = {};
-    bool step = false, help = false, error = false;
+    std::optional<std::string> filename = {};  ///< Name of binary file
+    int trace = 0;                             ///< Level of trace info to print
+    bool step = false,  ///< If `true` wait after each instruction
+        help = false,   ///< If `true` print the help message and exit
+        error = false;  ///< If `true` an error occurred during parsing
 };
 
 /// Parse the arguments given to the program.

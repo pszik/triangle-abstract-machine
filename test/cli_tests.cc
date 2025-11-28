@@ -25,7 +25,7 @@ TEST(CliTests, ParseTraceWithFnameOk) {
     std::optional<CliArgs> args = ParseCli(2, argv);
     ASSERT_TRUE(args);
     ASSERT_FALSE(args->help || args->step || args->error);
-    ASSERT_EQ(0, *args->trace);
+    ASSERT_EQ(1, args->trace);
     ASSERT_EQ("test.tam", args->filename);
 }
 
@@ -34,7 +34,7 @@ TEST(CliTests, ParseTraceWithTraceLvl) {
     std::optional<CliArgs> args = ParseCli(3, argv);
     ASSERT_TRUE(args);
     ASSERT_FALSE(args->help || args->step || args->error);
-    ASSERT_EQ(2, *args->trace);
+    ASSERT_EQ(2, args->trace);
     ASSERT_EQ("test.tam", args->filename);
 }
 
@@ -49,7 +49,7 @@ TEST(CliTests, ParseTraceStepOk) {
     std::optional<CliArgs> args = ParseCli(3, argv);
     ASSERT_TRUE(args);
     ASSERT_FALSE(args->help);
-    ASSERT_EQ(0, *args->trace);
+    ASSERT_EQ(1, args->trace);
     ASSERT_TRUE(args->step);
     ASSERT_EQ("test.tam", args->filename);
 }

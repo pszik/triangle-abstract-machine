@@ -76,7 +76,7 @@ static void PrintHelpMessage() {
               << "  -t,--trace        print the stack and allocated heap "
                  "after each instruction"
               << std::endl
-              << "                    (optionally takes a number from 0 to 2 "
+              << "                    (optionally takes a number from 1 to 3 "
                  "to indicate how much"
               << std::endl
               << "                    information to print each tick)"
@@ -92,19 +92,32 @@ static void PrintHelpMessage() {
 /// Execute a single fetch-decode-execute cycle on the given emulator.
 ///
 /// @param emulator emulator to run
-/// @param trace if `true` print a memory trace before returning
+/// @param trace if greater than 0, print a memory trace before returning
 /// @param step if `true` wait for key press from user before returning
 /// @return `true` if execution should continue, `false` if not
 static bool CpuCycle(tam::TamEmulator& emulator, int trace, bool step) {
-    const tam::TamInstruction Instr = emulator.FetchDecode();
-    bool running = emulator.Execute(Instr);
+    const tam::TamInstruction instr = emulator.FetchDecode();
+    bool running = emulator.Execute(instr);
 
     if (trace) {
-        std::cout << std::endl
-                  << std::hex << std::setfill('0') << std::setw(4)
-                  << emulator.RegisterValue(tam::CP) << ": "
-                  << tam::GetMnemonic(Instr) << std::endl;
-        std::cout << emulator.GetSnapshot();
+        printf("\n%04x: %s\n", emulator.RegisterValue(tam::CP),
+               tam::GetMnemonic(instr).c_str());
+
+        if (trace > 1) {
+            std::cout << std::endl
+                      << "SB   LB   ST   HT   HB   CP" << std::endl;
+            printf("%04x %04x %04x %04x %04x %04x\n",
+                   emulator.RegisterValue(tam::SB),
+                   emulator.RegisterValue(tam::LB),
+                   emulator.RegisterValue(tam::ST),
+                   emulator.RegisterValue(tam::HT),
+                   emulator.RegisterValue(tam::HB),
+                   emulator.RegisterValue(tam::CP));
+        }
+
+        if (trace > 2) {
+            std::cout << std::endl << emulator.GetSnapshot();
+        }
     }
 
     if (trace && step) {
@@ -145,7 +158,7 @@ int main(int argc, const char** argv) {
     bool running = true;
     do {
         try {
-            running = CpuCycle(emulator, *args->trace, args->step);
+            running = CpuCycle(emulator, args->trace, args->step);
         } catch (const std::exception& e) {
             std::cerr << e.what() << std::endl;
             return 3;
