@@ -25,9 +25,9 @@
 
 #include "tam/cli.h"
 
+#include <stdlib.h>
 #include <string.h>
 
-#include <cstdlib>
 #include <optional>
 #include <stack>
 
@@ -45,7 +45,6 @@ static bool IsStepTok(const char* tok) {
 
 static bool IsTraceLvlTok(const char* tok) {
     switch (tok[0]) {
-        case '0':
         case '1':
         case '2':
         case '3':
@@ -124,7 +123,7 @@ std::optional<CliArgs> ParseCli(int argc, const char** argv) noexcept {
                 break;
             case tok_trace:
                 if (IsTraceTok(argv[i])) {
-                    args.trace = 0;
+                    args.trace = 1;
                 } else {
                     args.error = true;
                 }
