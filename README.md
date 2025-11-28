@@ -15,8 +15,10 @@ Usage: tam [OPTIONS] FILENAME
 
 Options:
   -t,--trace        print the stack and allocated heap after each instruction
-  -s,--step         press RETURN to advance after each instruction
-                    (only if trace is also given)
+                    (optionally takes a number from 0-2 to indiciate how much
+                    information to print each tick)
+  -s,--step         press RETURN to advance after each instruction (only valid
+                    if -t also given)
   -h,--help         print this help message
 ```
 

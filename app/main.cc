@@ -28,7 +28,6 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -77,6 +76,11 @@ static void PrintHelpMessage() {
               << "  -t,--trace        print the stack and allocated heap "
                  "after each instruction"
               << std::endl
+              << "                    (optionally takes a number from 0 to 2 "
+                 "to indicate how much"
+              << std::endl
+              << "                    information to print each tick)"
+              << std::endl
               << "  -s,--step         press RETURN to advance after each "
                  "instruction"
               << std::endl
@@ -91,7 +95,7 @@ static void PrintHelpMessage() {
 /// @param trace if `true` print a memory trace before returning
 /// @param step if `true` wait for key press from user before returning
 /// @return `true` if execution should continue, `false` if not
-static bool CpuCycle(tam::TamEmulator& emulator, bool trace, bool step) {
+static bool CpuCycle(tam::TamEmulator& emulator, int trace, bool step) {
     const tam::TamInstruction Instr = emulator.FetchDecode();
     bool running = emulator.Execute(Instr);
 
@@ -112,7 +116,7 @@ static bool CpuCycle(tam::TamEmulator& emulator, bool trace, bool step) {
 }
 
 int main(int argc, const char** argv) {
-    std::unique_ptr<CliArgs> args = ParseCli(argc - 1, argv + 1);
+    std::optional<CliArgs> args = ParseCli(argc - 1, argv + 1);
     if (!args) {
         PrintHelpMessage();
         return 1;
@@ -123,15 +127,15 @@ int main(int argc, const char** argv) {
         return 0;
     }
 
-    if (!std::filesystem::is_regular_file(args->filename)) {
-        std::cerr << "error: io error: file '" << args->filename
+    if (!std::filesystem::is_regular_file(*args->filename)) {
+        std::cerr << "error: io error: file '" << *args->filename
                   << "' not found" << std::endl;
         return 1;
     }
 
     tam::TamEmulator emulator;
     try {
-        std::vector<uint32_t> program = ReadProgramFromFile(args->filename);
+        std::vector<uint32_t> program = ReadProgramFromFile(*args->filename);
         emulator.LoadProgram(program);
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
@@ -141,7 +145,7 @@ int main(int argc, const char** argv) {
     bool running = true;
     do {
         try {
-            running = CpuCycle(emulator, args->trace, args->step);
+            running = CpuCycle(emulator, *args->trace, args->step);
         } catch (const std::exception& e) {
             std::cerr << e.what() << std::endl;
             return 3;

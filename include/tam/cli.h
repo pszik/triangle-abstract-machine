@@ -27,16 +27,23 @@
 #define TAM_CLI_H__
 
 #include <memory>
+#include <optional>
 #include <string>
 
 /// Contains the parsed CLI arguments.
 ///
 /// The three flags all default to `false` for simplicity.
-struct CliArgs {
+struct CliArgsOld {
     std::string filename = "";  ///< Name of binary file
     bool trace = false,         ///< If `true`, print memory at each instruction
         step = false,  ///< If `true`, wait for RETURN before continuing
         help = false;  ///< If `true`, print help message
+};
+
+struct CliArgs {
+    std::optional<std::string> filename = {};
+    std::optional<int> trace = {};
+    bool step = false, help = false, error = false;
 };
 
 /// Parse the arguments given to the program.
@@ -51,6 +58,6 @@ struct CliArgs {
 /// @param argc number of arguments
 /// @param argv the arguments
 /// @return the parsed arguments, or `nullptr` if parsing failed
-std::unique_ptr<CliArgs> ParseCli(int argc, const char** argv) noexcept;
+std::optional<CliArgs> ParseCli(int argc, const char** argv) noexcept;
 
 #endif  // TAM_CLI_H__
