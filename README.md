@@ -1,7 +1,7 @@
 # Triangle Abstract Machine
 
 ![GitHub Release](https://img.shields.io/github/v/release/pszik/triangle-abstract-machine)
-![GitHub Release](https://img.shields.io/github/v/release/pszik/triangle-abstract-machine?include_prereleases&filter=nightly*&display_name=release&label=nightly)
+![GitHub Release](https://img.shields.io/github/v/release/pszik/triangle-abstract-machine?include_prereleases&filter=nightly*&display_name=tag&label=nightly)
 ![GitHub License](https://img.shields.io/github/license/pszik/triangle-abstract-machine)
 
 This is an emulator for the Triangle Abstract Machine (TAM) defined by Watt and Brown.
