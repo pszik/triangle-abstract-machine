@@ -96,11 +96,12 @@ static void PrintHelpMessage() {
 /// @param step if `true` wait for key press from user before returning
 /// @return `true` if execution should continue, `false` if not
 static bool CpuCycle(tam::TamEmulator& emulator, int trace, bool step) {
+    const tam::TamAddr cp = emulator.RegisterValue(tam::CP);
     const tam::TamInstruction instr = emulator.FetchDecode();
     bool running = emulator.Execute(instr);
 
     if (trace) {
-        printf("\n%04x: %s\n", emulator.RegisterValue(tam::CP),
+        printf("\n%04x: %s\n", cp,
                tam::GetMnemonic(instr).c_str());
 
         if (trace > 1) {
