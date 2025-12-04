@@ -33,6 +33,10 @@ namespace tam {
 /// Iterates through all existing free blocks in the heap to try and find one of
 /// the correct size. If none is found, the heap is expanded.
 TamAddr TamEmulator::Allocate(int n) {
+    // if allocating zero bytes, just return 0. otherwise we will have duplicate block addresses
+    if (n == 0)
+        return 0;
+
     // try to find unallocated space inside heap
     for (auto block_iter = this->free_blocks_.begin(),
               iter_end = this->free_blocks_.end();
@@ -66,6 +70,14 @@ TamAddr TamEmulator::Allocate(int n) {
 /// If the block was at the end of the heap then the heap is contracted,
 /// otherwise the freed block is added to the list of available blocks.
 void TamEmulator::Free(TamAddr addr, TamData size) {
+    if (addr == 0) {
+        // address 0 is for zero-sized allocations.
+        if (size != 0)
+            throw RuntimeError(ExceptionKind::kDataAccessViolation,
+                               this->registers_[CP] - 1);
+        return;
+    }
+
     if (addr <= this->registers_[HT])
         throw RuntimeError(ExceptionKind::kDataAccessViolation,
                            this->registers_[CP] - 1);

@@ -52,3 +52,11 @@ TEST_F(HeapTest, FreeMiddleOfHeap) {
     EXPECT_TRUE(this->free_blocks_.count(65533));
     EXPECT_EQ(3, this->free_blocks_[65533]);
 }
+
+TEST_F(HeapTest, HeapAllocateZero) {
+    this->registers_[tam::HT] = 65530;
+    this->allocated_blocks_[65531] = 2;
+    this->allocated_blocks_[65533] = 3;
+    ASSERT_EQ(0, this->Allocate(0));
+    ASSERT_NO_THROW(this->Free(0, 0));
+}
